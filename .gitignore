@@ -1,0 +1,8 @@
+.aws/
+*.env
+credentials
+ingestion/data/
+.idea/
+__pycache__/
+*.pyc
+.venv/.venv/
