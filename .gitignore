@@ -5,4 +5,4 @@ ingestion/data/
 .idea/
 __pycache__/
 *.pyc
-.venv/.venv/
+.venv/
