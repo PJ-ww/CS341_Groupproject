@@ -1,73 +1,78 @@
-import hashlib, json, logging, os
+import hashlib
+import json
+import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
 import boto3
-import requests
+from botocore.exceptions import ClientError
 
-from config import BUCKET, REGION, SOURCES
+from config import BUCKET, FILES, REGION
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 s3 = boto3.client("s3", region_name=REGION)
-
-
-def download(url, local_path):
-    r = requests.get(url, timeout=120)
-    r.raise_for_status()
-    with open(local_path, "wb") as f:
-        f.write(r.content)
-    return len(r.content)
+DATA_DIR = Path(__file__).parent / "data"
 
 
 def md5(path):
     h = hashlib.md5()
     with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
+        for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
 
 
 def already_uploaded(key, checksum):
-    """ข้ามถ้าไฟล์เดิมเหมือนกัน -> รันซ้ำได้ (idempotent)"""
+    """ไฟล์เดิมเหมือนกัน -> ข้าม ทำให้รันซ้ำได้ (idempotent)"""
     try:
         head = s3.head_object(Bucket=BUCKET, Key=key)
         return head["Metadata"].get("md5") == checksum
-    except s3.exceptions.ClientError:
-        return False
+    except ClientError as e:
+        if e.response["Error"]["Code"] in ("404", "NoSuchKey", "NotFound"):
+            return False
+        raise
 
 
 def main():
-    os.makedirs("data", exist_ok=True)
     manifest = []
-    for src in SOURCES:
-        local = os.path.join("data", src["filename"])
-        key = src["s3_prefix"] + src["filename"]
+    for item in FILES:
+        local = DATA_DIR / item["local_file"]
+        key = item["s3_prefix"] + item["s3_name"]
+        entry = {"local_file": item["local_file"], "s3_key": key, "source": item["source"]}
         try:
-            logging.info("Downloading %s", src["name"])
-            size = download(src["url"], local)
+            if not local.exists():
+                raise FileNotFoundError(local)
             checksum = md5(local)
+            entry.update(bytes=local.stat().st_size, md5=checksum)
 
             if already_uploaded(key, checksum):
+                entry["status"] = "skipped"
                 logging.info("Skip (unchanged): %s", key)
-                status = "skipped"
             else:
                 s3.upload_file(
-                    local, BUCKET, key,
-                    ExtraArgs={"Metadata": {"md5": checksum, "source_url": src["url"][:1000]}},
+                    str(local), BUCKET, key,
+                    ExtraArgs={"Metadata": {"md5": checksum}},
                 )
+                entry["status"] = "uploaded"
                 logging.info("Uploaded s3://%s/%s", BUCKET, key)
-                status = "uploaded"
-
-            manifest.append({"source": src["name"], "s3_key": key, "bytes": size,
-                             "md5": checksum, "status": status,
-                             "ingested_at": datetime.now(timezone.utc).isoformat()})
         except Exception as e:
-            logging.error("FAILED %s: %s", src["name"], e)
-            manifest.append({"source": src["name"], "status": "failed", "error": str(e)})
+            entry.update(status="failed", error=str(e))
+            logging.error("FAILED %s: %s", item["local_file"], e)
 
-    # เก็บ manifest ไว้เป็นหลักฐาน (data lineage)
+        entry["source_url"] = item["source_url"]
+        entry["ingested_at"] = datetime.now(timezone.utc).isoformat()
+        manifest.append(entry)
+
     mkey = f"raw/_manifests/manifest_{datetime.now(timezone.utc):%Y%m%dT%H%M%S}.json"
-    s3.put_object(Bucket=BUCKET, Key=mkey, Body=json.dumps(manifest, ensure_ascii=False, indent=2))
-    logging.info("Manifest written: %s", mkey)
+    s3.put_object(
+        Bucket=BUCKET, Key=mkey,
+        Body=json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"),
+    )
+    logging.info("Manifest written: s3://%s/%s", BUCKET, mkey)
+
+    failed = [m for m in manifest if m["status"] == "failed"]
+    if failed:
+        raise SystemExit(f"{len(failed)} file(s) failed")
 
 
 if __name__ == "__main__":
