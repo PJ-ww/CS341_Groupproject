@@ -39,5 +39,27 @@ FILES = [
         "source": "TODO",
         "source_url": "TODO",
     },
+    {
+        "local_file": "Geographic_Data.csv",
+        "s3_prefix": "raw/pdpm/geographic/",
+        "s3_name": "pdpm_flood_risk_geographic.csv",
+        "source": "สำนักงานป้องกันและบรรเทาสาธารณภัยจังหวัด",
+        "source_url": "TODO",
+    },
+    {
+        "local_file": "Number_of Households_Affected_by_Flooding.csv",
+        "s3_prefix": "raw/pdpm/flood_relief/",
+        "s3_name": "pdpm_flood_affected_households.csv",
+        "source": "หน่วยงานท้องถิ่นจังหวัด",
+        "source_url": "TODO",
+    },
+    {
+        "local_file": "Salary2.csv",
+        "s3_prefix": "raw/nso/",
+        "s3_name": "nso_household_income_by_area.csv",
+        "source": "สำนักงานสถิติแห่งชาติ",
+        "source_url": "TODO",
+    },
+
 
 ]
