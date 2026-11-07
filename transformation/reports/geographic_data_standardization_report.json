@@ -1,0 +1,27 @@
+{
+    "input_file": "C:\\Users\\User\\OneDrive\\เดสก์ท็อป\\cs341-term-project\\CS341_Groupproject\\transformation\\output\\geographic_data_cleaned.csv",
+    "output_file": "C:\\Users\\User\\OneDrive\\เดสก์ท็อป\\cs341-term-project\\CS341_Groupproject\\transformation\\output\\geographic_data_standardized.csv",
+    "original_rows": 1772,
+    "output_rows": 1772,
+    "rows_removed": 0,
+    "risk_category_order": [
+        "เสี่ยงต่ำมาก",
+        "เสี่ยงต่ำ",
+        "เสี่ยงปานกลาง",
+        "เสี่ยงสูง",
+        "เสี่ยงสูงมาก"
+    ],
+    "risk_categories_found": [
+        "เสี่ยงต่ำมาก",
+        "เสี่ยงต่ำ",
+        "เสี่ยงปานกลาง",
+        "เสี่ยงสูง",
+        "เสี่ยงสูงมาก"
+    ],
+    "transformations": [
+        "Defined an ordered risk category from very low to very high",
+        "Verified the year column is integer",
+        "Preserved original column names and missing values",
+        "No rows were removed"
+    ]
+}
