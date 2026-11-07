@@ -1,0 +1,623 @@
+[
+  {
+    "file": "2564_by_disaster_type1.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 83,
+    "accepted_count": 76,
+    "quarantined_count": 7,
+    "duplicate_rows_quarantined": 0,
+    "column_stats": [
+      {
+        "column": "ที่",
+        "missing_count": 1,
+        "unique_nonempty": 80
+      },
+      {
+        "column": "จังหวัด",
+        "missing_count": 5,
+        "unique_nonempty": 78
+      },
+      {
+        "column": "ด้านดำรงชีพ",
+        "missing_count": 2,
+        "unique_nonempty": 44
+      },
+      {
+        "column": "ด้านสังคมสงเคราะห์",
+        "missing_count": 4,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "ด้านการแพทย์",
+        "missing_count": 3,
+        "unique_nonempty": 2
+      },
+      {
+        "column": "ด้านเกษตรพืช",
+        "missing_count": 3,
+        "unique_nonempty": 54
+      },
+      {
+        "column": "ด้านเกษตรประมง",
+        "missing_count": 3,
+        "unique_nonempty": 45
+      },
+      {
+        "column": "ด้านเกษตรปศุสัตว์",
+        "missing_count": 3,
+        "unique_nonempty": 27
+      },
+      {
+        "column": "ด้านเกษตรอื่น",
+        "missing_count": 3,
+        "unique_nonempty": 2
+      },
+      {
+        "column": "ด้านบรรเทา",
+        "missing_count": 3,
+        "unique_nonempty": 31
+      },
+      {
+        "column": "ด้านการปฏิบัติงานให้",
+        "missing_count": 2,
+        "unique_nonempty": 16
+      },
+      {
+        "column": "ป้องกันหรือยับยั้ง",
+        "missing_count": 2,
+        "unique_nonempty": 78
+      },
+      {
+        "column": "รวมทั้งสิ้น",
+        "missing_count": 2,
+        "unique_nonempty": 81
+      },
+      {
+        "column": "วงเงิน",
+        "missing_count": 2,
+        "unique_nonempty": 80
+      },
+      {
+        "column": "วงเงินอนุมัติ",
+        "missing_count": 2,
+        "unique_nonempty": 75
+      },
+      {
+        "column": "วงเงินไม่อนุมัติ",
+        "missing_count": 3,
+        "unique_nonempty": 10
+      }
+    ],
+    "notes": [
+      "แถวหัวตารางต่อและแถวสรุปถูก quarantine จากตารางระดับจังหวัด ไม่ได้ถือว่าเป็นข้อมูลต้นทางเสีย"
+    ],
+    "issues": [],
+    "quarantine_file": "quarantine/2564_by_disaster_type1__csv.jsonl"
+  },
+  {
+    "file": "dpm-gd015__1.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 29999,
+    "accepted_count": 29999,
+    "quarantined_count": 0,
+    "duplicate_rows_quarantined": 0,
+    "column_stats": [
+      {
+        "column": "PROVINCE_CODE",
+        "missing_count": 0,
+        "unique_nonempty": 37
+      },
+      {
+        "column": "PROVINCE_NAME",
+        "missing_count": 0,
+        "unique_nonempty": 37
+      },
+      {
+        "column": "AMPHUR_CODE",
+        "missing_count": 0,
+        "unique_nonempty": 494
+      },
+      {
+        "column": "AMPHUR_NAME",
+        "missing_count": 0,
+        "unique_nonempty": 492
+      },
+      {
+        "column": "DISTRICT_CODE",
+        "missing_count": 113,
+        "unique_nonempty": 3411
+      },
+      {
+        "column": "DISTRICT_NAME",
+        "missing_count": 113,
+        "unique_nonempty": 2779
+      },
+      {
+        "column": "MOO_NO",
+        "missing_count": 202,
+        "unique_nonempty": 28
+      },
+      {
+        "column": "ORG_CODE",
+        "missing_count": 29886,
+        "unique_nonempty": 21
+      },
+      {
+        "column": "ORG_NAME",
+        "missing_count": 29886,
+        "unique_nonempty": 21
+      },
+      {
+        "column": "COMMUNITY_NAME",
+        "missing_count": 29886,
+        "unique_nonempty": 113
+      },
+      {
+        "column": "MOO_ID",
+        "missing_count": 0,
+        "unique_nonempty": 29999
+      },
+      {
+        "column": "DIS_TYPE_NAME",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "Y2562",
+        "missing_count": 22305,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "Y2563",
+        "missing_count": 25317,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "Y2564",
+        "missing_count": 18499,
+        "unique_nonempty": 6
+      },
+      {
+        "column": "Y2565",
+        "missing_count": 11104,
+        "unique_nonempty": 8
+      },
+      {
+        "column": "Y2566",
+        "missing_count": 19635,
+        "unique_nonempty": 5
+      },
+      {
+        "column": "Y2567",
+        "missing_count": 29974,
+        "unique_nonempty": 2
+      }
+    ],
+    "notes": [
+      "ช่องปี Y2562–Y2567 ว่างได้ตามรูปแบบต้นทาง; เก็บเป็น missing/ไม่มีรายการ ไม่แปลงเป็นศูนย์",
+      "ชื่อคอลัมน์บางตัวมีช่องว่างท้ายชื่อ; ควร normalize header ในขั้น clean โดยเก็บ mapping ไว้"
+    ],
+    "quarantine": [],
+    "issues": []
+  },
+  {
+    "file": "Geographic_Data.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 1816,
+    "accepted_count": 1772,
+    "quarantined_count": 44,
+    "duplicate_rows_quarantined": 44,
+    "column_stats": [
+      {
+        "column": "ปี",
+        "missing_count": 0,
+        "unique_nonempty": 2
+      },
+      {
+        "column": "รายการ",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "อำเภอ",
+        "missing_count": 0,
+        "unique_nonempty": 9
+      },
+      {
+        "column": "ตำบล",
+        "missing_count": 0,
+        "unique_nonempty": 79
+      },
+      {
+        "column": "หมู่ที่",
+        "missing_count": 46,
+        "unique_nonempty": 21
+      },
+      {
+        "column": "ความเสี่ยง",
+        "missing_count": 0,
+        "unique_nonempty": 5
+      },
+      {
+        "column": "เหล่งที่มา",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      }
+    ],
+    "notes": [
+      "หมู่ที่ว่างได้ เพราะรายการบางแถวเป็นระดับตำบล ไม่ใช่ระดับหมู่บ้าน",
+      "พบชื่อหัวคอลัมน์ 'เหล่งที่มา'; ควรยืนยันกับเจ้าของข้อมูลก่อนเปลี่ยนชื่อ"
+    ],
+    "issues": [],
+    "deduplicated_file": "cleaned/Geographic_Data_deduplicated.csv",
+    "deduplicated_row_count": 1772,
+    "quarantine_file": "quarantine/Geographic_Data__csv.jsonl"
+  },
+  {
+    "file": "Number_of Households_Affected_by_Flooding.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 144,
+    "accepted_count": 144,
+    "quarantined_count": 0,
+    "duplicate_rows_quarantined": 0,
+    "column_stats": [
+      {
+        "column": "ปี",
+        "missing_count": 0,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "รายการ",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "อำเภอ",
+        "missing_count": 0,
+        "unique_nonempty": 8
+      },
+      {
+        "column": "ตำบล",
+        "missing_count": 0,
+        "unique_nonempty": 48
+      },
+      {
+        "column": "จำนวน",
+        "missing_count": 0,
+        "unique_nonempty": 17
+      },
+      {
+        "column": "หน่วย",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "ที่มา",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      }
+    ],
+    "notes": [],
+    "quarantine": [],
+    "issues": []
+  },
+  {
+    "file": "Number_of_Affected_Households.xlsx",
+    "format": "xlsx",
+    "sheets": {
+      "Sheet2": {
+        "data_row_count": 48,
+        "accepted_count": 48,
+        "quarantined_count": 0,
+        "duplicate_rows_quarantined": 0,
+        "column_stats": [
+          {
+            "column": "ครั้งที่",
+            "missing_count": 0,
+            "unique_nonempty": 7
+          },
+          {
+            "column": "อำเภอ",
+            "missing_count": 0,
+            "unique_nonempty": 9
+          },
+          {
+            "column": "รายการ",
+            "missing_count": 0,
+            "unique_nonempty": 3
+          },
+          {
+            "column": "จำนวน",
+            "missing_count": 0,
+            "unique_nonempty": 37
+          },
+          {
+            "column": "หน่วยนับ",
+            "missing_count": 0,
+            "unique_nonempty": 3
+          }
+        ],
+        "notes": [
+          "ข้อมูลเป็นรายการสรุปหลายประเภท (ตำบล/หมู่บ้าน/ครัวเรือน); อย่ารวมจำนวนต่างหน่วยเข้าด้วยกัน"
+        ],
+        "quarantine": [],
+        "issues": []
+      }
+    }
+  },
+  {
+    "file": "Salary.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 15400,
+    "accepted_count": 15400,
+    "quarantined_count": 0,
+    "duplicate_rows_quarantined": 0,
+    "column_stats": [
+      {
+        "column": "year",
+        "missing_count": 0,
+        "unique_nonempty": 2
+      },
+      {
+        "column": "province",
+        "missing_count": 0,
+        "unique_nonempty": 77
+      },
+      {
+        "column": "source_income1",
+        "missing_count": 0,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "source_income2",
+        "missing_count": 0,
+        "unique_nonempty": 5
+      },
+      {
+        "column": "source_income3",
+        "missing_count": 0,
+        "unique_nonempty": 10
+      },
+      {
+        "column": "soc_eco_class1",
+        "missing_count": 0,
+        "unique_nonempty": 4
+      },
+      {
+        "column": "soc_eco_class2",
+        "missing_count": 0,
+        "unique_nonempty": 10
+      },
+      {
+        "column": "value",
+        "missing_count": 0,
+        "unique_nonempty": 8616
+      },
+      {
+        "column": "unit",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "attribute",
+        "missing_count": 13675,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "source",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      }
+    ],
+    "notes": [
+      "ช่อง attribute ว่างได้; ค่า '.00' เป็นค่าศูนย์ตามคำอธิบายใน attribute ไม่ใช่ค่าว่าง",
+      "ค่า value ติดลบรับไว้ เพราะกำไรสุทธิจากธุรกิจ/เกษตรอาจเป็นผลขาดทุนได้"
+    ],
+    "quarantine": [],
+    "issues": []
+  },
+  {
+    "file": "Salary2.csv",
+    "format": "csv",
+    "encoding": "utf-8-sig",
+    "data_row_count": 144,
+    "accepted_count": 144,
+    "quarantined_count": 0,
+    "duplicate_rows_quarantined": 0,
+    "column_stats": [
+      {
+        "column": "YEAR",
+        "missing_count": 0,
+        "unique_nonempty": 8
+      },
+      {
+        "column": "CODE_REGION",
+        "missing_count": 0,
+        "unique_nonempty": 6
+      },
+      {
+        "column": "REGION",
+        "missing_count": 0,
+        "unique_nonempty": 10
+      },
+      {
+        "column": "CODE_AREA",
+        "missing_count": 0,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "AREA",
+        "missing_count": 0,
+        "unique_nonempty": 3
+      },
+      {
+        "column": "MONTHLY_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 144
+      },
+      {
+        "column": "CURRENT_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 143
+      },
+      {
+        "column": "MONEY_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 144
+      },
+      {
+        "column": "FROM_WORK",
+        "missing_count": 0,
+        "unique_nonempty": 143
+      },
+      {
+        "column": "CURRENT_TRANSFER",
+        "missing_count": 0,
+        "unique_nonempty": 139
+      },
+      {
+        "column": "PROPERTY_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 124
+      },
+      {
+        "column": "NONMONEY_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 139
+      },
+      {
+        "column": "NONCUR_M_INCOME",
+        "missing_count": 0,
+        "unique_nonempty": 121
+      },
+      {
+        "column": "UNIT",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      },
+      {
+        "column": "SOURCE",
+        "missing_count": 0,
+        "unique_nonempty": 1
+      }
+    ],
+    "notes": [],
+    "quarantine": [],
+    "issues": []
+  },
+  {
+    "file": "STATISTIC_FLD.xlsx",
+    "format": "xlsx",
+    "sheets": {
+      "_SELECT_PROVINCE_CODE_PROVINCE_": {
+        "data_row_count": 57024,
+        "accepted_count": 57024,
+        "quarantined_count": 0,
+        "duplicate_rows_quarantined": 0,
+        "column_stats": [
+          {
+            "column": "PROVINCE_CODE",
+            "missing_count": 0,
+            "unique_nonempty": 77
+          },
+          {
+            "column": "PROVINCE_NAME",
+            "missing_count": 0,
+            "unique_nonempty": 77
+          },
+          {
+            "column": "AMPHUR_CODE",
+            "missing_count": 0,
+            "unique_nonempty": 909
+          },
+          {
+            "column": "AMPHUR_NAME",
+            "missing_count": 0,
+            "unique_nonempty": 904
+          },
+          {
+            "column": "DISTRICT_CODE",
+            "missing_count": 367,
+            "unique_nonempty": 6461
+          },
+          {
+            "column": "DISTRICT_NAME",
+            "missing_count": 367,
+            "unique_nonempty": 5194
+          },
+          {
+            "column": "MOO_NO",
+            "missing_count": 456,
+            "unique_nonempty": 29
+          },
+          {
+            "column": "ORG_CODE",
+            "missing_count": 56657,
+            "unique_nonempty": 50
+          },
+          {
+            "column": "ORG_NAME",
+            "missing_count": 56657,
+            "unique_nonempty": 50
+          },
+          {
+            "column": "COMMUNITY_NAME",
+            "missing_count": 56657,
+            "unique_nonempty": 365
+          },
+          {
+            "column": "MOO_ID",
+            "missing_count": 0,
+            "unique_nonempty": 57023
+          },
+          {
+            "column": "DIS_TYPE_NAME",
+            "missing_count": 0,
+            "unique_nonempty": 1
+          },
+          {
+            "column": "Y2562",
+            "missing_count": 42729,
+            "unique_nonempty": 6
+          },
+          {
+            "column": "Y2563",
+            "missing_count": 40317,
+            "unique_nonempty": 7
+          },
+          {
+            "column": "Y2564",
+            "missing_count": 30675,
+            "unique_nonempty": 6
+          },
+          {
+            "column": "Y2565",
+            "missing_count": 20670,
+            "unique_nonempty": 11
+          },
+          {
+            "column": "Y2566",
+            "missing_count": 35933,
+            "unique_nonempty": 6
+          },
+          {
+            "column": "Y2567",
+            "missing_count": 56817,
+            "unique_nonempty": 2
+          }
+        ],
+        "notes": [
+          "ช่องปี Y2562–Y2567 ว่างได้ตามรูปแบบต้นทาง; เก็บเป็น missing/ไม่มีรายการ ไม่แปลงเป็นศูนย์",
+          "ชื่อคอลัมน์บางตัวมีช่องว่างท้ายชื่อ; ควร normalize header ในขั้น clean โดยเก็บ mapping ไว้"
+        ],
+        "quarantine": [],
+        "issues": []
+      }
+    }
+  }
+]
