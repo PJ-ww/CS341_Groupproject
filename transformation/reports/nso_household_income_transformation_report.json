@@ -1,0 +1,60 @@
+{
+  "source_file": "ingestion\\data\\raw\\nso\\nso_household_income.csv",
+  "output_csv": "transformation\\output\\nso_household_income_transformed.csv",
+  "output_parquet": "transformation\\output\\nso_household_income_transformed.parquet",
+  "original_rows": 15400,
+  "transformed_rows": 15400,
+  "original_columns": [
+    "year",
+    "province",
+    "source_income1",
+    "source_income2",
+    "source_income3",
+    "soc_eco_class1",
+    "soc_eco_class2",
+    "value",
+    "unit",
+    "attribute",
+    "source"
+  ],
+  "transformed_columns": [
+    "year",
+    "province",
+    "source_income1",
+    "source_income2",
+    "source_income3",
+    "soc_eco_class1",
+    "soc_eco_class2",
+    "value",
+    "unit",
+    "attribute",
+    "source"
+  ],
+  "rows_removed": 0,
+  "missing_values": {
+    "year": 0,
+    "province": 0,
+    "source_income1": 0,
+    "source_income2": 0,
+    "source_income3": 0,
+    "soc_eco_class1": 0,
+    "soc_eco_class2": 0,
+    "value": 0,
+    "unit": 0,
+    "attribute": 13675,
+    "source": 0
+  },
+  "year_distribution": {
+    "2566": 7700,
+    "2568": 7700
+  },
+  "notes": [
+    "Text columns were stripped of leading and trailing whitespace.",
+    "Year was converted to nullable integer.",
+    "Income value was converted to numeric.",
+    "Missing values were preserved.",
+    "Zero and negative income values were preserved.",
+    "Income categories were not aggregated.",
+    "Income data represents socioeconomic groups, not individual households."
+  ]
+}
