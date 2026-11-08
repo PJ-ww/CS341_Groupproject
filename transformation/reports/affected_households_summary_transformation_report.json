@@ -1,0 +1,51 @@
+{
+  "source_file": "ingestion\\data\\raw\\pdpm\\flood_relief\\pdpm_affected_households.xlsx",
+  "source_sheet": "Sheet2",
+  "output_csv": "transformation\\output\\affected_households_summary_transformed.csv",
+  "output_parquet": "transformation\\output\\affected_households_summary_transformed.parquet",
+  "original_rows": 48,
+  "transformed_rows": 48,
+  "original_columns": [
+    "ครั้งที่",
+    "อำเภอ",
+    "รายการ",
+    "จำนวน",
+    "หน่วยนับ"
+  ],
+  "transformed_columns": [
+    "ครั้งที่",
+    "อำเภอ",
+    "รายการ",
+    "จำนวน",
+    "หน่วยนับ"
+  ],
+  "rows_removed": 0,
+  "item_distribution": {
+    "จำนวนตำบลที่เกิดภัย": 16,
+    "จำนวนหมู่บ้านที่เกิดภัย": 16,
+    "ครัวเรือนที่ได้รับผลกระทบ": 16
+  },
+  "unit_distribution": {
+    "ตำบล": 16,
+    "หมู่บ้าน": 16,
+    "ครัวเรือน": 16
+  },
+  "missing_values": {
+    "ครั้งที่": 0,
+    "อำเภอ": 0,
+    "รายการ": 0,
+    "จำนวน": 0,
+    "หน่วยนับ": 0
+  },
+  "duplicate_rows": 0,
+  "notes": [
+    "Text columns were stripped of leading and trailing whitespace.",
+    "Count column was converted to nullable integer.",
+    "Original event round was preserved.",
+    "No year was created because the source does not specify one.",
+    "Different measurement units were kept separate.",
+    "No aggregation was performed across different units.",
+    "Missing values were preserved.",
+    "Original source file was not modified."
+  ]
+}
