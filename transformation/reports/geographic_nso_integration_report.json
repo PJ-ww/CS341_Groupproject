@@ -1,0 +1,34 @@
+{
+    "process": "Geographic Data and NSO Income Integration",
+    "join_keys": [
+        "จังหวัด",
+        "ปี"
+    ],
+    "province": "ยโสธร",
+    "year": 2568,
+    "income_indicator": "รายได้ทั้งสิ้นต่อเดือน",
+    "geographic_rows_before_filter": 1772,
+    "nso_rows_before_filter": 15400,
+    "geographic_rows_after_filter": 886,
+    "nso_income_rows_after_filter": 10,
+    "integrated_rows": 10,
+    "geographic_risk_summary": {
+        "Very Low": 408,
+        "Low": 233,
+        "Moderate": 81,
+        "High": 114,
+        "Very High": 50
+    },
+    "join_type": "many NSO socioeconomic groups to one geographic summary",
+    "join_validation": "many_to_one",
+    "limitations": [
+        "Geographic risk data is at subdistrict/village record level and is aggregated to province-year level before integration.",
+        "NSO income data is provincial survey data separated by socioeconomic group, not individual household income.",
+        "Geographic risk summary is repeated for each socioeconomic group in the integrated contextual dataset.",
+        "This integration does not establish household-level relationships between income and flood risk."
+    ],
+    "outputs": [
+        "C:\\Users\\User\\OneDrive\\เดสก์ท็อป\\cs341-term-project\\CS341_Groupproject\\transformation\\output\\geographic_nso_integrated.csv",
+        "C:\\Users\\User\\OneDrive\\เดสก์ท็อป\\cs341-term-project\\CS341_Groupproject\\transformation\\output\\geographic_nso_integrated.parquet"
+    ]
+}
