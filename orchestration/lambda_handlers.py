@@ -92,8 +92,9 @@ def _prepare_workdir():
 
 def _run(script, cwd):
     print(f"RUN {script.relative_to(WORK_DIR)}")
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join(p for p in sys.path if p)}
     proc = subprocess.run([sys.executable, str(script)], cwd=cwd, capture_output=True,
-                          text=True, encoding="utf-8", errors="replace")
+                          text=True, encoding="utf-8", errors="replace", env=env)
     print(proc.stdout[-3000:])
     if proc.stderr:
         print("STDERR:", proc.stderr[-3000:])
