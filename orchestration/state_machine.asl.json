@@ -1,0 +1,67 @@
+{
+  "Comment": "CS341 Flood Recovery batch pipeline",
+  "StartAt": "CheckBatch",
+  "States": {
+    "CheckBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "cs341-check-batch", "Payload.$": "$" },
+      "ResultSelector": { "already_processed.$": "$.Payload.already_processed" },
+      "ResultPath": "$.check",
+      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
+      "Next": "AlreadyProcessed?"
+    },
+    "AlreadyProcessed?": {
+      "Type": "Choice",
+      "Choices": [ { "Variable": "$.check.already_processed", "BooleanEquals": true, "Next": "Stop" } ],
+      "Default": "ValidateBatch"
+    },
+    "Stop": { "Type": "Succeed" },
+    "ValidateBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "cs341-validate-batch", "Payload.$": "$" },
+      "ResultSelector": {
+        "valid.$": "$.Payload.valid",
+        "quarantined_rows.$": "$.Payload.quarantined_rows",
+        "reason.$": "$.Payload.reason"
+      },
+      "ResultPath": "$.validation",
+      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
+      "Next": "Valid?"
+    },
+    "Valid?": {
+      "Type": "Choice",
+      "Choices": [ { "Variable": "$.validation.valid", "BooleanEquals": true, "Next": "TransformBatch" } ],
+      "Default": "QuarantineBatch"
+    },
+    "QuarantineBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "cs341-quarantine-batch", "Payload.$": "$" },
+      "ResultPath": null,
+      "Next": "BatchRejected"
+    },
+    "BatchRejected": {
+      "Type": "Fail",
+      "Error": "ValidationFailed",
+      "Cause": "Batch failed validation. Files were copied to quarantine/."
+    },
+    "TransformBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "cs341-transform-batch", "Payload.$": "$" },
+      "ResultPath": null,
+      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
+      "Next": "VerifyBatch"
+    },
+    "VerifyBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "cs341-verify-batch", "Payload.$": "$" },
+      "ResultPath": null,
+      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
+      "End": true
+    }
+  }
+}
