@@ -57,3 +57,23 @@
 ## 8. Repository
 - **GitHub Repository:** https://github.com/PJ-ww/CS341_Groupproject
 - **GitHub Issues:** https://github.com/PJ-ww/CS341_Groupproject/issues
+
+## 9. วิธีรัน Pipeline ซ้ำบนเครื่อง (Local Run)
+
+ส่วน Validation → Transformation → Integration รันซ้ำได้บนเครื่องโดยไม่ต้องใช้ AWS เพราะข้อมูลดิบ 8 ไฟล์อยู่ใน `ingestion/data/` แล้ว (ต้องใช้ Python 3.11 ขึ้นไป)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python run_all.py
+```
+
+บน Windows ให้เปิดใช้ venv ด้วย `.venv\Scripts\Activate.ps1`
+
+`run_all.py` จะจัดวางไฟล์ดิบ รัน validation และสคริปต์ transformation ทั้งหมดตามลำดับ แล้วตรวจจำนวนแถวของผลลัพธ์เทียบกับที่ทีมรายงานไว้ ใช้เวลาไม่กี่นาที คำอธิบายรายขั้นตอนอยู่ใน [`transformation/README.md`](transformation/README.md) หัวข้อ 8 และคู่มือสำหรับผู้ตรวจอยู่ใน [`RUN_INSTRUCTIONS.md`](RUN_INSTRUCTIONS.md)
+
+ส่วนที่ใช้ AWS (`ingestion/ingest.py`, `orchestration/`, Athena) ต้องใช้ Credentials ของทีม ดูวิธีตั้งค่าใน [`ingestion/README.md`](ingestion/README.md) และหลักฐานการทำงานในวิดีโอเดโมด้านบน
+
+ปัญหาที่พบระหว่างทำและเหตุผลของการตัดสินใจสำคัญ สรุปไว้ใน [`docs/05-problems-and-decisions.md`](docs/05-problems-and-decisions.md)
+

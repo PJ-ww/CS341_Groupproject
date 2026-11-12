@@ -274,7 +274,29 @@ No primary integrated fact table has been created yet. Integration keys and rela
 
 Run commands from the repository root directory.
 
+### 8.1 Prerequisites
+
 ```bash
+python -m pip install -r requirements.txt
+```
+
+Python 3.11+ is required (pandas 3.x). `openpyxl` (for `.xlsx`) is included in `requirements.txt`.
+
+### 8.2 Quick way: one command
+
+```bash
+python run_all.py
+```
+
+`run_all.py` stages the raw files, runs validation, runs every transformation script in the correct order, and checks the output row counts against the values reported in this README. It stops at the first failing step. Add `--verbose` to see each script's output.
+
+### 8.3 Step by step
+
+Some transformation scripts read raw files from `ingestion/data/raw/...` (the same layout as S3 and the Lambda working directory). `prepare_local_data.py` copies the files downloaded to `ingestion/data/` into that layout. Run it once before the transformation scripts.
+
+```bash
+python prepare_local_data.py
+python ingestion/validate_data.py
 python transformation/scripts/clean_data.py
 python transformation/scripts/standardize.py
 python transformation/scripts/create_features.py
@@ -283,7 +305,14 @@ python transformation/scripts/transform_nso_income.py
 python transformation/scripts/transform_disaster_budget.py
 python transformation/scripts/transform_flood_affected_households.py
 python transformation/scripts/transform_affected_households_summary.py
+python transformation/scripts/integrate_data.py
 ```
+
+Order matters: `integrate_data.py` needs the outputs of `create_features.py` and `transform_nso_income.py`, and `clean_data.py` reads `validation/cleaned/Geographic_Data_deduplicated.csv` produced by `validate_data.py`.
+
+### 8.4 Re-run behavior
+
+Scripts overwrite their outputs, so re-running gives the same CSV files. Parquet files may differ in bytes (file metadata varies by library version or environment) while containing identical data; compare them with `pd.read_parquet(...).equals(...)` rather than by checksum. JSON reports differ only in path separators (Windows vs macOS/Linux) and file ordering.
 
 ## 9. Output Formats
 
