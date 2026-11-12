@@ -166,11 +166,11 @@ done
 ## 6. สร้างและรัน Step Functions
 
 ```bash
-aws stepfunctions create-state-machine --name cs341-flood-pipeline \
+aws stepfunctions create-state-machine --name cs341-pipeline \
   --definition file://orchestration/state_machine.asl.json \
   --role-arn arn:aws:iam::$ACCOUNT_ID:role/cs341-sfn-role
 
-SM_ARN=arn:aws:states:$AWS_REGION:$ACCOUNT_ID:stateMachine:cs341-flood-pipeline
+SM_ARN=arn:aws:states:$AWS_REGION:$ACCOUNT_ID:stateMachine:cs341-pipeline
 aws stepfunctions start-execution --state-machine-arn $SM_ARN \
   --input "{\"bucket\":\"$BUCKET\",\"batch_id\":\"2026-11\"}"
 ```

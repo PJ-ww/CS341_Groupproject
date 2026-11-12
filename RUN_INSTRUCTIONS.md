@@ -1,8 +1,10 @@
 # คู่มือทดลองรันโปรเจกต์ CS341 Flood Impact & Recovery
 
-คู่มือนี้อธิบายวิธีรันส่วน **Validation → Transformation → Integration** บนเครื่องของอาจารย์ได้ทันที **โดยไม่ต้องใช้ AWS Account หรือ Credentials** เพราะไฟล์ข้อมูลดิบทั้ง 8 ไฟล์แนบอยู่ในโฟลเดอร์ `ingestion/data/` แล้ว
+คู่มือนี้อธิบายวิธี clone repo แล้วรันส่วน **Validation → Transformation → Integration** บนเครื่องของตัวเอง **โดยไม่ต้องใช้ AWS Account หรือ Credentials**
 
-ใช้เวลาประมาณ 5 นาที
+ข้อมูลดิบ 8 ไฟล์**ไม่ได้อยู่ใน GitHub** (`ingestion/data/` อยู่ใน `.gitignore`) ต้องดาวน์โหลดจากเว็บต้นทางก่อน ตามขั้นตอนที่ 3 แต่ผลลัพธ์ที่ทีมรันไว้แล้วทั้งหมดอยู่ใน repo (`validation/`, `transformation/output/`, `transformation/reports/`) จึงเปิดตรวจได้ทันทีโดยไม่ต้องรัน
+
+ใช้เวลาติดตั้งและรันประมาณ 5 นาที ไม่รวมเวลาดาวน์โหลดข้อมูลดิบ
 
 ---
 
@@ -14,20 +16,23 @@
 | ระบบปฏิบัติการ | macOS / Linux / Windows |
 | อินเทอร์เน็ต | ใช้เฉพาะตอนติดตั้งไลบรารี |
 
-> **หมายเหตุ:** ไม่ต้องใช้โฟลเดอร์ `.venv` ที่มากับไฟล์ zip เพราะสร้างจาก macOS ของทีม ให้สร้างใหม่ตามขั้นตอนด้านล่าง
-
 ---
 
 ## 2. ติดตั้ง
 
-แตกไฟล์ `CS341_Groupproject.zip` แล้วเปิด Terminal (Windows: PowerShell) ที่โฟลเดอร์ `CS341_Groupproject`
+Clone repo แล้วเปิด Terminal (Windows: PowerShell) ที่โฟลเดอร์ `CS341_Groupproject`
+
+```bash
+git clone https://github.com/PJ-ww/CS341_Groupproject.git
+cd CS341_Groupproject
+```
 
 **macOS / Linux**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt openpyxl
+python -m pip install -r requirements.txt
 ```
 
 **Windows (PowerShell)**
@@ -35,10 +40,10 @@ python -m pip install -r requirements.txt openpyxl
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt openpyxl
+python -m pip install -r requirements.txt
 ```
 
-- ต้องติดตั้ง `openpyxl` เพิ่ม เพราะใช้อ่านไฟล์ `.xlsx` แต่ยังไม่อยู่ใน `requirements.txt`
+- `requirements.txt` มีครบทั้ง pandas, pyarrow, openpyxl (อ่าน `.xlsx`) และ boto3
 - หากติดตั้งเวอร์ชันที่ระบุใน `requirements.txt` ไม่ได้ ให้ใช้คำสั่งนี้แทน:
   ```bash
   python -m pip install pandas pyarrow openpyxl
@@ -46,9 +51,21 @@ python -m pip install -r requirements.txt openpyxl
 
 ---
 
-## 3. จัดโครงสร้างไฟล์ข้อมูล (ทำครั้งเดียว)
+## 3. เตรียมไฟล์ข้อมูลดิบ (ทำครั้งเดียว)
 
-สคริปต์ transformation 5 ตัวอ่านไฟล์จากโฟลเดอร์ `ingestion/data/raw/...` ซึ่งเลียนแบบโครงสร้างบน S3 ให้รันสคริปต์ช่วยนี้จาก root ของโปรเจกต์ (ไฟล์ `prepare_local_data.py` แนบมาพร้อมคู่มือนี้ ให้วางไว้ที่ root ของโปรเจกต์):
+**3.1 ดาวน์โหลดข้อมูลดิบ 8 ไฟล์**
+
+ดาวน์โหลดจากหน้าชุดข้อมูลต้นทาง แล้วเปลี่ยนชื่อและวางไว้ใน `ingestion/data/` ตามตารางใน [`ingestion/README.md`](ingestion/README.md) หัวข้อ **6B** (สมาชิกทีมที่มี AWS Credentials ใช้หัวข้อ 6 โหลดจาก S3 แทนได้)
+
+ถ้ายังไม่มีข้อมูลดิบ ยังรันได้บางส่วน:
+- `clean_data.py` → `standardize.py` → `create_features.py` รันได้เลย เพราะใช้ `validation/cleaned/Geographic_Data_deduplicated.csv` ที่อยู่ใน repo
+- ขั้นอื่นต้องมีข้อมูลดิบ ถ้าไม่มีจะขึ้น `[MISSING]` ในขั้น 3.2 และ `run_all.py` จะหยุดที่ขั้นแรก
+
+ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด (6 พ.ย. 2569) จำนวนแถวจึงอาจไม่ตรงกับตารางด้านล่างทุกค่า
+
+**3.2 จัดโครงสร้างโฟลเดอร์**
+
+สคริปต์ transformation 5 ตัวอ่านไฟล์จากโฟลเดอร์ `ingestion/data/raw/...` ซึ่งเลียนแบบโครงสร้างบน S3 ให้รันสคริปต์ช่วยที่อยู่ที่ root ของ repo:
 
 ```bash
 python prepare_local_data.py
@@ -58,7 +75,7 @@ python prepare_local_data.py
 
 ---
 
-> **ทางลัด:** หลังติดตั้งเสร็จ รัน `python run_all.py` คำสั่งเดียวแทนขั้นตอนที่ 3–5 ได้ (ใช้ `--verbose` เพื่อดูข้อความของแต่ละสคริปต์) ท้ายสุดจะตรวจจำนวนแถวของผลลัพธ์ให้อัตโนมัติ ส่วนขั้นตอนด้านล่างเป็นการรันทีละขั้นเพื่อดูผลลัพธ์แต่ละส่วน
+> **ทางลัด:** หลังติดตั้งและวางไฟล์ดิบเสร็จ รัน `python run_all.py` คำสั่งเดียวแทนขั้นตอนที่ 3–5 ได้ (ใช้ `--verbose` เพื่อดูข้อความของแต่ละสคริปต์) ท้ายสุดจะตรวจจำนวนแถวของผลลัพธ์ให้อัตโนมัติ ส่วนขั้นตอนด้านล่างเป็นการรันทีละขั้นเพื่อดูผลลัพธ์แต่ละส่วน
 
 ## 4. รัน Data Validation
 
@@ -152,7 +169,7 @@ python orchestration/build_package.py
 
 ## 8. ส่วนที่ต้องใช้ AWS (รันบนเครื่องอื่นไม่ได้)
 
-ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่ต้องรัน:
+ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่จำเป็นต้องรัน ถ้าต้องการลองบน AWS Account ของตัวเอง ทำตาม [`orchestration/README.md`](orchestration/README.md) (สร้าง bucket, ตาราง Athena จาก `sql/setup/01_create_tables.sql`, Lambda และ Step Functions)
 
 | ส่วน | ไฟล์ | หมายเหตุ |
 |---|---|---|
@@ -173,7 +190,8 @@ python orchestration/build_package.py
 |---|---|
 | `ModuleNotFoundError: openpyxl` | ยังไม่ได้ติดตั้ง รัน `python -m pip install openpyxl` |
 | `ModuleNotFoundError: pyarrow` | รัน `python -m pip install pyarrow` |
-| `FileNotFoundError: ...ingestion/data/raw/...` | ยังไม่ได้รัน `python prepare_local_data.py` (ขั้นตอนที่ 3) |
+| `[MISSING] ...ingestion/data/...` | ยังไม่ได้ดาวน์โหลดไฟล์ดิบ หรือชื่อไฟล์ไม่ตรง (ขั้นตอนที่ 3.1) |
+| `FileNotFoundError: ...ingestion/data/raw/...` | ยังไม่ได้รัน `python prepare_local_data.py` (ขั้นตอนที่ 3.2) |
 | `FileNotFoundError: ...validation/cleaned/Geographic_Data_deduplicated.csv` | ยังไม่ได้รัน `ingestion/validate_data.py` (ขั้นตอนที่ 4) |
 | `FileNotFoundError: ...nso_household_income_transformed.csv` | รัน `integrate_data.py` ก่อน `transform_nso_income.py` ให้รันสคริปต์ตามลำดับในขั้นตอนที่ 5 |
 | ติดตั้ง pandas ไม่ได้ / เวอร์ชันไม่ตรง | ตรวจว่าใช้ Python 3.11+ (`python --version`) หรือใช้คำสั่งติดตั้งแบบไม่ระบุเวอร์ชัน |

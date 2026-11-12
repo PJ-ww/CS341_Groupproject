@@ -87,6 +87,26 @@ python run_all.py
 
 ผลลัพธ์ของขั้นที่ 4-5 commit ไว้แล้วใน `validation/` และ `transformation/output/` จึงเปิดดูได้โดยไม่ต้องรันใหม่
 
-## 9. Repository
+## 9. สิ่งที่ต้องทำต่อก่อน Final
+
+รวบรวมจาก [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) หัวข้อ 5.2 และข้อจำกัดของ pipeline ใน Issue #15
+
+**ด้านการวิเคราะห์**
+1. วิเคราะห์ข้ามตารางสำหรับ Q3 ระดับจังหวัด: เชื่อมความถี่น้ำท่วมจาก `flood_village_stats` กับรายได้จาก `nso_income` ปี 2566 (ปีเดียวที่ซ้อนกัน) โดยตรวจความตรงกันของชื่อจังหวัดก่อน JOIN แล้วนำเสนอเป็นตารางหรือกราฟ
+2. รัน query ใน `sql/analysis/` บน Athena อีกรอบ แล้วเทียบตัวเลขกับหัวข้อ 2 ของ `data-analysis-summary.md`
+3. ทีมยืนยันข้อสรุปเชิงตีความในหัวข้อ 3 ของ `data-analysis-summary.md` (ผลไหนตอบ Q1–Q3 ได้แค่ไหน)
+4. เตรียมหลักฐานการทำงานและผลลัพธ์สำหรับนำเสนอ
+
+**ด้าน pipeline (จาก Issue #15)**
+1. Step Functions ยังต้องกดรันเอง ยังไม่มี trigger อัตโนมัติ (ต่อยอดด้วย EventBridge)
+2. จำนวนแถวที่ `VerifyBatch` ใช้เทียบใส่ตายตัวไว้ในโค้ด (`DATASETS` ใน `orchestration/lambda_handlers.py`) ถ้าข้อมูลต้นทางเปลี่ยนต้องแก้ตาม
+3. ไฟล์ใน `processed/` ถูกเขียนทับทุกรอบ ประวัติของแต่ละ batch เก็บอยู่ที่ `validation/batch_id=<id>/` และ `_SUCCESS.json` เท่านั้น
+4. ตาราง `nso_income_partitioned` ไม่ถูกสร้างใหม่โดย pipeline ตอนนี้ DDL ของทุกตารางอยู่ใน [`sql/setup/01_create_tables.sql`](sql/setup/01_create_tables.sql) แล้ว แต่ CTAS ของตารางนี้ต้องรันเอง
+
+**ข้อจำกัดของข้อมูลที่แก้ไม่ได้ในโครงงานนี้** (ต้องระบุในรายงาน Final)
+- ไม่มีข้อมูลระยะเวลาฟื้นตัว จึงตอบ Q2 ว่าความช่วยเหลือทำให้ฟื้นตัวเร็วขึ้นหรือไม่ได้โดยตรง
+- ข้อมูลความเสี่ยง (ยโสธร) และข้อมูลครัวเรือนที่ได้รับผลกระทบ (พังงา, หนองคาย) อยู่คนละจังหวัด จึง JOIN กันไม่ได้
+
+## 10. Repository
 - **GitHub Repository:** https://github.com/PJ-ww/CS341_Groupproject
 - **GitHub Issues:** https://github.com/PJ-ww/CS341_Groupproject/issues

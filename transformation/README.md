@@ -256,10 +256,17 @@ Current considerations:
 - NSO Household Income contains province-level socioeconomic group information. A province-year contextual relationship may be explored for Yasothon in 2568, but it must not be interpreted as household-level income.
 - Disaster Budget contains province-level data for 2564. It can be used for province-level analysis when geographic and temporal limitations are documented.
 - Flood Affected Households contains data from Phang Nga and should not be joined directly with Yasothon Geographic Data.
-- Affected Households Summary contains district-level information and multiple measurement units. Its year and geographic compatibility must be established before integration.
+- Affected Households Summary contains district-level information from Nong Khai and multiple measurement units. Its year and geographic compatibility must be established before integration.
 - `pdpm_gd015.csv` overlaps with Flood Village Stats and does not provide additional non-missing yearly values for matching records. It is not used as a supplementary source.
 
-No primary integrated fact table has been created yet. Integration keys and relationships must be confirmed before joining datasets.
+One integrated dataset has been created: `geographic_nso_integrated` (`integrate_data.py`).
+
+- Join keys: `จังหวัด` + `ปี` (Yasothon, 2568), many NSO socioeconomic groups to one geographic risk summary (validated as many-to-one)
+- Inputs: 1,772 geographic rows (886 after filtering to 2568) and 15,400 NSO rows (10 after filtering to Yasothon 2568, `รายได้ทั้งสิ้นต่อเดือน`)
+- Output: 10 rows, one per socioeconomic group, each carrying the same risk-level counts and percentages
+- Report: `transformation/reports/geographic_nso_integration_report.json`
+
+It is a province-year contextual table, not a household- or village-level fact table, so it cannot show a relationship between income and flood risk inside the province. Other joins remain out of scope until their geographic level and time period match.
 
 ## 7. Data Quality and Limitations
 
