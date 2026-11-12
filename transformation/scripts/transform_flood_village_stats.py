@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[2]
 
 INPUT_FILE = (
     ROOT
-    / "ingestion/data"
-    / "STATISTIC_FLD.xlsx"
+    / "ingestion/data/raw/pdpm/flood_stats/"
+    / "pdpm_flood_village_stats.xlsx"
 )
 
 OUTPUT_DIR = ROOT / "transformation/output"

@@ -70,16 +70,16 @@ transformation/
 
 The module uses source datasets that have been checked by the Data Validation process.
 
-| Dataset | Input File (local path) | S3 key | Source |
+| Dataset | Downloaded as (`ingestion/data/`) | Script reads (`ingestion/data/` + S3 key) | Source |
 |---|---|---|---|
-| Geographic Data | `validation/cleaned/Geographic_Data_deduplicated.csv` (committed) | `validation/batch_id=<id>/cleaned/...` | PDPM |
-| Flood Village Stats | `ingestion/data/STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | PDPM |
-| Household Income | `ingestion/data/Salary.csv` | `raw/nso/nso_household_income.csv` | NSO |
-| Disaster Budget | `ingestion/data/2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | PDPM |
-| Flood Affected Households | `ingestion/data/Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | PDPM |
-| Affected Households Summary | `ingestion/data/Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | PDPM |
+| Geographic Data | - | `validation/cleaned/Geographic_Data_deduplicated.csv` (committed) | PDPM |
+| Flood Village Stats | `STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | PDPM |
+| Household Income | `Salary.csv` | `raw/nso/nso_household_income.csv` | NSO |
+| Disaster Budget | `2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | PDPM |
+| Flood Affected Households | `Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | PDPM |
+| Affected Households Summary | `Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | PDPM |
 
-Raw files are not stored in Git. Download them into `ingestion/data/` first, either from S3 or from the original sources (see [`ingestion/README.md`](../ingestion/README.md), sections 6 and 6B). The file names follow `local_file` in [`ingestion/config.py`](../ingestion/config.py).
+Raw files are not stored in Git. Download them into `ingestion/data/` first, either from S3 or from the original sources (see [`ingestion/README.md`](../ingestion/README.md), sections 6 and 6B). Then run `python prepare_local_data.py`, which copies each file to `ingestion/data/<S3 key>` (the layout the `transform_*.py` scripts and the Lambda working directory use). The mapping comes from `local_file`, `s3_prefix` and `s3_name` in [`ingestion/config.py`](../ingestion/config.py).
 
 Note:
 - Geographic Data uses the deduplicated output from Data Validation.
@@ -276,7 +276,29 @@ No primary integrated fact table has been created yet. Integration keys and rela
 
 Run commands from the repository root directory.
 
+### 8.1 Prerequisites
+
 ```bash
+python -m pip install -r requirements.txt
+```
+
+Python 3.11+ is required (pandas 3.x). `openpyxl` (for `.xlsx`) is included in `requirements.txt`.
+
+### 8.2 Quick way: one command
+
+```bash
+python run_all.py
+```
+
+`run_all.py` stages the raw files, runs validation, runs every transformation script in the correct order, and checks the output row counts against the values reported in this README. It stops at the first failing step. Add `--verbose` to see each script's output.
+
+### 8.3 Step by step
+
+Some transformation scripts read raw files from `ingestion/data/raw/...` (the same layout as S3 and the Lambda working directory). `prepare_local_data.py` copies the files downloaded to `ingestion/data/` into that layout. Run it once before the transformation scripts.
+
+```bash
+python prepare_local_data.py
+python ingestion/validate_data.py
 python transformation/scripts/clean_data.py
 python transformation/scripts/standardize.py
 python transformation/scripts/create_features.py
@@ -285,10 +307,16 @@ python transformation/scripts/transform_nso_income.py
 python transformation/scripts/transform_disaster_budget.py
 python transformation/scripts/transform_flood_affected_households.py
 python transformation/scripts/transform_affected_households_summary.py
-python transformation/scripts/integrate_data.py   # needs create_features.py and transform_nso_income.py outputs
+python transformation/scripts/integrate_data.py
 ```
 
-Requires `pandas`, `pyarrow` and `openpyxl` (`python -m pip install -r requirements.txt`). The first three scripts only need the committed `validation/cleaned/` file; the `transform_*.py` scripts need the raw files in `ingestion/data/`.
+Order matters: `integrate_data.py` needs the outputs of `create_features.py` and `transform_nso_income.py`, and `clean_data.py` reads `validation/cleaned/Geographic_Data_deduplicated.csv` produced by `validate_data.py`.
+
+Requires `pandas`, `pyarrow` and `openpyxl` (`python -m pip install -r requirements.txt`). The first three scripts only need the committed `validation/cleaned/` file; the `transform_*.py` scripts need the raw files in `ingestion/data/raw/...` (created by `prepare_local_data.py`).
+
+### 8.4 Re-run behavior
+
+Scripts overwrite their outputs, so re-running gives the same CSV files. Parquet files may differ in bytes (file metadata varies by library version or environment) while containing identical data; compare them with `pd.read_parquet(...).equals(...)` rather than by checksum. JSON reports differ only in path separators (Windows vs macOS/Linux) and file ordering.
 
 ## 9. Output Formats
 

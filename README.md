@@ -54,20 +54,38 @@
 | นางสาวพาขวัญ จุลโยธิน | 6709650532 |
 | นายภัทรดร ชีวชูเกียรติ | 6709650557 |
 
-## 8. How to Run
+## 8. How to Run (Local Run)
 
-รันทุกคำสั่งจาก root ของ repo
+ส่วน Validation → Transformation → Integration รันซ้ำได้บนเครื่องโดยไม่ต้องใช้ AWS (ต้องใช้ Python 3.11 ขึ้นไป) โดยต้องวางข้อมูลดิบ 8 ไฟล์ไว้ใน `ingestion/data/` ก่อน ข้อมูลดิบไม่ได้อยู่ใน Git สมาชิกทีมโหลดจาก S3 ได้ ส่วนคนนอกทีมให้ดาวน์โหลดจากเว็บต้นทางตาม [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6B
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python run_all.py
+```
+
+บน Windows ให้เปิดใช้ venv ด้วย `.venv\Scripts\Activate.ps1`
+
+`run_all.py` จะจัดวางไฟล์ดิบ รัน validation และสคริปต์ transformation ทั้งหมดตามลำดับ แล้วตรวจจำนวนแถวของผลลัพธ์เทียบกับที่ทีมรายงานไว้ ใช้เวลาไม่กี่นาที คำอธิบายรายขั้นตอนอยู่ใน [`transformation/README.md`](transformation/README.md) หัวข้อ 8 และคู่มือสำหรับผู้ตรวจอยู่ใน [`RUN_INSTRUCTIONS.md`](RUN_INSTRUCTIONS.md)
+
+ส่วนที่ใช้ AWS (`ingestion/ingest.py`, `orchestration/`, Athena) ต้องใช้ AWS Credentials ดูวิธีตั้งค่าใน [`ingestion/README.md`](ingestion/README.md) วิธีสร้างตารางและ deploy บน account ของตัวเองอยู่ใน [`orchestration/README.md`](orchestration/README.md) และดูหลักฐานการทำงานได้ในวิดีโอเดโมด้านบน
+
+ปัญหาที่พบระหว่างทำและเหตุผลของการตัดสินใจสำคัญ สรุปไว้ใน [`docs/05-problems-and-decisions.md`](docs/05-problems-and-decisions.md)
+
+### รายละเอียดแต่ละขั้น
 
 | ขั้น | ทำอะไร | คู่มือ |
 |---|---|---|
 | 1 | สร้าง venv และติดตั้ง `python -m pip install -r requirements.txt` | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 3 |
 | 2 | วางไฟล์ดิบ 8 ไฟล์ไว้ใน `ingestion/data/` จาก S3 (สมาชิกทีม) หรือดาวน์โหลดจากเว็บต้นทาง (คนนอกทีม) | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6 / 6B |
-| 3 | ตรวจข้อมูล `python ingestion/validate_data.py` | [`docs/04-data-validation.md`](docs/04-data-validation.md) |
-| 4 | แปลงข้อมูล `python transformation/scripts/<script>.py` ตามลำดับ | [`transformation/README.md`](transformation/README.md) หัวข้อ 8 |
-| 5 | อัปโหลด S3, สร้างตาราง Athena (`sql/setup/01_create_tables.sql`), deploy Lambda + Step Functions | [`orchestration/README.md`](orchestration/README.md) |
-| 6 | รัน query วิเคราะห์ใน `sql/analysis/` และ `sql/data_quality/` บน database `flood_recovery_db` | [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) |
+| 3 | `python prepare_local_data.py` คัดลอกไฟล์ไปไว้ที่ `ingestion/data/raw/...` ซึ่งเป็นโครงสร้างที่สคริปต์ transformation อ่าน | [`RUN_INSTRUCTIONS.md`](RUN_INSTRUCTIONS.md) |
+| 4 | ตรวจข้อมูล `python ingestion/validate_data.py` | [`docs/04-data-validation.md`](docs/04-data-validation.md) |
+| 5 | แปลงข้อมูล `python transformation/scripts/<script>.py` ตามลำดับ (ขั้น 3-5 รวมอยู่ใน `run_all.py` แล้ว) | [`transformation/README.md`](transformation/README.md) หัวข้อ 8 |
+| 6 | อัปโหลด S3, สร้างตาราง Athena (`sql/setup/01_create_tables.sql`), deploy Lambda + Step Functions | [`orchestration/README.md`](orchestration/README.md) |
+| 7 | รัน query วิเคราะห์ใน `sql/analysis/` และ `sql/data_quality/` บน database `flood_recovery_db` | [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) |
 
-ผลลัพธ์ของขั้นที่ 3-4 commit ไว้แล้วใน `validation/` และ `transformation/output/` จึงเปิดดูได้โดยไม่ต้องรันใหม่
+ผลลัพธ์ของขั้นที่ 4-5 commit ไว้แล้วใน `validation/` และ `transformation/output/` จึงเปิดดูได้โดยไม่ต้องรันใหม่
 
 ## 9. Repository
 - **GitHub Repository:** https://github.com/PJ-ww/CS341_Groupproject

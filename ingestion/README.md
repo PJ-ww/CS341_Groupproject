@@ -182,7 +182,13 @@ ingestion/data/
 └── STATISTIC_FLD.xlsx
 ```
 
-ทุกสคริปต์ (`inspect_files.py`, `validate_data.py`, `ingest.py`, `transformation/scripts/transform_*.py` และ Lambda `ValidateBatch`/`TransformBatch`) อ่านไฟล์จากชื่อเหล่านี้ใน `ingestion/data/` โดยตรง ชื่อไฟล์ทั้งหมดกำหนดไว้ที่คีย์ `local_file` ใน [`config.py`](config.py)
+`inspect_files.py`, `validate_data.py` และ `ingest.py` อ่านไฟล์จากชื่อเหล่านี้ใน `ingestion/data/` โดยตรง (ชื่อกำหนดไว้ที่คีย์ `local_file` ใน [`config.py`](config.py)) ส่วนสคริปต์ `transformation/scripts/transform_*.py` อ่านจาก `ingestion/data/raw/...` ซึ่งเป็นโครงสร้างเดียวกับ S3 จึงต้องรันคำสั่งนี้จาก root ของ repo ก่อน:
+
+```bash
+python prepare_local_data.py
+```
+
+หรือใช้ `python run_all.py` ที่รันขั้นนี้ให้อัตโนมัติ
 
 หมายเหตุ
 
