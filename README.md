@@ -1,5 +1,14 @@
 # CS341 Group Project: Flood Impact & Recovery
 
+## Architecture
+
+![Architecture Diagram](architechture/architecture_diagram.png)
+
+## Demo Video
+
+[![CS341 Demo](https://img.youtube.com/vi/vEXtP3JA8TA/maxresdefault.jpg)](https://youtu.be/vEXtP3JA8TA)
+
+ลิงก์วิดีโอ: https://youtu.be/vEXtP3JA8TA
 ## 1. Project Overview
 โครงการนี้ศึกษาผลกระทบจากน้ำท่วมและปัจจัยที่เกี่ยวข้องกับความเสียหายและการฟื้นตัวของผู้ประสบภัยในประเทศไทย โดยใช้ข้อมูลจริงจากหน่วยงานภาครัฐ เพื่อนำมารวบรวม ตรวจสอบ เชื่อมโยง และวิเคราะห์ข้อมูลสำหรับตอบคำถามวิจัย
 
