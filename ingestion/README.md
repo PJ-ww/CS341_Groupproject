@@ -44,14 +44,20 @@ python3 -m venv .venv
 เปิดใช้งาน Virtual Environment:
 
 ```bash
-source .venv/bin/activate
+source .venv/bin/activate          # macOS / Linux
+source .venv/Scripts/activate      # Windows (Git Bash)
+.venv\Scripts\Activate.ps1         # Windows (PowerShell)
 ```
 
-ติดตั้ง Python dependencies:
+ติดตั้ง Python dependencies ทั้งหมดของโปรเจกต์ (boto3, pandas, pyarrow, openpyxl):
 
 ```bash
-python -m pip install -r ingestion/requirements.txt
+python -m pip install -r requirements.txt
 ```
+
+`ingestion/requirements.txt` อ้างถึงไฟล์เดียวกันนี้ ติดตั้งจากไฟล์ไหนก็ได้ผลเหมือนกัน
+
+> **ไม่มี AWS Credentials ของทีม?** (เช่น ผู้ตรวจหรือคนนอกทีม) ข้ามหัวข้อ 4-6 ไปที่หัวข้อ **6B** ด้านล่าง แล้วโหลดไฟล์จากเว็บไซต์ต้นทางแทน
 
 ## 4. Configure AWS Credentials
 
@@ -147,6 +153,43 @@ aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_relief/pdpm_flood_affected_ho
 aws s3 cp s3://cs341-flood-recovery/raw/nso/nso_household_income_by_area.csv ingestion/data/Salary2.csv --profile cs341-team
 ```
 
+## 6B. ดาวน์โหลดจากแหล่งต้นทาง (ไม่ต้องใช้ AWS)
+
+ข้อมูลดิบไม่ได้อยู่ใน Git (`ingestion/data/` อยู่ใน `.gitignore`) คนที่ไม่มี Credentials ของทีมจึงต้องดาวน์โหลดไฟล์เองจากหน้าชุดข้อมูลด้านล่าง (รายละเอียดเพิ่มเติมอยู่ใน [`data_catalog/sources.md`](../data_catalog/sources.md)) แล้ว**เปลี่ยนชื่อไฟล์ให้ตรงตามคอลัมน์ "บันทึกเป็น"** และวางไว้ในโฟลเดอร์ `ingestion/data/` โดยไม่สร้างโฟลเดอร์ย่อย
+
+| # | หน้าชุดข้อมูล | บันทึกเป็น `ingestion/data/...` |
+|---|---|---|
+| 1 | https://data.go.th/dataset/gdpublish-dfs_21_02 (ไฟล์ตรง: https://drive.disaster.go.th/index.php/s/g8xpZR8TSWitRYf) | `STATISTIC_FLD.xlsx` |
+| 2 | https://catalog.disaster.go.th/dataset/dpm-gd015 | `dpm-gd015__1.csv` |
+| 3 | https://catalog.disaster.go.th/en/dataset/dpm-gd020 (ไฟล์ปี 2564 ตามประเภทภัย) | `2564_by_disaster_type1.csv` |
+| 4 | https://data.go.th/dataset/disaster_69_14 | `Number_of_Affected_Households.xlsx` |
+| 5 | https://data.go.th/th/dataset/flood01_30 | `Number_of Households_Affected_by_Flooding.csv` (มีช่องว่างหลัง `Number_of`) |
+| 6 | data.go.th: พื้นที่เสี่ยงน้ำท่วมรายหมู่ที่ จังหวัดยโสธร (สำนักงานป้องกันและบรรเทาสาธารณภัยจังหวัด) | `Geographic_Data.csv` |
+| 7 | https://data.go.th/en/dataset/ns_08_20241 (รายได้ครัวเรือน รายจังหวัด) | `Salary.csv` |
+| 8 | https://data.go.th/en/dataset/ns_08_20241 (รายได้ครัวเรือน รายภาค) | `Salary2.csv` |
+
+โครงสร้างที่ถูกต้องหลังดาวน์โหลดครบ:
+
+```text
+ingestion/data/
+├── 2564_by_disaster_type1.csv
+├── dpm-gd015__1.csv
+├── Geographic_Data.csv
+├── Number_of Households_Affected_by_Flooding.csv
+├── Number_of_Affected_Households.xlsx
+├── Salary.csv
+├── Salary2.csv
+└── STATISTIC_FLD.xlsx
+```
+
+ทุกสคริปต์ (`inspect_files.py`, `validate_data.py`, `ingest.py`, `transformation/scripts/transform_*.py` และ Lambda `ValidateBatch`/`TransformBatch`) อ่านไฟล์จากชื่อเหล่านี้ใน `ingestion/data/` โดยตรง ชื่อไฟล์ทั้งหมดกำหนดไว้ที่คีย์ `local_file` ใน [`config.py`](config.py)
+
+หมายเหตุ
+
+- ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด (6 พ.ย. 2569) จำนวนแถวจึงอาจไม่ตรงกับตัวเลขใน `data_catalog/sources.md` และรายงานใน repo
+- ถ้าต้องการลองเฉพาะ transformation ฝั่ง geographic (`clean_data.py` → `standardize.py` → `create_features.py`) ไม่ต้องโหลดไฟล์ดิบเลย เพราะสคริปต์เหล่านี้อ่าน `validation/cleaned/Geographic_Data_deduplicated.csv` ซึ่ง commit ไว้แล้ว
+- ผลลัพธ์ของทุกสคริปต์ commit ไว้แล้วใน `transformation/output/` จึงตรวจผลได้โดยไม่ต้องรันใหม่
+
 ## 7. Verify Downloaded Files
 
 ตรวจสอบว่า Dataset ถูกดาวน์โหลดครบทั้ง 8 ไฟล์:
@@ -185,3 +228,19 @@ python ingestion/inspect_files.py
 ```powershell
 python ingestion/validate_data.py
 ```
+
+---
+
+# Upload Raw Data to S3 (`ingest.py`)
+
+อัปโหลดไฟล์ใน `ingestion/data/` ขึ้น `s3://<BUCKET>/raw/...` ตาม `config.py` (ข้ามไฟล์ที่ md5 ตรงกับใน S3 แล้ว) และเขียน manifest ไว้ที่ `raw/_manifests/` สคริปต์ใช้ default credentials ของ boto3 จึงต้องระบุ profile ผ่านตัวแปรแวดล้อม:
+
+```bash
+AWS_PROFILE=cs341-team python ingestion/ingest.py
+```
+
+```powershell
+$env:AWS_PROFILE = "cs341-team"; python ingestion/ingest.py
+```
+
+ขั้นต่อไป (สร้างตาราง Athena, deploy Lambda และ Step Functions) ดูที่ [`orchestration/README.md`](../orchestration/README.md)

@@ -54,6 +54,21 @@
 | นางสาวพาขวัญ จุลโยธิน | 6709650532 |
 | นายภัทรดร ชีวชูเกียรติ | 6709650557 |
 
-## 8. Repository
+## 8. How to Run
+
+รันทุกคำสั่งจาก root ของ repo
+
+| ขั้น | ทำอะไร | คู่มือ |
+|---|---|---|
+| 1 | สร้าง venv และติดตั้ง `python -m pip install -r requirements.txt` | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 3 |
+| 2 | วางไฟล์ดิบ 8 ไฟล์ไว้ใน `ingestion/data/` จาก S3 (สมาชิกทีม) หรือดาวน์โหลดจากเว็บต้นทาง (คนนอกทีม) | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6 / 6B |
+| 3 | ตรวจข้อมูล `python ingestion/validate_data.py` | [`docs/04-data-validation.md`](docs/04-data-validation.md) |
+| 4 | แปลงข้อมูล `python transformation/scripts/<script>.py` ตามลำดับ | [`transformation/README.md`](transformation/README.md) หัวข้อ 8 |
+| 5 | อัปโหลด S3, สร้างตาราง Athena (`sql/setup/01_create_tables.sql`), deploy Lambda + Step Functions | [`orchestration/README.md`](orchestration/README.md) |
+| 6 | รัน query วิเคราะห์ใน `sql/analysis/` และ `sql/data_quality/` บน database `flood_recovery_db` | [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) |
+
+ผลลัพธ์ของขั้นที่ 3-4 commit ไว้แล้วใน `validation/` และ `transformation/output/` จึงเปิดดูได้โดยไม่ต้องรันใหม่
+
+## 9. Repository
 - **GitHub Repository:** https://github.com/PJ-ww/CS341_Groupproject
 - **GitHub Issues:** https://github.com/PJ-ww/CS341_Groupproject/issues

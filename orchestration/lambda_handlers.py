@@ -181,21 +181,18 @@ def quarantine_batch(event, context):
 def transform_batch(event, context):
     """Run the 9 transformation scripts of Person 3, upload the 7 datasets to processed/."""
     bucket, batch_id = _params(event)
+    cfg = _load_config()
     wd = _prepare_workdir()
 
-    # raw/ -> ingestion/data/raw/...  (same layout the scripts expect)
-    paginator = s3.get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=bucket, Prefix="raw/"):
-        for obj in page.get("Contents", []):
-            key = obj["Key"]
-            if key.endswith("/") or key.startswith("raw/_manifests/"):
-                continue
-            dest = wd / "ingestion" / "data" / key
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            s3.download_file(bucket, key, str(dest))
+    # raw/<prefix>/<s3_name> -> ingestion/data/<local_file>  (same layout the scripts expect)
+    data_dir = wd / "ingestion" / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    for item in cfg.FILES:
+        s3.download_file(bucket, item["s3_prefix"] + item["s3_name"], str(data_dir / item["local_file"]))
 
     # validation/cleaned -> validation/cleaned  (clean_data.py reads the deduplicated geographic file)
     cleaned_prefix = f"validation/batch_id={batch_id}/cleaned/"
+    paginator = s3.get_paginator("list_objects_v2")
     for page in paginator.paginate(Bucket=bucket, Prefix=cleaned_prefix):
         for obj in page.get("Contents", []):
             dest = wd / "validation" / "cleaned" / obj["Key"][len(cleaned_prefix):]

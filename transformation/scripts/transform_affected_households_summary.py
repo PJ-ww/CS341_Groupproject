@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 INPUT_FILE = (
     PROJECT_ROOT
-    / "ingestion/data/raw/pdpm/flood_relief/pdpm_affected_households.xlsx"
+    / "ingestion/data/Number_of_Affected_Households.xlsx"
 )
 
 OUTPUT_DIR = PROJECT_ROOT / "transformation/output"

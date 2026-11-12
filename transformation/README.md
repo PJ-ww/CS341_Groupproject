@@ -70,14 +70,16 @@ transformation/
 
 The module uses source datasets that have been checked by the Data Validation process.
 
-| Dataset | Input File | Source |
-|---|---|---|
-| Geographic Data | `Geographic_Data_deduplicated.csv` | PDPM |
-| Flood Village Stats | `pdpm_flood_village_stats.xlsx` | PDPM |
-| Household Income | `nso_household_income.csv` | NSO |
-| Disaster Budget | `pdpm_2564_by_disaster_type.csv` | PDPM |
-| Flood Affected Households | `pdpm_flood_affected_households.csv` | PDPM |
-| Affected Households Summary | `pdpm_affected_households.xlsx` | PDPM |
+| Dataset | Input File (local path) | S3 key | Source |
+|---|---|---|---|
+| Geographic Data | `validation/cleaned/Geographic_Data_deduplicated.csv` (committed) | `validation/batch_id=<id>/cleaned/...` | PDPM |
+| Flood Village Stats | `ingestion/data/STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | PDPM |
+| Household Income | `ingestion/data/Salary.csv` | `raw/nso/nso_household_income.csv` | NSO |
+| Disaster Budget | `ingestion/data/2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | PDPM |
+| Flood Affected Households | `ingestion/data/Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | PDPM |
+| Affected Households Summary | `ingestion/data/Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | PDPM |
+
+Raw files are not stored in Git. Download them into `ingestion/data/` first, either from S3 or from the original sources (see [`ingestion/README.md`](../ingestion/README.md), sections 6 and 6B). The file names follow `local_file` in [`ingestion/config.py`](../ingestion/config.py).
 
 Note:
 - Geographic Data uses the deduplicated output from Data Validation.
@@ -283,7 +285,10 @@ python transformation/scripts/transform_nso_income.py
 python transformation/scripts/transform_disaster_budget.py
 python transformation/scripts/transform_flood_affected_households.py
 python transformation/scripts/transform_affected_households_summary.py
+python transformation/scripts/integrate_data.py   # needs create_features.py and transform_nso_income.py outputs
 ```
+
+Requires `pandas`, `pyarrow` and `openpyxl` (`python -m pip install -r requirements.txt`). The first three scripts only need the committed `validation/cleaned/` file; the `transform_*.py` scripts need the raw files in `ingestion/data/`.
 
 ## 9. Output Formats
 

@@ -1,2 +1,2 @@
-boto3
-requests
+# ใช้ dependencies ชุดเดียวกับ root ของ repo (pandas, pyarrow, openpyxl, boto3)
+-r ../requirements.txt
