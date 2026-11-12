@@ -1,29 +1,29 @@
 
-# Data Transformation & Processing
+# การแปลงและประมวลผลข้อมูล (Data Transformation & Processing)
 
-## 1. Overview
+## 1. ภาพรวม
 
-This module transforms validated source datasets into standardized formats suitable for data storage and further analysis.
+โมดูลนี้แปลงชุดข้อมูลต้นทางที่ผ่านการตรวจสอบ (validation) แล้ว ให้อยู่ในรูปแบบมาตรฐานที่เหมาะสำหรับการจัดเก็บข้อมูลและการวิเคราะห์ต่อไป
 
-The transformation process includes:
-- Data cleaning and standardization
-- Data type conversion
-- Missing value handling
-- Feature engineering
-- Data preparation for integration and storage
-- Exporting transformed datasets in CSV and Parquet formats
-- Generating transformation reports
+กระบวนการแปลงข้อมูลประกอบด้วย:
+- การทำความสะอาดและปรับข้อมูลให้เป็นมาตรฐาน
+- การแปลงชนิดข้อมูล
+- การจัดการค่าที่หายไป (missing values)
+- การสร้างฟีเจอร์ (feature engineering)
+- การเตรียมข้อมูลสำหรับการรวมข้อมูล (integration) และการจัดเก็บ
+- การส่งออกชุดข้อมูลที่แปลงแล้วในรูปแบบ CSV และ Parquet
+- การสร้างรายงานการแปลงข้อมูล
 
-## 2. Responsibilities
+## 2. หน้าที่ความรับผิดชอบ
 
-- Clean and standardize source datasets.
-- Convert columns into appropriate data types.
-- Preserve missing values according to source meaning.
-- Create additional features when necessary.
-- Integrate datasets only when geographic, temporal, and data-granularity compatibility is established.
-- Prepare transformed datasets for the Data Storage module.
+- ทำความสะอาดและปรับชุดข้อมูลต้นทางให้เป็นมาตรฐาน
+- แปลงคอลัมน์ให้เป็นชนิดข้อมูลที่เหมาะสม
+- คงค่าที่หายไปไว้ตามความหมายของข้อมูลต้นทาง
+- สร้างฟีเจอร์เพิ่มเติมเมื่อจำเป็น
+- รวมชุดข้อมูลเฉพาะเมื่อยืนยันได้ว่าระดับพื้นที่ ช่วงเวลา และความละเอียดของข้อมูล (granularity) สอดคล้องกัน
+- เตรียมชุดข้อมูลที่แปลงแล้วสำหรับโมดูล Data Storage
 
-## 3. Directory Structure
+## 3. โครงสร้างไดเรกทอรี
 
 ```text
 transformation/
@@ -66,242 +66,242 @@ transformation/
 └── README.md
 ```
 
-## 4. Input Datasets
+## 4. ชุดข้อมูลนำเข้า
 
-The module uses source datasets that have been checked by the Data Validation process.
+โมดูลนี้ใช้ชุดข้อมูลต้นทางที่ผ่านการตรวจสอบจากกระบวนการ Data Validation แล้ว
 
-| Dataset | Downloaded as (`ingestion/data/`) | Script reads (`ingestion/data/` + S3 key) | Source |
+| ชุดข้อมูล | ชื่อไฟล์ที่ดาวน์โหลด (`ingestion/data/`) | ไฟล์ที่สคริปต์อ่าน (`ingestion/data/` + S3 key) | แหล่งที่มา |
 |---|---|---|---|
-| Geographic Data | - | `validation/cleaned/Geographic_Data_deduplicated.csv` (committed) | PDPM |
-| Flood Village Stats | `STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | PDPM |
-| Household Income | `Salary.csv` | `raw/nso/nso_household_income.csv` | NSO |
-| Disaster Budget | `2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | PDPM |
-| Flood Affected Households | `Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | PDPM |
-| Affected Households Summary | `Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | PDPM |
+| Geographic Data | - | `validation/cleaned/Geographic_Data_deduplicated.csv` (commit ไว้ใน Git) | ปภ. (PDPM) |
+| Flood Village Stats | `STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | ปภ. (PDPM) |
+| Household Income | `Salary.csv` | `raw/nso/nso_household_income.csv` | สสช. (NSO) |
+| Disaster Budget | `2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | ปภ. (PDPM) |
+| Flood Affected Households | `Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | ปภ. (PDPM) |
+| Affected Households Summary | `Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | ปภ. (PDPM) |
 
-Raw files are not stored in Git. Download them into `ingestion/data/` first, either from S3 or from the original sources (see [`ingestion/README.md`](../ingestion/README.md), sections 6 and 6B). Then run `python prepare_local_data.py`, which copies each file to `ingestion/data/<S3 key>` (the layout the `transform_*.py` scripts and the Lambda working directory use). The mapping comes from `local_file`, `s3_prefix` and `s3_name` in [`ingestion/config.py`](../ingestion/config.py).
+ไฟล์ดิบ (raw files) ไม่ได้จัดเก็บไว้ใน Git ให้ดาวน์โหลดไฟล์ไว้ที่ `ingestion/data/` ก่อน โดยดาวน์โหลดจาก S3 หรือจากแหล่งข้อมูลต้นฉบับ (ดู [`ingestion/README.md`](../ingestion/README.md) หัวข้อ 6 และ 6B) จากนั้นรัน `python prepare_local_data.py` ซึ่งจะคัดลอกแต่ละไฟล์ไปไว้ที่ `ingestion/data/<S3 key>` (โครงสร้างเดียวกับที่สคริปต์ `transform_*.py` และ working directory ของ Lambda ใช้) การจับคู่ชื่อไฟล์มาจาก `local_file`, `s3_prefix` และ `s3_name` ใน [`ingestion/config.py`](../ingestion/config.py)
 
-Note:
-- Geographic Data uses the deduplicated output from Data Validation.
-- Flood Village Stats uses the raw Excel file because a separate accepted output was not available locally. Its Validation Report indicates that all 57,024 rows were accepted.
-- The other listed datasets were confirmed as accepted in the Validation Report. Their raw inputs were used because separate accepted output files were not available locally.
+หมายเหตุ:
+- Geographic Data ใช้ผลลัพธ์ที่ลบข้อมูลซ้ำแล้ว (deduplicated) จาก Data Validation
+- Flood Village Stats ใช้ไฟล์ Excel ดิบ เนื่องจากไม่มีไฟล์ผลลัพธ์ที่ผ่านการยอมรับ (accepted output) แยกไว้ในเครื่อง โดย Validation Report ระบุว่าทั้ง 57,024 แถวผ่านการยอมรับ
+- ชุดข้อมูลอื่น ๆ ในตารางได้รับการยืนยันว่าผ่านการยอมรับใน Validation Report แล้ว และใช้ไฟล์ดิบเป็นข้อมูลนำเข้าเนื่องจากไม่มีไฟล์ผลลัพธ์ที่ผ่านการยอมรับแยกไว้ในเครื่อง
 
-## 5. Transformation Processes
+## 5. กระบวนการแปลงข้อมูล
 
 ### 5.1 Geographic Data
 
-Scripts:
+สคริปต์:
 - `clean_data.py`
 - `standardize.py`
 - `create_features.py`
 
-Processing:
-- Removed leading and trailing whitespace.
-- Standardized data types and risk categories.
-- Created `risk_level_code`.
-- Created `risk_level`.
+การประมวลผล:
+- ลบช่องว่างที่อยู่หน้าและท้ายข้อความ
+- ปรับชนิดข้อมูลและหมวดหมู่ความเสี่ยงให้เป็นมาตรฐาน
+- สร้างคอลัมน์ `risk_level_code`
+- สร้างคอลัมน์ `risk_level`
 
-Output:
+ผลลัพธ์:
 - `geographic_data_cleaned.csv`
 - `geographic_data_standardized.csv`
 - `geographic_data_features.csv`
 
-Results:
-- Input rows: 1,772
-- Output rows: 1,772
-- Rows removed during transformation: 0
-- Final output columns: 9
+ผลการประมวลผล:
+- จำนวนแถวนำเข้า: 1,772
+- จำนวนแถวผลลัพธ์: 1,772
+- จำนวนแถวที่ถูกลบระหว่างการแปลง: 0
+- จำนวนคอลัมน์ผลลัพธ์สุดท้าย: 9
 
 ### 5.2 Flood Village Stats
 
-Script:
+สคริปต์:
 - `transform_flood_village_stats.py`
 
-Processing:
-- Standardized column names.
-- Converted text columns to String.
-- Preserved area codes as String.
-- Converted yearly columns `Y2562–Y2567` to nullable integers.
-- Preserved missing yearly values.
-- Created `years_with_reported_value`.
+การประมวลผล:
+- ปรับชื่อคอลัมน์ให้เป็นมาตรฐาน
+- แปลงคอลัมน์ข้อความเป็นชนิด String
+- คงรหัสพื้นที่ไว้เป็นชนิด String
+- แปลงคอลัมน์รายปี `Y2562–Y2567` เป็นจำนวนเต็มที่รองรับค่าว่าง (nullable integer)
+- คงค่ารายปีที่หายไปไว้
+- สร้างคอลัมน์ `years_with_reported_value`
 
-Output:
+ผลลัพธ์:
 - `flood_village_stats_transformed.csv`
 - `flood_village_stats_transformed.parquet`
 
-Results:
-- Input rows: 57,024
-- Output rows: 57,024
-- Rows removed: 0
-- Output columns: 19
+ผลการประมวลผล:
+- จำนวนแถวนำเข้า: 57,024
+- จำนวนแถวผลลัพธ์: 57,024
+- จำนวนแถวที่ถูกลบ: 0
+- จำนวนคอลัมน์ผลลัพธ์: 19
 
 ### 5.3 NSO Household Income
 
-Script:
+สคริปต์:
 - `transform_nso_income.py`
 
-Processing:
-- Standardized text columns.
-- Converted `year` to nullable integer.
-- Converted `value` to numeric.
-- Preserved zero and negative values.
-- Preserved missing values in `attribute`.
-- Did not aggregate income categories.
+การประมวลผล:
+- ปรับคอลัมน์ข้อความให้เป็นมาตรฐาน
+- แปลง `year` เป็นจำนวนเต็มที่รองรับค่าว่าง
+- แปลง `value` เป็นตัวเลข
+- คงค่าศูนย์และค่าติดลบไว้
+- คงค่าที่หายไปในคอลัมน์ `attribute` ไว้
+- ไม่รวม (aggregate) หมวดหมู่รายได้
 
-Output:
+ผลลัพธ์:
 - `nso_household_income_transformed.csv`
 - `nso_household_income_transformed.parquet`
 
-Results:
-- Input rows: 15,400
-- Output rows: 15,400
-- Rows removed: 0
-- Output columns: 11
+ผลการประมวลผล:
+- จำนวนแถวนำเข้า: 15,400
+- จำนวนแถวผลลัพธ์: 15,400
+- จำนวนแถวที่ถูกลบ: 0
+- จำนวนคอลัมน์ผลลัพธ์: 11
 
-Important limitation:
-- Income data is categorized by socioeconomic groups at province level.
-- It does not represent individual household income.
-- Yasothon has 100 records in year 2568, but these records represent different income categories and socioeconomic groups.
+ข้อจำกัดสำคัญ:
+- ข้อมูลรายได้จำแนกตามกลุ่มเศรษฐสังคมในระดับจังหวัด
+- ไม่ได้แสดงรายได้ของครัวเรือนรายครัวเรือน
+- จังหวัดยโสธรมี 100 ระเบียนในปี 2568 แต่ระเบียนเหล่านี้แทนหมวดหมู่รายได้และกลุ่มเศรษฐสังคมที่แตกต่างกัน
 
 ### 5.4 Disaster Budget 2564
 
-Script:
+สคริปต์:
 - `transform_disaster_budget.py`
 
-Processing:
-- Selected province records from section 1 (วงเงินจังหวัด).
-- Excluded summary rows and records outside section 1.
-- Removed commas before numeric conversion.
-- Converted dash values (`-` and `--`) to missing values.
-- Added Buddhist year 2564.
-- Preserved province-level budget information.
+การประมวลผล:
+- เลือกระเบียนระดับจังหวัดจากส่วนที่ 1 (วงเงินจังหวัด)
+- ตัดแถวสรุปและระเบียนที่อยู่นอกส่วนที่ 1 ออก
+- ลบเครื่องหมายจุลภาคก่อนแปลงเป็นตัวเลข
+- แปลงค่าขีด (`-` และ `--`) เป็นค่าที่หายไป
+- เพิ่มปีพุทธศักราช 2564
+- คงข้อมูลงบประมาณระดับจังหวัดไว้
 
-Output:
+ผลลัพธ์:
 - `disaster_budget_2564_transformed.csv`
 - `disaster_budget_2564_transformed.parquet`
 
-Results:
-- Original rows: 83
-- Transformed rows: 76
-- Province count: 76
-- Rows excluded: 7
-- Output columns: 17
+ผลการประมวลผล:
+- จำนวนแถวต้นฉบับ: 83
+- จำนวนแถวที่แปลงแล้ว: 76
+- จำนวนจังหวัด: 76
+- จำนวนแถวที่ถูกตัดออก: 7
+- จำนวนคอลัมน์ผลลัพธ์: 17
 
-Important limitation:
-- This dataset represents province-level budget information for year 2564.
-- Bangkok from section 2 and non-province summary records are excluded.
+ข้อจำกัดสำคัญ:
+- ชุดข้อมูลนี้แสดงข้อมูลงบประมาณระดับจังหวัดของปี 2564
+- ตัดกรุงเทพมหานครจากส่วนที่ 2 และระเบียนสรุปที่ไม่ใช่จังหวัดออก
 
 ### 5.5 Flood Affected Households
 
-Script:
+สคริปต์:
 - `transform_flood_affected_households.py`
 
-Processing:
-- Standardized text values.
-- Converted year and household count to nullable integers.
-- Preserved zero values and missing values.
-- Did not aggregate records across geographic areas.
+การประมวลผล:
+- ปรับค่าข้อความให้เป็นมาตรฐาน
+- แปลงปีและจำนวนครัวเรือนเป็นจำนวนเต็มที่รองรับค่าว่าง
+- คงค่าศูนย์และค่าที่หายไปไว้
+- ไม่รวมระเบียนข้ามพื้นที่
 
-Output:
+ผลลัพธ์:
 - `flood_affected_households_transformed.csv`
 - `flood_affected_households_transformed.parquet`
 
-Results:
-- Input rows: 144
-- Output rows: 144
-- Rows removed: 0
-- Output columns: 7
+ผลการประมวลผล:
+- จำนวนแถวนำเข้า: 144
+- จำนวนแถวผลลัพธ์: 144
+- จำนวนแถวที่ถูกลบ: 0
+- จำนวนคอลัมน์ผลลัพธ์: 7
 
-Important limitation:
-- This dataset contains flood-affected household records from Phang Nga province.
-- It is geographically different from the Yasothon Geographic Data.
+ข้อจำกัดสำคัญ:
+- ชุดข้อมูลนี้มีระเบียนครัวเรือนที่ได้รับผลกระทบจากอุทกภัยของจังหวัดพังงา
+- ซึ่งเป็นพื้นที่ต่างจาก Geographic Data ของจังหวัดยโสธร
 
 ### 5.6 Affected Households Summary
 
-Script:
+สคริปต์:
 - `transform_affected_households_summary.py`
 
-Processing:
-- Read data from Excel sheet `Sheet2`.
-- Standardized text columns.
-- Converted `จำนวน` to nullable integer.
-- Preserved event rounds and original measurement units.
-- Did not aggregate different measurement units.
-- Did not create a year because the source does not specify one.
+การประมวลผล:
+- อ่านข้อมูลจากชีต Excel `Sheet2`
+- ปรับคอลัมน์ข้อความให้เป็นมาตรฐาน
+- แปลง `จำนวน` เป็นจำนวนเต็มที่รองรับค่าว่าง
+- คงรอบเหตุการณ์และหน่วยวัดต้นฉบับไว้
+- ไม่รวมค่าที่มีหน่วยวัดต่างกัน
+- ไม่สร้างคอลัมน์ปี เนื่องจากข้อมูลต้นทางไม่ได้ระบุปีไว้
 
-Output:
+ผลลัพธ์:
 - `affected_households_summary_transformed.csv`
 - `affected_households_summary_transformed.parquet`
 
-Results:
-- Input rows: 48
-- Output rows: 48
-- Rows removed: 0
-- Output columns: 5
+ผลการประมวลผล:
+- จำนวนแถวนำเข้า: 48
+- จำนวนแถวผลลัพธ์: 48
+- จำนวนแถวที่ถูกลบ: 0
+- จำนวนคอลัมน์ผลลัพธ์: 5
 
-Important limitation:
-- The dataset contains three different measurement units:
+ข้อจำกัดสำคัญ:
+- ชุดข้อมูลมีหน่วยวัดที่แตกต่างกัน 3 หน่วย:
   - ตำบล
   - หมู่บ้าน
   - ครัวเรือน
-- Values must be interpreted separately according to their measurement units.
+- ต้องตีความค่าแยกกันตามหน่วยวัดของแต่ละค่า
 
-## 6. Integration Considerations
+## 6. ข้อพิจารณาในการรวมข้อมูล (Integration)
 
-Datasets should only be joined when their geographic level, time period, and data granularity are compatible.
+ควรเชื่อม (join) ชุดข้อมูลเฉพาะเมื่อระดับพื้นที่ ช่วงเวลา และความละเอียดของข้อมูลสอดคล้องกันเท่านั้น
 
-Current considerations:
+ข้อพิจารณาในปัจจุบัน:
 
-- Geographic Data contains subdistrict and village-level risk information for Yasothon.
-- NSO Household Income contains province-level socioeconomic group information. A province-year contextual relationship may be explored for Yasothon in 2568, but it must not be interpreted as household-level income.
-- Disaster Budget contains province-level data for 2564. It can be used for province-level analysis when geographic and temporal limitations are documented.
-- Flood Affected Households contains data from Phang Nga and should not be joined directly with Yasothon Geographic Data.
-- Affected Households Summary contains district-level information from Nong Khai and multiple measurement units. Its year and geographic compatibility must be established before integration.
-- `pdpm_gd015.csv` overlaps with Flood Village Stats and does not provide additional non-missing yearly values for matching records. It is not used as a supplementary source.
+- Geographic Data มีข้อมูลความเสี่ยงระดับตำบลและหมู่บ้านของจังหวัดยโสธร
+- NSO Household Income มีข้อมูลกลุ่มเศรษฐสังคมระดับจังหวัด อาจพิจารณาความสัมพันธ์เชิงบริบทระดับจังหวัด-ปีสำหรับยโสธรในปี 2568 ได้ แต่ห้ามตีความว่าเป็นรายได้ระดับครัวเรือน
+- Disaster Budget มีข้อมูลระดับจังหวัดของปี 2564 สามารถใช้วิเคราะห์ระดับจังหวัดได้เมื่อระบุข้อจำกัดด้านพื้นที่และช่วงเวลาไว้อย่างชัดเจน
+- Flood Affected Households เป็นข้อมูลของจังหวัดพังงา จึงไม่ควรเชื่อมโดยตรงกับ Geographic Data ของยโสธร
+- Affected Households Summary มีข้อมูลระดับอำเภอของจังหวัดหนองคายและมีหน่วยวัดหลายหน่วย ต้องยืนยันความสอดคล้องด้านปีและพื้นที่ก่อนนำไปรวม
+- `pdpm_gd015.csv` ซ้ำซ้อนกับ Flood Village Stats และไม่มีค่ารายปีที่ไม่ว่างเพิ่มเติมสำหรับระเบียนที่ตรงกัน จึงไม่ใช้เป็นแหล่งข้อมูลเสริม
 
-One integrated dataset has been created: `geographic_nso_integrated` (`integrate_data.py`).
+ได้สร้างชุดข้อมูลที่รวมแล้วหนึ่งชุด คือ `geographic_nso_integrated` (`integrate_data.py`)
 
-- Join keys: `จังหวัด` + `ปี` (Yasothon, 2568), many NSO socioeconomic groups to one geographic risk summary (validated as many-to-one)
-- Inputs: 1,772 geographic rows (886 after filtering to 2568) and 15,400 NSO rows (10 after filtering to Yasothon 2568, `รายได้ทั้งสิ้นต่อเดือน`)
-- Output: 10 rows, one per socioeconomic group, each carrying the same risk-level counts and percentages
-- Report: `transformation/reports/geographic_nso_integration_report.json`
+- คีย์ที่ใช้เชื่อม: `จังหวัด` + `ปี` (ยโสธร, 2568) โดยกลุ่มเศรษฐสังคมของ NSO หลายกลุ่มเชื่อมกับสรุปความเสี่ยงเชิงพื้นที่หนึ่งชุด (ตรวจสอบแล้วว่าเป็นแบบ many-to-one)
+- ข้อมูลนำเข้า: Geographic 1,772 แถว (เหลือ 886 แถวหลังกรองปี 2568) และ NSO 15,400 แถว (เหลือ 10 แถวหลังกรองยโสธร ปี 2568 และ `รายได้ทั้งสิ้นต่อเดือน`)
+- ผลลัพธ์: 10 แถว แถวละหนึ่งกลุ่มเศรษฐสังคม โดยแต่ละแถวมีจำนวนและร้อยละของระดับความเสี่ยงชุดเดียวกัน
+- รายงาน: `transformation/reports/geographic_nso_integration_report.json`
 
-It is a province-year contextual table, not a household- or village-level fact table, so it cannot show a relationship between income and flood risk inside the province. Other joins remain out of scope until their geographic level and time period match.
+ตารางนี้เป็นตารางบริบทระดับจังหวัด-ปี ไม่ใช่ fact table ระดับครัวเรือนหรือหมู่บ้าน จึงไม่สามารถแสดงความสัมพันธ์ระหว่างรายได้กับความเสี่ยงอุทกภัยภายในจังหวัดได้ การเชื่อมข้อมูลอื่น ๆ ยังอยู่นอกขอบเขตจนกว่าระดับพื้นที่และช่วงเวลาจะสอดคล้องกัน
 
-## 7. Data Quality and Limitations
+## 7. คุณภาพข้อมูลและข้อจำกัด
 
-- Original raw files are not modified.
-- Missing values are preserved when they represent unavailable or unreported information.
-- Zero values are preserved when they are actual reported values.
-- Dash values in the budget dataset are treated as missing, not zero.
-- Income categories are not aggregated into household-level income.
-- Different measurement units are not summed together.
-- Geographic and temporal mismatches must be documented before integration.
-- Transformation reports record row counts, missing values, and transformation details.
+- ไม่มีการแก้ไขไฟล์ดิบต้นฉบับ
+- คงค่าที่หายไปไว้เมื่อค่านั้นหมายถึงข้อมูลที่ไม่มีหรือไม่ได้รายงาน
+- คงค่าศูนย์ไว้เมื่อเป็นค่าที่รายงานจริง
+- ค่าขีดในชุดข้อมูลงบประมาณถือเป็นค่าที่หายไป ไม่ใช่ศูนย์
+- ไม่รวมหมวดหมู่รายได้เป็นรายได้ระดับครัวเรือน
+- ไม่นำค่าที่มีหน่วยวัดต่างกันมารวมกัน
+- ต้องระบุความไม่สอดคล้องด้านพื้นที่และช่วงเวลาไว้ก่อนการรวมข้อมูล
+- รายงานการแปลงข้อมูลบันทึกจำนวนแถว ค่าที่หายไป และรายละเอียดการแปลง
 
-## 8. How to Run
+## 8. วิธีการรัน
 
-Run commands from the repository root directory.
+รันคำสั่งจากไดเรกทอรีรากของ repository
 
-### 8.1 Prerequisites
+### 8.1 สิ่งที่ต้องเตรียม
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Python 3.11+ is required (pandas 3.x). `openpyxl` (for `.xlsx`) is included in `requirements.txt`.
+ต้องใช้ Python 3.11 ขึ้นไป (pandas 3.x) และ `openpyxl` (สำหรับไฟล์ `.xlsx`) รวมอยู่ใน `requirements.txt` แล้ว
 
-### 8.2 Quick way: one command
+### 8.2 วิธีด่วน: คำสั่งเดียว
 
 ```bash
 python run_all.py
 ```
 
-`run_all.py` stages the raw files, runs validation, runs every transformation script in the correct order, and checks the output row counts against the values reported in this README. It stops at the first failing step. Add `--verbose` to see each script's output.
+`run_all.py` จะเตรียมไฟล์ดิบ รัน validation รันสคริปต์แปลงข้อมูลทุกตัวตามลำดับที่ถูกต้อง และตรวจสอบจำนวนแถวของผลลัพธ์เทียบกับค่าที่ระบุใน README นี้ โดยจะหยุดทันทีเมื่อขั้นตอนใดล้มเหลว เพิ่ม `--verbose` เพื่อดูผลลัพธ์ของแต่ละสคริปต์
 
-### 8.3 Step by step
+### 8.3 ทีละขั้นตอน
 
-Some transformation scripts read raw files from `ingestion/data/raw/...` (the same layout as S3 and the Lambda working directory). `prepare_local_data.py` copies the files downloaded to `ingestion/data/` into that layout. Run it once before the transformation scripts.
+สคริปต์แปลงข้อมูลบางตัวอ่านไฟล์ดิบจาก `ingestion/data/raw/...` (โครงสร้างเดียวกับ S3 และ working directory ของ Lambda) โดย `prepare_local_data.py` จะคัดลอกไฟล์ที่ดาวน์โหลดไว้ใน `ingestion/data/` ไปยังโครงสร้างดังกล่าว ให้รันหนึ่งครั้งก่อนรันสคริปต์แปลงข้อมูล
 
 ```bash
 python prepare_local_data.py
@@ -317,23 +317,23 @@ python transformation/scripts/transform_affected_households_summary.py
 python transformation/scripts/integrate_data.py
 ```
 
-Order matters: `integrate_data.py` needs the outputs of `create_features.py` and `transform_nso_income.py`, and `clean_data.py` reads `validation/cleaned/Geographic_Data_deduplicated.csv` produced by `validate_data.py`.
+ลำดับมีความสำคัญ: `integrate_data.py` ต้องใช้ผลลัพธ์จาก `create_features.py` และ `transform_nso_income.py` ส่วน `clean_data.py` อ่านไฟล์ `validation/cleaned/Geographic_Data_deduplicated.csv` ที่สร้างโดย `validate_data.py`
 
-Requires `pandas`, `pyarrow` and `openpyxl` (`python -m pip install -r requirements.txt`). The first three scripts only need the committed `validation/cleaned/` file; the `transform_*.py` scripts need the raw files in `ingestion/data/raw/...` (created by `prepare_local_data.py`).
+ต้องใช้ `pandas`, `pyarrow` และ `openpyxl` (`python -m pip install -r requirements.txt`) สคริปต์สามตัวแรกต้องการเพียงไฟล์ใน `validation/cleaned/` ที่ commit ไว้แล้ว ส่วนสคริปต์ `transform_*.py` ต้องมีไฟล์ดิบใน `ingestion/data/raw/...` (สร้างโดย `prepare_local_data.py`)
 
-### 8.4 Re-run behavior
+### 8.4 พฤติกรรมเมื่อรันซ้ำ
 
-Scripts overwrite their outputs, so re-running gives the same CSV files. Parquet files may differ in bytes (file metadata varies by library version or environment) while containing identical data; compare them with `pd.read_parquet(...).equals(...)` rather than by checksum. JSON reports differ only in path separators (Windows vs macOS/Linux) and file ordering.
+สคริปต์จะเขียนทับผลลัพธ์เดิม การรันซ้ำจึงได้ไฟล์ CSV เหมือนเดิม ไฟล์ Parquet อาจมีไบต์ต่างกัน (metadata ของไฟล์ขึ้นกับเวอร์ชันของไลบรารีหรือสภาพแวดล้อม) แต่ข้อมูลภายในเหมือนกัน ให้เปรียบเทียบด้วย `pd.read_parquet(...).equals(...)` แทนการเทียบ checksum ส่วนรายงาน JSON จะต่างกันเฉพาะตัวคั่น path (Windows กับ macOS/Linux) และลำดับไฟล์
 
-## 9. Output Formats
+## 9. รูปแบบผลลัพธ์
 
-- CSV: Suitable for inspection and data exchange.
-- Parquet: Suitable for analytical processing and data storage.
-- JSON: Transformation reports containing processing results and data quality information.
+- CSV: เหมาะสำหรับการตรวจดูข้อมูลและการแลกเปลี่ยนข้อมูล
+- Parquet: เหมาะสำหรับการประมวลผลเชิงวิเคราะห์และการจัดเก็บข้อมูล
+- JSON: รายงานการแปลงข้อมูลที่มีผลการประมวลผลและข้อมูลด้านคุณภาพข้อมูล
 
-## 10. Tools
+## 10. เครื่องมือ
 
 - Python
 - Pandas
 - PyArrow
-- Boto3 (for AWS S3 integration when required)
+- Boto3 (สำหรับเชื่อมต่อ AWS S3 เมื่อจำเป็น)
