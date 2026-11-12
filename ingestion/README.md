@@ -1,17 +1,4 @@
-<<<<<<< Updated upstream
-# Ingestion and validation
-
-- `inspect_files.py` แสดงหัวตารางและตัวอย่างข้อมูลจาก CSV/XLSX (ต้องติดตั้ง `openpyxl`)
-- `validate_data.py` ตรวจเงื่อนไขคุณภาพพื้นฐานจากไฟล์ใน `data/` โดยไม่แก้ raw และแยกผลไว้ที่ root ของ repo ใน `validation/reports/`, `validation/cleaned/` และ `validation/quarantine/`
-- ดูวิธีตรวจ กฎ และผลล่าสุดใน [`docs/04-data-validation.md`](../docs/04-data-validation.md)
-
-รัน validator จาก root ของ repo:
-
-```powershell
-python ingestion/validate_data.py
-```
-=======
-# Installation and AWS Configuration
+# Ingestion: Installation and AWS Configuration
 
 ขั้นตอนสำหรับสมาชิกในทีมที่ต้องการ Clone โปรเจกต์และดาวน์โหลด Dataset จาก AWS S3 มาใช้งานบนเครื่องของตนเอง โดยสมาชิกทุกคนใช้ AWS IAM User และ Credentials ชุดเดียวกัน
 
@@ -184,4 +171,17 @@ python ingestion/inspect_files.py
 | Number of Datasets | 8 |
 
 เมื่อดำเนินการครบทุกขั้นตอนแล้ว สมาชิกจะมีโค้ดโปรเจกต์และ Dataset ทั้ง 8 ไฟล์พร้อมสำหรับทำ Data Validation, Data Cleaning และ Data Transformation ต่อไป
->>>>>>> Stashed changes
+
+---
+
+# Data Validation
+
+- `inspect_files.py` แสดงหัวตารางและตัวอย่างข้อมูลจาก CSV/XLSX (ต้องติดตั้ง `openpyxl`)
+- `validate_data.py` ตรวจเงื่อนไขคุณภาพพื้นฐานจากไฟล์ใน `data/` โดยไม่แก้ raw และแยกผลไว้ที่ root ของ repo ใน `validation/reports/`, `validation/cleaned/` และ `validation/quarantine/`
+- ดูวิธีตรวจ กฎ และผลล่าสุดใน [`docs/04-data-validation.md`](../docs/04-data-validation.md)
+
+รัน validator จาก root ของ repo:
+
+```powershell
+python ingestion/validate_data.py
+```
