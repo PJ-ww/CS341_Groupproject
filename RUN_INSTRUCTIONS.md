@@ -1,4 +1,4 @@
-# คู่มือทดลองรันโปรเจกต์ CS341 Flood Impact & Recovery (สำหรับอาจารย์)
+# คู่มือทดลองรันโปรเจกต์ CS341 Flood Impact & Recovery
 
 คู่มือนี้อธิบายวิธีรันส่วน **Validation → Transformation → Integration** บนเครื่องของอาจารย์ได้ทันที **โดยไม่ต้องใช้ AWS Account หรือ Credentials** เพราะไฟล์ข้อมูลดิบทั้ง 8 ไฟล์แนบอยู่ในโฟลเดอร์ `ingestion/data/` แล้ว
 
