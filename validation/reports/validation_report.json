@@ -1,623 +1,672 @@
-[
-  {
-    "file": "2564_by_disaster_type1.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 83,
-    "accepted_count": 76,
-    "quarantined_count": 7,
-    "duplicate_rows_quarantined": 0,
-    "column_stats": [
-      {
-        "column": "ที่",
-        "missing_count": 1,
-        "unique_nonempty": 80
-      },
-      {
-        "column": "จังหวัด",
-        "missing_count": 5,
-        "unique_nonempty": 78
-      },
-      {
-        "column": "ด้านดำรงชีพ",
-        "missing_count": 2,
-        "unique_nonempty": 44
-      },
-      {
-        "column": "ด้านสังคมสงเคราะห์",
-        "missing_count": 4,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "ด้านการแพทย์",
-        "missing_count": 3,
-        "unique_nonempty": 2
-      },
-      {
-        "column": "ด้านเกษตรพืช",
-        "missing_count": 3,
-        "unique_nonempty": 54
-      },
-      {
-        "column": "ด้านเกษตรประมง",
-        "missing_count": 3,
-        "unique_nonempty": 45
-      },
-      {
-        "column": "ด้านเกษตรปศุสัตว์",
-        "missing_count": 3,
-        "unique_nonempty": 27
-      },
-      {
-        "column": "ด้านเกษตรอื่น",
-        "missing_count": 3,
-        "unique_nonempty": 2
-      },
-      {
-        "column": "ด้านบรรเทา",
-        "missing_count": 3,
-        "unique_nonempty": 31
-      },
-      {
-        "column": "ด้านการปฏิบัติงานให้",
-        "missing_count": 2,
-        "unique_nonempty": 16
-      },
-      {
-        "column": "ป้องกันหรือยับยั้ง",
-        "missing_count": 2,
-        "unique_nonempty": 78
-      },
-      {
-        "column": "รวมทั้งสิ้น",
-        "missing_count": 2,
-        "unique_nonempty": 81
-      },
-      {
-        "column": "วงเงิน",
-        "missing_count": 2,
-        "unique_nonempty": 80
-      },
-      {
-        "column": "วงเงินอนุมัติ",
-        "missing_count": 2,
-        "unique_nonempty": 75
-      },
-      {
-        "column": "วงเงินไม่อนุมัติ",
-        "missing_count": 3,
-        "unique_nonempty": 10
-      }
-    ],
-    "notes": [
-      "แถวหัวตารางต่อและแถวสรุปถูก quarantine จากตารางระดับจังหวัด ไม่ได้ถือว่าเป็นข้อมูลต้นทางเสีย"
-    ],
-    "issues": [],
-    "quarantine_file": "quarantine/2564_by_disaster_type1__csv.jsonl"
-  },
-  {
-    "file": "dpm-gd015__1.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 29999,
-    "accepted_count": 29999,
-    "quarantined_count": 0,
-    "duplicate_rows_quarantined": 0,
-    "column_stats": [
-      {
-        "column": "PROVINCE_CODE",
-        "missing_count": 0,
-        "unique_nonempty": 37
-      },
-      {
-        "column": "PROVINCE_NAME",
-        "missing_count": 0,
-        "unique_nonempty": 37
-      },
-      {
-        "column": "AMPHUR_CODE",
-        "missing_count": 0,
-        "unique_nonempty": 494
-      },
-      {
-        "column": "AMPHUR_NAME",
-        "missing_count": 0,
-        "unique_nonempty": 492
-      },
-      {
-        "column": "DISTRICT_CODE",
-        "missing_count": 113,
-        "unique_nonempty": 3411
-      },
-      {
-        "column": "DISTRICT_NAME",
-        "missing_count": 113,
-        "unique_nonempty": 2779
-      },
-      {
-        "column": "MOO_NO",
-        "missing_count": 202,
-        "unique_nonempty": 28
-      },
-      {
-        "column": "ORG_CODE",
-        "missing_count": 29886,
-        "unique_nonempty": 21
-      },
-      {
-        "column": "ORG_NAME",
-        "missing_count": 29886,
-        "unique_nonempty": 21
-      },
-      {
-        "column": "COMMUNITY_NAME",
-        "missing_count": 29886,
-        "unique_nonempty": 113
-      },
-      {
-        "column": "MOO_ID",
-        "missing_count": 0,
-        "unique_nonempty": 29999
-      },
-      {
-        "column": "DIS_TYPE_NAME",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "Y2562",
-        "missing_count": 22305,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "Y2563",
-        "missing_count": 25317,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "Y2564",
-        "missing_count": 18499,
-        "unique_nonempty": 6
-      },
-      {
-        "column": "Y2565",
-        "missing_count": 11104,
-        "unique_nonempty": 8
-      },
-      {
-        "column": "Y2566",
-        "missing_count": 19635,
-        "unique_nonempty": 5
-      },
-      {
-        "column": "Y2567",
-        "missing_count": 29974,
-        "unique_nonempty": 2
-      }
-    ],
-    "notes": [
-      "ช่องปี Y2562–Y2567 ว่างได้ตามรูปแบบต้นทาง; เก็บเป็น missing/ไม่มีรายการ ไม่แปลงเป็นศูนย์",
-      "ชื่อคอลัมน์บางตัวมีช่องว่างท้ายชื่อ; ควร normalize header ในขั้น clean โดยเก็บ mapping ไว้"
-    ],
-    "quarantine": [],
-    "issues": []
-  },
-  {
-    "file": "Geographic_Data.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 1816,
-    "accepted_count": 1772,
-    "quarantined_count": 44,
-    "duplicate_rows_quarantined": 44,
-    "column_stats": [
-      {
-        "column": "ปี",
-        "missing_count": 0,
-        "unique_nonempty": 2
-      },
-      {
-        "column": "รายการ",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "อำเภอ",
-        "missing_count": 0,
-        "unique_nonempty": 9
-      },
-      {
-        "column": "ตำบล",
-        "missing_count": 0,
-        "unique_nonempty": 79
-      },
-      {
-        "column": "หมู่ที่",
-        "missing_count": 46,
-        "unique_nonempty": 21
-      },
-      {
-        "column": "ความเสี่ยง",
-        "missing_count": 0,
-        "unique_nonempty": 5
-      },
-      {
-        "column": "เหล่งที่มา",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      }
-    ],
-    "notes": [
-      "หมู่ที่ว่างได้ เพราะรายการบางแถวเป็นระดับตำบล ไม่ใช่ระดับหมู่บ้าน",
-      "พบชื่อหัวคอลัมน์ 'เหล่งที่มา'; ควรยืนยันกับเจ้าของข้อมูลก่อนเปลี่ยนชื่อ"
-    ],
-    "issues": [],
-    "deduplicated_file": "cleaned/Geographic_Data_deduplicated.csv",
-    "deduplicated_row_count": 1772,
-    "quarantine_file": "quarantine/Geographic_Data__csv.jsonl"
-  },
-  {
-    "file": "Number_of Households_Affected_by_Flooding.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 144,
-    "accepted_count": 144,
-    "quarantined_count": 0,
-    "duplicate_rows_quarantined": 0,
-    "column_stats": [
-      {
-        "column": "ปี",
-        "missing_count": 0,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "รายการ",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "อำเภอ",
-        "missing_count": 0,
-        "unique_nonempty": 8
-      },
-      {
-        "column": "ตำบล",
-        "missing_count": 0,
-        "unique_nonempty": 48
-      },
-      {
-        "column": "จำนวน",
-        "missing_count": 0,
-        "unique_nonempty": 17
-      },
-      {
-        "column": "หน่วย",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "ที่มา",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      }
-    ],
-    "notes": [],
-    "quarantine": [],
-    "issues": []
-  },
-  {
-    "file": "Number_of_Affected_Households.xlsx",
-    "format": "xlsx",
-    "sheets": {
-      "Sheet2": {
-        "data_row_count": 48,
-        "accepted_count": 48,
-        "quarantined_count": 0,
-        "duplicate_rows_quarantined": 0,
-        "column_stats": [
-          {
-            "column": "ครั้งที่",
-            "missing_count": 0,
-            "unique_nonempty": 7
+{
+  "files_checked": 5,
+  "files_passed": 5,
+  "files_with_warnings": 0,
+  "files_failed": 0,
+  "results": {
+    "chiangmai_damage.xlsx": {
+      "file_type": "XLSX",
+      "status": "PASS",
+      "sheets": {
+        "Sheet1": {
+          "status": "PASS",
+          "issues": [],
+          "notes": [
+            "Structural validation only; business rules are not yet defined.",
+            "Original column names and values are preserved."
+          ],
+          "row_count": 883,
+          "accepted_count": 866,
+          "quarantined_count": 17,
+          "duplicate_count": 17,
+          "columns": [
+            "ปี",
+            "อำเภอ",
+            "ตำบล",
+            "หมู่บ้าน",
+            "วันที่เกิดภัย",
+            "ราษฎร(คน)",
+            "ราษฎร(ครัวเรือน)",
+            "อพยพ(ครัวเรือน)",
+            "อพยพ(คน)",
+            "เสียชีวิต(คน)",
+            "สูญหาย(คน)",
+            "บาดเจ็บ(คน)",
+            "บ้านพักอาศัย(หลัง)",
+            "บ้านเรือนบางส่วน(หลัง)"
+          ],
+          "missing_values_by_column": {
+            "ปี": 0,
+            "อำเภอ": 0,
+            "ตำบล": 0,
+            "หมู่บ้าน": 0,
+            "วันที่เกิดภัย": 0,
+            "ราษฎร(คน)": 0,
+            "ราษฎร(ครัวเรือน)": 0,
+            "อพยพ(ครัวเรือน)": 0,
+            "อพยพ(คน)": 0,
+            "เสียชีวิต(คน)": 0,
+            "สูญหาย(คน)": 0,
+            "บาดเจ็บ(คน)": 0,
+            "บ้านพักอาศัย(หลัง)": 0,
+            "บ้านเรือนบางส่วน(หลัง)": 302
           },
-          {
-            "column": "อำเภอ",
-            "missing_count": 0,
-            "unique_nonempty": 9
+          "unique_values_by_column": {
+            "ปี": 5,
+            "อำเภอ": 25,
+            "ตำบล": 12,
+            "หมู่บ้าน": 54,
+            "วันที่เกิดภัย": 327,
+            "ราษฎร(คน)": 419,
+            "ราษฎร(ครัวเรือน)": 360,
+            "อพยพ(ครัวเรือน)": 3,
+            "อพยพ(คน)": 3,
+            "เสียชีวิต(คน)": 4,
+            "สูญหาย(คน)": 2,
+            "บาดเจ็บ(คน)": 3,
+            "บ้านพักอาศัย(หลัง)": 51,
+            "บ้านเรือนบางส่วน(หลัง)": 69
           },
-          {
-            "column": "รายการ",
-            "missing_count": 0,
-            "unique_nonempty": 3
+          "file_type": "XLSX",
+          "sheet_name": "Sheet1"
+        }
+      },
+      "row_count": 883,
+      "accepted_count": 866,
+      "quarantined_count": 17,
+      "file_name": "chiangmai_damage.xlsx",
+      "quarantine_file": "/Users/chanipornkimprasert/Library/CloudStorage/OneDrive-ThammasatUniversity/cs341/CS341_Groupproject/validation/quarantine/chiangmai_damage_quarantine.json"
+    },
+    "flood_2566.csv": {
+      "status": "PASS",
+      "issues": [],
+      "notes": [
+        "Structural validation only; business rules are not yet defined.",
+        "Original column names and values are preserved."
+      ],
+      "row_count": 19607,
+      "accepted_count": 19585,
+      "quarantined_count": 22,
+      "duplicate_count": 22,
+      "columns": [
+        "Incident Name",
+        "Disaster Date",
+        "Province Code",
+        "Province",
+        "District Code",
+        "District",
+        "Subdistrict Code",
+        "Subdistrict",
+        "Moo",
+        "Municipal Code",
+        "Municipality",
+        "Community",
+        "Village Code",
+        "Zone Center Name",
+        "Cause",
+        "Relief Declared Date",
+        "Disaster Area Date",
+        "Other Announce Date",
+        "End Disaster Date",
+        "Affected People",
+        "Affected Households",
+        "Evacuated People",
+        "Evacuated Households",
+        "Deaths",
+        "Missing",
+        "Injured",
+        "Housing Damage",
+        "Business Damage",
+        "Agriculture Damage",
+        "Livestock Damage",
+        "Fishing Damage",
+        "Transport Damage",
+        "Health Damage",
+        "Culture Damage",
+        "Education/Sports",
+        "Utilities Damage",
+        "Govt. Locations Damage",
+        "Other Public Benefits",
+        "Govt Property Damage"
+      ],
+      "missing_values_by_column": {
+        "Incident Name": 0,
+        "Disaster Date": 0,
+        "Province Code": 0,
+        "Province": 0,
+        "District Code": 0,
+        "District": 0,
+        "Subdistrict Code": 251,
+        "Subdistrict": 251,
+        "Moo": 251,
+        "Municipal Code": 19355,
+        "Municipality": 19355,
+        "Community": 19355,
+        "Village Code": 0,
+        "Zone Center Name": 0,
+        "Cause": 5520,
+        "Relief Declared Date": 3111,
+        "Disaster Area Date": 0,
+        "Other Announce Date": 19606,
+        "End Disaster Date": 2812,
+        "Affected People": 14382,
+        "Affected Households": 14312,
+        "Evacuated People": 19605,
+        "Evacuated Households": 14312,
+        "Deaths": 14312,
+        "Missing": 14312,
+        "Injured": 14312,
+        "Housing Damage": 18145,
+        "Business Damage": 19591,
+        "Agriculture Damage": 16862,
+        "Livestock Damage": 19567,
+        "Fishing Damage": 19324,
+        "Transport Damage": 18833,
+        "Health Damage": 19602,
+        "Culture Damage": 19581,
+        "Education/Sports": 19584,
+        "Utilities Damage": 19593,
+        "Govt. Locations Damage": 19584,
+        "Other Public Benefits": 19408,
+        "Govt Property Damage": 19593
+      },
+      "unique_values_by_column": {
+        "Incident Name": 2,
+        "Disaster Date": 166,
+        "Province Code": 70,
+        "Province": 70,
+        "District Code": 539,
+        "District": 536,
+        "Subdistrict Code": 2626,
+        "Subdistrict": 2318,
+        "Moo": 29,
+        "Municipal Code": 35,
+        "Municipality": 35,
+        "Community": 224,
+        "Village Code": 17411,
+        "Zone Center Name": 19,
+        "Cause": 8,
+        "Relief Declared Date": 148,
+        "Disaster Area Date": 161,
+        "Other Announce Date": 1,
+        "End Disaster Date": 175,
+        "Affected People": 605,
+        "Affected Households": 367,
+        "Evacuated People": 2,
+        "Evacuated Households": 3,
+        "Deaths": 5,
+        "Missing": 3,
+        "Injured": 3,
+        "Housing Damage": 164,
+        "Business Damage": 6,
+        "Agriculture Damage": 579,
+        "Livestock Damage": 27,
+        "Fishing Damage": 84,
+        "Transport Damage": 46,
+        "Health Damage": 2,
+        "Culture Damage": 5,
+        "Education/Sports": 5,
+        "Utilities Damage": 5,
+        "Govt. Locations Damage": 3,
+        "Other Public Benefits": 20,
+        "Govt Property Damage": 6
+      },
+      "encoding": "utf-8-sig",
+      "file_type": "CSV",
+      "file_name": "flood_2566.csv",
+      "quarantine_file": "/Users/chanipornkimprasert/Library/CloudStorage/OneDrive-ThammasatUniversity/cs341/CS341_Groupproject/validation/quarantine/flood_2566_quarantine.json"
+    },
+    "flood_2567.csv": {
+      "status": "PASS",
+      "issues": [],
+      "notes": [
+        "Structural validation only; business rules are not yet defined.",
+        "Original column names and values are preserved."
+      ],
+      "row_count": 34882,
+      "accepted_count": 34882,
+      "quarantined_count": 0,
+      "duplicate_count": 0,
+      "columns": [
+        "_id",
+        "Situation name",
+        "Disaster Type",
+        "Disaster Date",
+        "region",
+        "Province Code",
+        "Province",
+        "District Code",
+        "District",
+        "Sub-district Code",
+        "Sub-district",
+        "Moo",
+        "Municipal Code",
+        "Municipality",
+        "Community",
+        "Village Code",
+        "District Center",
+        "Title",
+        "Nature/Cause",
+        "status",
+        "situation",
+        "Aid Zone Declaration",
+        "Disaster Declaration",
+        "Other Declarations",
+        "Situation Ended",
+        "Affected People",
+        "Affected Households",
+        "Evacuees",
+        "Evacuees (Households)",
+        "fatalities_count",
+        "Missing Persons",
+        "injuries_count",
+        "Housing (Units)",
+        "Business (Sites)",
+        "Agriculture (Acres)",
+        "Livestock (Head)",
+        "Fisheries (Ponds)",
+        "Transportation (Sites)",
+        "Health (Sites)",
+        "Religion/Culture (Sites)",
+        "Education/Sports (Sites)",
+        "Utilities (Sites)",
+        "Government Sites",
+        "Other Public Benefit (Sites)",
+        "Gov./Private Property (Units)"
+      ],
+      "missing_values_by_column": {
+        "_id": 0,
+        "Situation name": 0,
+        "Disaster Type": 0,
+        "Disaster Date": 0,
+        "region": 0,
+        "Province Code": 0,
+        "Province": 0,
+        "District Code": 0,
+        "District": 0,
+        "Sub-district Code": 1560,
+        "Sub-district": 1560,
+        "Moo": 1563,
+        "Municipal Code": 33321,
+        "Municipality": 33321,
+        "Community": 33321,
+        "Village Code": 0,
+        "District Center": 3,
+        "Title": 0,
+        "Nature/Cause": 14908,
+        "status": 0,
+        "situation": 0,
+        "Aid Zone Declaration": 8135,
+        "Disaster Declaration": 6640,
+        "Other Declarations": 34881,
+        "Situation Ended": 11531,
+        "Affected People": 28301,
+        "Affected Households": 26836,
+        "Evacuees": 34870,
+        "Evacuees (Households)": 26836,
+        "fatalities_count": 26836,
+        "Missing Persons": 26836,
+        "injuries_count": 26836,
+        "Housing (Units)": 32215,
+        "Business (Sites)": 34856,
+        "Agriculture (Acres)": 32443,
+        "Livestock (Head)": 34810,
+        "Fisheries (Ponds)": 34608,
+        "Transportation (Sites)": 34018,
+        "Health (Sites)": 34872,
+        "Religion/Culture (Sites)": 34841,
+        "Education/Sports (Sites)": 34829,
+        "Utilities (Sites)": 34866,
+        "Government Sites": 34851,
+        "Other Public Benefit (Sites)": 34749,
+        "Gov./Private Property (Units)": 34831
+      },
+      "unique_values_by_column": {
+        "_id": 34882,
+        "Situation name": 2,
+        "Disaster Type": 2,
+        "Disaster Date": 191,
+        "region": 6,
+        "Province Code": 73,
+        "Province": 73,
+        "District Code": 622,
+        "District": 619,
+        "Sub-district Code": 3411,
+        "Sub-district": 2966,
+        "Moo": 29,
+        "Municipal Code": 80,
+        "Municipality": 80,
+        "Community": 1221,
+        "Village Code": 24623,
+        "District Center": 19,
+        "Title": 1834,
+        "Nature/Cause": 11,
+        "status": 7,
+        "situation": 3,
+        "Aid Zone Declaration": 174,
+        "Disaster Declaration": 184,
+        "Other Declarations": 1,
+        "Situation Ended": 231,
+        "Affected People": 920,
+        "Affected Households": 625,
+        "Evacuees": 10,
+        "Evacuees (Households)": 12,
+        "fatalities_count": 4,
+        "Missing Persons": 3,
+        "injuries_count": 4,
+        "Housing (Units)": 301,
+        "Business (Sites)": 9,
+        "Agriculture (Acres)": 585,
+        "Livestock (Head)": 46,
+        "Fisheries (Ponds)": 79,
+        "Transportation (Sites)": 55,
+        "Health (Sites)": 3,
+        "Religion/Culture (Sites)": 12,
+        "Education/Sports (Sites)": 7,
+        "Utilities (Sites)": 9,
+        "Government Sites": 9,
+        "Other Public Benefit (Sites)": 18,
+        "Gov./Private Property (Units)": 9
+      },
+      "encoding": "utf-8-sig",
+      "file_type": "CSV",
+      "file_name": "flood_2567.csv"
+    },
+    "household_income.xlsx": {
+      "file_type": "XLSX",
+      "status": "PASS",
+      "sheets": {
+        "Sheet1": {
+          "status": "PASS",
+          "issues": [],
+          "notes": [
+            "Structural validation only; business rules are not yet defined.",
+            "Original column names and values are preserved."
+          ],
+          "row_count": 2167,
+          "accepted_count": 2167,
+          "quarantined_count": 0,
+          "duplicate_count": 0,
+          "columns": [
+            "รายการสถิติ",
+            "อำเภอ",
+            "ตำบล",
+            "พื้นที่",
+            "ครัวเรือน",
+            "รายได้",
+            "หน่วย"
+          ],
+          "missing_values_by_column": {
+            "รายการสถิติ": 0,
+            "อำเภอ": 0,
+            "ตำบล": 0,
+            "พื้นที่": 0,
+            "ครัวเรือน": 0,
+            "รายได้": 0,
+            "หน่วย": 0
           },
-          {
-            "column": "จำนวน",
-            "missing_count": 0,
-            "unique_nonempty": 37
+          "unique_values_by_column": {
+            "รายการสถิติ": 1,
+            "อำเภอ": 25,
+            "ตำบล": 199,
+            "พื้นที่": 1951,
+            "ครัวเรือน": 404,
+            "รายได้": 2161,
+            "หน่วย": 1
           },
-          {
-            "column": "หน่วยนับ",
-            "missing_count": 0,
-            "unique_nonempty": 3
-          }
-        ],
-        "notes": [
-          "ข้อมูลเป็นรายการสรุปหลายประเภท (ตำบล/หมู่บ้าน/ครัวเรือน); อย่ารวมจำนวนต่างหน่วยเข้าด้วยกัน"
-        ],
-        "quarantine": [],
-        "issues": []
-      }
-    }
-  },
-  {
-    "file": "Salary.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 15400,
-    "accepted_count": 15400,
-    "quarantined_count": 0,
-    "duplicate_rows_quarantined": 0,
-    "column_stats": [
-      {
-        "column": "year",
-        "missing_count": 0,
-        "unique_nonempty": 2
+          "file_type": "XLSX",
+          "sheet_name": "Sheet1"
+        }
       },
-      {
-        "column": "province",
-        "missing_count": 0,
-        "unique_nonempty": 77
+      "row_count": 2167,
+      "accepted_count": 2167,
+      "quarantined_count": 0,
+      "file_name": "household_income.xlsx"
+    },
+    "village_mapping.json": {
+      "status": "PASS",
+      "issues": [],
+      "notes": [
+        "Structural validation only; business rules are not yet defined.",
+        "Original column names and values are preserved."
+      ],
+      "row_count": 2198,
+      "accepted_count": 2198,
+      "quarantined_count": 0,
+      "duplicate_count": 0,
+      "columns": [
+        "pcode",
+        "pname",
+        "tname",
+        "acode",
+        "aname",
+        "tcode",
+        "mcode",
+        "mname",
+        "oct_side15_lat",
+        "oct_side15_lon",
+        "oct_side15_distance",
+        "oct_side15_road",
+        "oct_side15_road_name",
+        "oct_side15_road_num",
+        "oct_side15_road_distance",
+        "oct_side15_road_name2",
+        "oct_side15_road_num2",
+        "oct_side15_wmen",
+        "oct_side15_men",
+        "oct_side15_total",
+        "oct_side15_house",
+        "oct_side15_leader",
+        "oct_side15_leader_cause",
+        "oct_side15_local",
+        "oct_side15_local_name",
+        "oct_side15_local2",
+        "oct_side15_local2_name",
+        "oct_side15_local3",
+        "oct_side15_local3_name",
+        "oct_side15_local4",
+        "oct_side15_local4_name",
+        "oct_side15_local5",
+        "oct_side15_local5_name",
+        "oct_side15_river",
+        "oct_side15_river_name",
+        "oct_side15_sea",
+        "oct_side15_sea_name",
+        "oct_side15_lagoon",
+        "oct_side15_lagoon_name",
+        "oct_side15_mangrove",
+        "oct_side15_mangrove_name",
+        "oct_side15_mangrove_area",
+        "oct_side15_swamp",
+        "oct_side15_swamp_name",
+        "oct_side15_swamp_area",
+        "oct_side15_island",
+        "oct_side15_island_name",
+        "oct_side15_foth",
+        "oct_side15_foth_name",
+        "oct_side15_mountain",
+        "oct_side15_mountain_name",
+        "oct_side15_mountain_sea_leval",
+        "oct_side15_border",
+        "oct_side15_border_name1",
+        "oct_side15_border_distance1",
+        "oct_side15_border_name2",
+        "oct_side15_border_distance2",
+        "oct_side15_mm_type1",
+        "oct_side15_mm_type2",
+        "oct_side15_mm_type2_name",
+        "oct_side15_mm_type3",
+        "oct_side15_mm_type3_name",
+        "oct_side15_power",
+        "oct_side15_power_name",
+        "oct_side15_highvoltage",
+        "oct_side15_dam",
+        "oct_side15_dam_name",
+        "oct_side15_reservoir",
+        "oct_side15_reservoir_name",
+        "oct_side15_weir",
+        "oct_side15_weir_name",
+        "oct_side15_housing",
+        "oct_side15_housing_total",
+        "oct_side15_condos",
+        "oct_side15_condos_total"
+      ],
+      "missing_values_by_column": {
+        "pcode": 0,
+        "pname": 0,
+        "tname": 0,
+        "acode": 0,
+        "aname": 0,
+        "tcode": 0,
+        "mcode": 0,
+        "mname": 0,
+        "oct_side15_lat": 0,
+        "oct_side15_lon": 0,
+        "oct_side15_distance": 18,
+        "oct_side15_road": 0,
+        "oct_side15_road_name": 1285,
+        "oct_side15_road_num": 1292,
+        "oct_side15_road_distance": 971,
+        "oct_side15_road_name2": 973,
+        "oct_side15_road_num2": 975,
+        "oct_side15_wmen": 9,
+        "oct_side15_men": 9,
+        "oct_side15_total": 9,
+        "oct_side15_house": 15,
+        "oct_side15_leader": 0,
+        "oct_side15_leader_cause": 2184,
+        "oct_side15_local": 0,
+        "oct_side15_local_name": 1290,
+        "oct_side15_local2": 0,
+        "oct_side15_local2_name": 1116,
+        "oct_side15_local3": 0,
+        "oct_side15_local3_name": 2117,
+        "oct_side15_local4": 0,
+        "oct_side15_local4_name": 2103,
+        "oct_side15_local5": 0,
+        "oct_side15_local5_name": 2198,
+        "oct_side15_river": 0,
+        "oct_side15_river_name": 684,
+        "oct_side15_sea": 0,
+        "oct_side15_sea_name": 2198,
+        "oct_side15_lagoon": 0,
+        "oct_side15_lagoon_name": 2195,
+        "oct_side15_mangrove": 0,
+        "oct_side15_mangrove_name": 2198,
+        "oct_side15_mangrove_area": 2198,
+        "oct_side15_swamp": 0,
+        "oct_side15_swamp_name": 2197,
+        "oct_side15_swamp_area": 2197,
+        "oct_side15_island": 0,
+        "oct_side15_island_name": 2198,
+        "oct_side15_foth": 0,
+        "oct_side15_foth_name": 1897,
+        "oct_side15_mountain": 0,
+        "oct_side15_mountain_name": 1971,
+        "oct_side15_mountain_sea_leval": 1980,
+        "oct_side15_border": 0,
+        "oct_side15_border_name1": 2170,
+        "oct_side15_border_distance1": 2170,
+        "oct_side15_border_name2": 2198,
+        "oct_side15_border_distance2": 2198,
+        "oct_side15_mm_type1": 0,
+        "oct_side15_mm_type2": 0,
+        "oct_side15_mm_type2_name": 2189,
+        "oct_side15_mm_type3": 0,
+        "oct_side15_mm_type3_name": 2155,
+        "oct_side15_power": 0,
+        "oct_side15_power_name": 2159,
+        "oct_side15_highvoltage": 0,
+        "oct_side15_dam": 0,
+        "oct_side15_dam_name": 2181,
+        "oct_side15_reservoir": 0,
+        "oct_side15_reservoir_name": 1708,
+        "oct_side15_weir": 0,
+        "oct_side15_weir_name": 1566,
+        "oct_side15_housing": 0,
+        "oct_side15_housing_total": 1792,
+        "oct_side15_condos": 0,
+        "oct_side15_condos_total": 2109
       },
-      {
-        "column": "source_income1",
-        "missing_count": 0,
-        "unique_nonempty": 3
+      "unique_values_by_column": {
+        "pcode": 1,
+        "pname": 1,
+        "tname": 194,
+        "acode": 25,
+        "aname": 25,
+        "tcode": 204,
+        "mcode": 2198,
+        "mname": 1778,
+        "oct_side15_lat": 2177,
+        "oct_side15_lon": 2171,
+        "oct_side15_distance": 385,
+        "oct_side15_road": 2,
+        "oct_side15_road_name": 335,
+        "oct_side15_road_num": 166,
+        "oct_side15_road_distance": 243,
+        "oct_side15_road_name2": 264,
+        "oct_side15_road_num2": 117,
+        "oct_side15_wmen": 762,
+        "oct_side15_men": 725,
+        "oct_side15_total": 1091,
+        "oct_side15_house": 673,
+        "oct_side15_leader": 2,
+        "oct_side15_leader_cause": 3,
+        "oct_side15_local": 2,
+        "oct_side15_local_name": 138,
+        "oct_side15_local2": 2,
+        "oct_side15_local2_name": 175,
+        "oct_side15_local3": 2,
+        "oct_side15_local3_name": 12,
+        "oct_side15_local4": 2,
+        "oct_side15_local4_name": 2,
+        "oct_side15_local5": 1,
+        "oct_side15_local5_name": 0,
+        "oct_side15_river": 2,
+        "oct_side15_river_name": 758,
+        "oct_side15_sea": 1,
+        "oct_side15_sea_name": 0,
+        "oct_side15_lagoon": 2,
+        "oct_side15_lagoon_name": 1,
+        "oct_side15_mangrove": 1,
+        "oct_side15_mangrove_name": 0,
+        "oct_side15_mangrove_area": 0,
+        "oct_side15_swamp": 2,
+        "oct_side15_swamp_name": 1,
+        "oct_side15_swamp_area": 1,
+        "oct_side15_island": 1,
+        "oct_side15_island_name": 0,
+        "oct_side15_foth": 2,
+        "oct_side15_foth_name": 238,
+        "oct_side15_mountain": 2,
+        "oct_side15_mountain_name": 197,
+        "oct_side15_mountain_sea_leval": 133,
+        "oct_side15_border": 2,
+        "oct_side15_border_name1": 1,
+        "oct_side15_border_distance1": 14,
+        "oct_side15_border_name2": 0,
+        "oct_side15_border_distance2": 0,
+        "oct_side15_mm_type1": 2,
+        "oct_side15_mm_type2": 2,
+        "oct_side15_mm_type2_name": 9,
+        "oct_side15_mm_type3": 2,
+        "oct_side15_mm_type3_name": 26,
+        "oct_side15_power": 2,
+        "oct_side15_power_name": 35,
+        "oct_side15_highvoltage": 2,
+        "oct_side15_dam": 2,
+        "oct_side15_dam_name": 15,
+        "oct_side15_reservoir": 2,
+        "oct_side15_reservoir_name": 463,
+        "oct_side15_weir": 2,
+        "oct_side15_weir_name": 566,
+        "oct_side15_housing": 2,
+        "oct_side15_housing_total": 14,
+        "oct_side15_condos": 2,
+        "oct_side15_condos_total": 14
       },
-      {
-        "column": "source_income2",
-        "missing_count": 0,
-        "unique_nonempty": 5
-      },
-      {
-        "column": "source_income3",
-        "missing_count": 0,
-        "unique_nonempty": 10
-      },
-      {
-        "column": "soc_eco_class1",
-        "missing_count": 0,
-        "unique_nonempty": 4
-      },
-      {
-        "column": "soc_eco_class2",
-        "missing_count": 0,
-        "unique_nonempty": 10
-      },
-      {
-        "column": "value",
-        "missing_count": 0,
-        "unique_nonempty": 8616
-      },
-      {
-        "column": "unit",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "attribute",
-        "missing_count": 13675,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "source",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      }
-    ],
-    "notes": [
-      "ช่อง attribute ว่างได้; ค่า '.00' เป็นค่าศูนย์ตามคำอธิบายใน attribute ไม่ใช่ค่าว่าง",
-      "ค่า value ติดลบรับไว้ เพราะกำไรสุทธิจากธุรกิจ/เกษตรอาจเป็นผลขาดทุนได้"
-    ],
-    "quarantine": [],
-    "issues": []
-  },
-  {
-    "file": "Salary2.csv",
-    "format": "csv",
-    "encoding": "utf-8-sig",
-    "data_row_count": 144,
-    "accepted_count": 144,
-    "quarantined_count": 0,
-    "duplicate_rows_quarantined": 0,
-    "column_stats": [
-      {
-        "column": "YEAR",
-        "missing_count": 0,
-        "unique_nonempty": 8
-      },
-      {
-        "column": "CODE_REGION",
-        "missing_count": 0,
-        "unique_nonempty": 6
-      },
-      {
-        "column": "REGION",
-        "missing_count": 0,
-        "unique_nonempty": 10
-      },
-      {
-        "column": "CODE_AREA",
-        "missing_count": 0,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "AREA",
-        "missing_count": 0,
-        "unique_nonempty": 3
-      },
-      {
-        "column": "MONTHLY_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 144
-      },
-      {
-        "column": "CURRENT_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 143
-      },
-      {
-        "column": "MONEY_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 144
-      },
-      {
-        "column": "FROM_WORK",
-        "missing_count": 0,
-        "unique_nonempty": 143
-      },
-      {
-        "column": "CURRENT_TRANSFER",
-        "missing_count": 0,
-        "unique_nonempty": 139
-      },
-      {
-        "column": "PROPERTY_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 124
-      },
-      {
-        "column": "NONMONEY_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 139
-      },
-      {
-        "column": "NONCUR_M_INCOME",
-        "missing_count": 0,
-        "unique_nonempty": 121
-      },
-      {
-        "column": "UNIT",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      },
-      {
-        "column": "SOURCE",
-        "missing_count": 0,
-        "unique_nonempty": 1
-      }
-    ],
-    "notes": [],
-    "quarantine": [],
-    "issues": []
-  },
-  {
-    "file": "STATISTIC_FLD.xlsx",
-    "format": "xlsx",
-    "sheets": {
-      "_SELECT_PROVINCE_CODE_PROVINCE_": {
-        "data_row_count": 57024,
-        "accepted_count": 57024,
-        "quarantined_count": 0,
-        "duplicate_rows_quarantined": 0,
-        "column_stats": [
-          {
-            "column": "PROVINCE_CODE",
-            "missing_count": 0,
-            "unique_nonempty": 77
-          },
-          {
-            "column": "PROVINCE_NAME",
-            "missing_count": 0,
-            "unique_nonempty": 77
-          },
-          {
-            "column": "AMPHUR_CODE",
-            "missing_count": 0,
-            "unique_nonempty": 909
-          },
-          {
-            "column": "AMPHUR_NAME",
-            "missing_count": 0,
-            "unique_nonempty": 904
-          },
-          {
-            "column": "DISTRICT_CODE",
-            "missing_count": 367,
-            "unique_nonempty": 6461
-          },
-          {
-            "column": "DISTRICT_NAME",
-            "missing_count": 367,
-            "unique_nonempty": 5194
-          },
-          {
-            "column": "MOO_NO",
-            "missing_count": 456,
-            "unique_nonempty": 29
-          },
-          {
-            "column": "ORG_CODE",
-            "missing_count": 56657,
-            "unique_nonempty": 50
-          },
-          {
-            "column": "ORG_NAME",
-            "missing_count": 56657,
-            "unique_nonempty": 50
-          },
-          {
-            "column": "COMMUNITY_NAME",
-            "missing_count": 56657,
-            "unique_nonempty": 365
-          },
-          {
-            "column": "MOO_ID",
-            "missing_count": 0,
-            "unique_nonempty": 57023
-          },
-          {
-            "column": "DIS_TYPE_NAME",
-            "missing_count": 0,
-            "unique_nonempty": 1
-          },
-          {
-            "column": "Y2562",
-            "missing_count": 42729,
-            "unique_nonempty": 6
-          },
-          {
-            "column": "Y2563",
-            "missing_count": 40317,
-            "unique_nonempty": 7
-          },
-          {
-            "column": "Y2564",
-            "missing_count": 30675,
-            "unique_nonempty": 6
-          },
-          {
-            "column": "Y2565",
-            "missing_count": 20670,
-            "unique_nonempty": 11
-          },
-          {
-            "column": "Y2566",
-            "missing_count": 35933,
-            "unique_nonempty": 6
-          },
-          {
-            "column": "Y2567",
-            "missing_count": 56817,
-            "unique_nonempty": 2
-          }
-        ],
-        "notes": [
-          "ช่องปี Y2562–Y2567 ว่างได้ตามรูปแบบต้นทาง; เก็บเป็น missing/ไม่มีรายการ ไม่แปลงเป็นศูนย์",
-          "ชื่อคอลัมน์บางตัวมีช่องว่างท้ายชื่อ; ควร normalize header ในขั้น clean โดยเก็บ mapping ไว้"
-        ],
-        "quarantine": [],
-        "issues": []
-      }
+      "file_type": "JSON",
+      "file_name": "village_mapping.json"
     }
   }
-]
+}

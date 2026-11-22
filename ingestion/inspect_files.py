@@ -1,5 +1,6 @@
-"""ตรวจไฟล์ใน ingestion/data/: encoding, หัวตาราง, จำนวนแถว, ชีตของ xlsx"""
+"""ตรวจไฟล์ใน ingestion/data/: encoding, หัวตาราง, จำนวนแถว, ชีต XLSX และโครงสร้าง JSON."""
 import csv
+import json
 from pathlib import Path
 
 import openpyxl
@@ -10,8 +11,8 @@ DATA_DIR = Path(__file__).parent / "data"
 def detect_encoding(path):
     for enc in ("utf-8-sig", "cp874"):
         try:
-            with open(path, encoding=enc) as f:
-                f.read()
+            with path.open(encoding=enc, newline="") as stream:
+                stream.read()
             return enc
         except UnicodeDecodeError:
             continue
@@ -19,30 +20,76 @@ def detect_encoding(path):
 
 
 def inspect_csv(path):
-    enc = detect_encoding(path)
-    print(f"encoding: {enc}")
-    with open(path, encoding=enc if enc != "unknown" else "utf-8", errors="replace") as f:
-        rows = list(csv.reader(f))
+    encoding = detect_encoding(path)
+    print(f"encoding: {encoding}")
+    if encoding == "unknown":
+        print("ไม่สามารถระบุ encoding เป็น UTF-8 หรือ cp874 ได้")
+        return
+
+    with path.open(encoding=encoding, newline="") as stream:
+        rows = list(csv.reader(stream))
+
     print(f"rows (รวมหัวตาราง): {len(rows)} | cols: {len(rows[0]) if rows else 0}")
-    for r in rows[:4]:
-        print(r)
+    for row in rows[:4]:
+        print(row)
 
 
 def inspect_xlsx(path):
-    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
-    for ws in wb.worksheets:
-        print(f"--- sheet '{ws.title}' rows={ws.max_row} cols={ws.max_column}")
-        for i, row in enumerate(ws.iter_rows(values_only=True)):
-            print(row[:12])
-            if i >= 3:
+    workbook = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        for worksheet in workbook.worksheets:
+            print(f"--- sheet '{worksheet.title}' rows={worksheet.max_row} cols={worksheet.max_column}")
+            for index, row in enumerate(worksheet.iter_rows(values_only=True)):
+                print(row[:12])
+                if index >= 3:
+                    break
+    finally:
+        workbook.close()
+
+
+def inspect_json(path):
+    with path.open(encoding="utf-8-sig") as stream:
+        data = json.load(stream)
+
+    print(f"root type: {type(data).__name__}")
+    if isinstance(data, dict):
+        print(f"top-level keys ({len(data)}): {list(data.keys())[:30]}")
+        # Common GeoJSON / wrapped-record structures
+        for key, value in data.items():
+            if isinstance(value, list):
+                print(f"list field: {key} | records: {len(value)}")
+                if value and isinstance(value[0], dict):
+                    print(f"first record keys: {list(value[0].keys())[:30]}")
                 break
+    elif isinstance(data, list):
+        print(f"records: {len(data)}")
+        if data and isinstance(data[0], dict):
+            print(f"first record keys: {list(data[0].keys())[:30]}")
+            print(f"first record sample: {data[0]}")
+        elif data:
+            print(f"first item sample: {data[0]}")
 
 
-for p in sorted(DATA_DIR.iterdir()):
-    if p.suffix.lower() not in (".csv", ".xlsx"):
-        continue
-    print(f"\n{'=' * 70}\n{p.name}  ({p.stat().st_size / 1024:.1f} KB)")
-    if p.suffix.lower() == ".csv":
-        inspect_csv(p)
-    else:
-        inspect_xlsx(p)
+def main():
+    if not DATA_DIR.exists():
+        raise SystemExit(f"Data directory not found: {DATA_DIR}")
+
+    files = sorted(path for path in DATA_DIR.iterdir() if path.is_file())
+    if not files:
+        raise SystemExit(f"No files found in {DATA_DIR}")
+
+    for path in files:
+        print(f"\n{'=' * 70}\n{path.name} ({path.stat().st_size / 1024:.1f} KB)")
+        suffix = path.suffix.lower()
+        if suffix == ".csv":
+            inspect_csv(path)
+        elif suffix == ".xlsx":
+            inspect_xlsx(path)
+        elif suffix == ".json":
+            inspect_json(path)
+        else:
+            print(f"Unsupported file extension: {suffix}")
+
+
+if __name__ == "__main__":
+    main()
