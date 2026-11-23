@@ -1,339 +1,1279 @@
+# Transformation & Data Integration
+## CS341 Term Project — Flood Impact and Recovery in Chiang Mai
 
-# การแปลงและประมวลผลข้อมูล (Data Transformation & Processing)
+**Scope:** Data Transformation, Data Quality Checks, and Data Integration
 
-## 1. ภาพรวม
+---
 
-โมดูลนี้แปลงชุดข้อมูลต้นทางที่ผ่านการตรวจสอบ (validation) แล้ว ให้อยู่ในรูปแบบมาตรฐานที่เหมาะสำหรับการจัดเก็บข้อมูลและการวิเคราะห์ต่อไป
+# 1. Overview
 
-กระบวนการแปลงข้อมูลประกอบด้วย:
-- การทำความสะอาดและปรับข้อมูลให้เป็นมาตรฐาน
-- การแปลงชนิดข้อมูล
-- การจัดการค่าที่หายไป (missing values)
-- การสร้างฟีเจอร์ (feature engineering)
-- การเตรียมข้อมูลสำหรับการรวมข้อมูล (integration) และการจัดเก็บ
-- การส่งออกชุดข้อมูลที่แปลงแล้วในรูปแบบ CSV และ Parquet
-- การสร้างรายงานการแปลงข้อมูล
+โฟลเดอร์นี้จัดเก็บกระบวนการ Transformation และ Integration สำหรับโครงงาน CS341 Term Project ซึ่งศึกษาผลกระทบจากอุทกภัยและแนวทางการฟื้นฟูในจังหวัดเชียงใหม่
 
-## 2. หน้าที่ความรับผิดชอบ
+หน้าที่หลักของส่วน Transformation คือการนำข้อมูลที่ผ่านกระบวนการ Cleaning และ Validation มาแปลงให้อยู่ในรูปแบบที่เป็นมาตรฐานเดียวกัน พร้อมตรวจสอบคุณภาพของข้อมูล และเชื่อมโยงข้อมูลจากหลายแหล่งเข้าด้วยกันเพื่อเตรียมพร้อมสำหรับการวิเคราะห์ในขั้นตอนถัดไป
 
-- ทำความสะอาดและปรับชุดข้อมูลต้นทางให้เป็นมาตรฐาน
-- แปลงคอลัมน์ให้เป็นชนิดข้อมูลที่เหมาะสม
-- คงค่าที่หายไปไว้ตามความหมายของข้อมูลต้นทาง
-- สร้างฟีเจอร์เพิ่มเติมเมื่อจำเป็น
-- รวมชุดข้อมูลเฉพาะเมื่อยืนยันได้ว่าระดับพื้นที่ ช่วงเวลา และความละเอียดของข้อมูล (granularity) สอดคล้องกัน
-- เตรียมชุดข้อมูลที่แปลงแล้วสำหรับโมดูล Data Storage
+งานที่รับผิดชอบแบ่งออกเป็น 3 ส่วนหลัก ได้แก่
 
-## 3. โครงสร้างไดเรกทอรี
+1. **Data Transformation:** แปลงข้อมูล Flood, Damage, Household Income และ Village Mapping ให้อยู่ในรูปแบบที่เหมาะสมต่อการวิเคราะห์
+2. **Data Integration:** เชื่อมโยงข้อมูล Flood และ Household Income เข้ากับ Village Mapping โดยใช้รหัสหมู่บ้านหรือข้อมูลตำแหน่งทางการปกครอง
+3. **Data Quality and Validation:** ตรวจสอบจำนวนแถว ความถูกต้องของชนิดข้อมูล ข้อมูลสูญหาย ความซ้ำซ้อน และผลลัพธ์หลังการเชื่อมโยงข้อมูล
+
+หลักการสำคัญในการทำงานคือ การรักษาข้อมูลต้นฉบับให้มากที่สุด ไม่สร้างข้อมูลขึ้นมาแทนค่าที่ขาดหาย และไม่จับคู่ข้อมูลที่ไม่มีหลักฐานเพียงพอ
+
+---
+
+# 2. Project Research Questions
+
+กระบวนการ Transformation และ Integration ถูกออกแบบมาเพื่อสนับสนุน Research Questions ของโครงงาน ได้แก่
+
+### Q1: Which areas in Chiang Mai are most affected by floods, and how do damage patterns change year to year?
+
+ต้องการศึกษาว่าพื้นที่ใดในจังหวัดเชียงใหม่ได้รับผลกระทบจากน้ำท่วมมากที่สุด และรูปแบบความเสียหายเปลี่ยนแปลงอย่างไรระหว่างปี
+
+ข้อมูลที่เกี่ยวข้อง:
+- Flood 2566
+- Flood 2567
+- Damage Records
+- Village Mapping
+
+การเตรียมข้อมูล:
+- รวมข้อมูลน้ำท่วมจากปี 2566 และ 2567
+- คัดเลือกข้อมูลเฉพาะจังหวัดเชียงใหม่
+- เชื่อมโยงข้อมูลน้ำท่วมกับข้อมูลหมู่บ้าน
+- รักษาข้อมูลปีและข้อมูลความเสียหายไว้เพื่อใช้เปรียบเทียบ
+
+### Q2: Are geographic and demographic characteristics related to flood impacts?
+
+ต้องการศึกษาความสัมพันธ์ระหว่างลักษณะทางภูมิศาสตร์ ประชากร และผลกระทบจากน้ำท่วม
+
+ข้อมูลที่เกี่ยวข้อง:
+- Flood Records
+- Village Mapping
+- Household Income
+
+การเตรียมข้อมูล:
+- เชื่อมโยง Flood กับข้อมูลพิกัด ประชากร และลักษณะภูมิศาสตร์ของหมู่บ้าน
+- เชื่อมโยง Household Income กับข้อมูลหมู่บ้านเท่าที่สามารถจับคู่ได้อย่างน่าเชื่อถือ
+- แยกข้อมูลที่จับคู่ไม่ได้และข้อมูลที่มีความกำกวมออกจากข้อมูลที่จับคู่ได้
+
+### Q3: How should aid priority areas be ranked?
+
+ต้องการเตรียมข้อมูลสำหรับจัดลำดับความสำคัญของพื้นที่ที่ควรได้รับความช่วยเหลือ
+
+ข้อมูลที่เกี่ยวข้อง:
+- Flood Records
+- Damage Records
+- Population
+- Households
+- Geographic Characteristics
+- Household Income
+
+การเตรียมข้อมูล:
+- รักษาตัวเลขผู้ได้รับผลกระทบและความเสียหาย
+- เชื่อมโยงข้อมูลประชากรและลักษณะพื้นที่
+- เก็บข้อมูลรายได้ครัวเรือนไว้เป็นบริบททางเศรษฐกิจและสังคม
+- ไม่กำหนดคะแนนหรืออันดับความช่วยเหลือในขั้น Transformation เพราะเป็นขั้นตอนวิเคราะห์ที่ต้องกำหนดเกณฑ์เพิ่มเติม
+
+---
+
+# 3. Directory Structure
+
+โครงสร้างโฟลเดอร์ที่ใช้ในงานนี้
 
 ```text
 transformation/
+│
+├── README.md
+│
 ├── scripts/
-│   ├── clean_data.py
-│   ├── standardize.py
-│   ├── create_features.py
-│   ├── transform_flood_village_stats.py
-│   ├── transform_nso_income.py
-│   ├── transform_disaster_budget.py
-│   ├── transform_flood_affected_households.py
-│   ├── transform_affected_households_summary.py
-│   └── integrate_data.py
+│   ├── transform_flood.py
+│   ├── transform_damage.py
+│   ├── transform_household_income.py
+│   ├── transform_village_mapping.py
+│   ├── integrate_flood_mapping.py
+│   ├── integrate_household_income_mapping.py
+│   ├── profile_datasets.py
+│   ├── profile_chiangmai_damage.py
+│   ├── check_mapping_coverage.py
+│   └── check_unmatched_codes.py
 │
 ├── output/
-│   ├── geographic_data_cleaned.csv
-│   ├── geographic_data_standardized.csv
-│   ├── geographic_data_features.csv
-│   ├── flood_village_stats_transformed.csv
-│   ├── flood_village_stats_transformed.parquet
-│   ├── nso_household_income_transformed.csv
-│   ├── nso_household_income_transformed.parquet
-│   ├── disaster_budget_2564_transformed.csv
-│   ├── disaster_budget_2564_transformed.parquet
-│   ├── flood_affected_households_transformed.csv
-│   ├── flood_affected_households_transformed.parquet
-│   ├── affected_households_summary_transformed.csv
-│   └── affected_households_summary_transformed.parquet
+│   ├── flood_2566_transformed.csv
+│   ├── flood_2567_transformed.csv
+│   ├── flood_chiangmai_combined.csv
+│   ├── chiangmai_damage_transformed.csv
+│   ├── household_income_transformed.csv
+│   ├── village_mapping_transformed.csv
+│   ├── flood_mapping_integrated.csv
+│   └── household_income_mapping_integrated.csv
 │
 ├── reports/
-│   ├── geographic_data_cleaning_report.json
-│   ├── geographic_data_standardization_report.json
-│   ├── geographic_data_features_report.json
-│   ├── flood_village_stats_transformation_report.json
-│   ├── nso_household_income_transformation_report.json
-│   ├── disaster_budget_2564_transformation_report.json
-│   ├── flood_affected_households_transformation_report.json
-│   └── affected_households_summary_transformation_report.json
+│   ├── flood_transformation_report.json
+│   ├── damage_transformation_report.json
+│   ├── household_income_transformation_report.json
+│   ├── village_mapping_transformation_report.json
+│   ├── flood_mapping_integration_report.json
+│   └── household_income_mapping_integration_report.json
 │
-└── README.md
+└── backup/
+    ├── scripts/
+    ├── output/
+    ├── reports/
+    └── README.md
 ```
-
-## 4. ชุดข้อมูลนำเข้า
-
-โมดูลนี้ใช้ชุดข้อมูลต้นทางที่ผ่านการตรวจสอบจากกระบวนการ Data Validation แล้ว
-
-| ชุดข้อมูล | ชื่อไฟล์ที่ดาวน์โหลด (`ingestion/data/`) | ไฟล์ที่สคริปต์อ่าน (`ingestion/data/` + S3 key) | แหล่งที่มา |
-|---|---|---|---|
-| Geographic Data | - | `validation/cleaned/Geographic_Data_deduplicated.csv` (commit ไว้ใน Git) | ปภ. (PDPM) |
-| Flood Village Stats | `STATISTIC_FLD.xlsx` | `raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx` | ปภ. (PDPM) |
-| Household Income | `Salary.csv` | `raw/nso/nso_household_income.csv` | สสช. (NSO) |
-| Disaster Budget | `2564_by_disaster_type1.csv` | `raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv` | ปภ. (PDPM) |
-| Flood Affected Households | `Number_of Households_Affected_by_Flooding.csv` | `raw/pdpm/flood_relief/pdpm_flood_affected_households.csv` | ปภ. (PDPM) |
-| Affected Households Summary | `Number_of_Affected_Households.xlsx` | `raw/pdpm/flood_relief/pdpm_affected_households.xlsx` | ปภ. (PDPM) |
-
-ไฟล์ดิบ (raw files) ไม่ได้จัดเก็บไว้ใน Git ให้ดาวน์โหลดไฟล์ไว้ที่ `ingestion/data/` ก่อน โดยดาวน์โหลดจาก S3 หรือจากแหล่งข้อมูลต้นฉบับ (ดู [`ingestion/README.md`](../ingestion/README.md) หัวข้อ 6 และ 6B) จากนั้นรัน `python prepare_local_data.py` ซึ่งจะคัดลอกแต่ละไฟล์ไปไว้ที่ `ingestion/data/<S3 key>` (โครงสร้างเดียวกับที่สคริปต์ `transform_*.py` และ working directory ของ Lambda ใช้) การจับคู่ชื่อไฟล์มาจาก `local_file`, `s3_prefix` และ `s3_name` ใน [`ingestion/config.py`](../ingestion/config.py)
 
 หมายเหตุ:
-- Geographic Data ใช้ผลลัพธ์ที่ลบข้อมูลซ้ำแล้ว (deduplicated) จาก Data Validation
-- Flood Village Stats ใช้ไฟล์ Excel ดิบ เนื่องจากไม่มีไฟล์ผลลัพธ์ที่ผ่านการยอมรับ (accepted output) แยกไว้ในเครื่อง โดย Validation Report ระบุว่าทั้ง 57,024 แถวผ่านการยอมรับ
-- ชุดข้อมูลอื่น ๆ ในตารางได้รับการยืนยันว่าผ่านการยอมรับใน Validation Report แล้ว และใช้ไฟล์ดิบเป็นข้อมูลนำเข้าเนื่องจากไม่มีไฟล์ผลลัพธ์ที่ผ่านการยอมรับแยกไว้ในเครื่อง
 
-## 5. กระบวนการแปลงข้อมูล
+- `scripts/` จัดเก็บ Python scripts สำหรับ Transformation และ Integration
+- `output/` จัดเก็บข้อมูลที่ผ่านการประมวลผลแล้ว
+- `reports/` จัดเก็บผลการตรวจสอบและสรุปการประมวลผลในรูปแบบ JSON
+- `backup/` จัดเก็บไฟล์จากงาน Transformation ชุดเดิม แยกออกจาก Pipeline ปัจจุบัน ไม่ใช่ Output ของ Pipeline เชียงใหม่ชุดนี้
 
-### 5.1 Geographic Data
+---
 
-สคริปต์:
-- `clean_data.py`
-- `standardize.py`
-- `create_features.py`
+# 4. Input Datasets
 
-การประมวลผล:
-- ลบช่องว่างที่อยู่หน้าและท้ายข้อความ
-- ปรับชนิดข้อมูลและหมวดหมู่ความเสี่ยงให้เป็นมาตรฐาน
-- สร้างคอลัมน์ `risk_level_code`
-- สร้างคอลัมน์ `risk_level`
+ข้อมูลต้นทางที่ใช้ในกระบวนการนี้อยู่ภายใน `validation/cleaned/`
 
-ผลลัพธ์:
-- `geographic_data_cleaned.csv`
-- `geographic_data_standardized.csv`
-- `geographic_data_features.csv`
+| Dataset | File | Description |
+|---|---|---|
+| Flood 2566 | `flood_2566_cleaned.csv` | ข้อมูลเหตุการณ์น้ำท่วมปี 2566 |
+| Flood 2567 | `flood_2567_cleaned.csv` | ข้อมูลเหตุการณ์น้ำท่วมปี 2567 |
+| Damage | `chiangmai_damage_cleaned.csv` | ข้อมูลความเสียหายจากภัยพิบัติในจังหวัดเชียงใหม่ |
+| Household Income | `household_income_cleaned.csv` | ข้อมูลรายได้และจำนวนครัวเรือน |
+| Village Mapping | `village_mapping_cleaned.csv` | ข้อมูลรหัสหมู่บ้าน ประชากร พิกัด และลักษณะภูมิศาสตร์ |
+| Geographic Data | `Geographic_Data_deduplicated.csv` | ข้อมูลภูมิศาสตร์อีกชุดหนึ่ง ซึ่งไม่ได้ใช้ใน Pipeline เชียงใหม่ที่อธิบายในเอกสารนี้ |
 
-ผลการประมวลผล:
-- จำนวนแถวนำเข้า: 1,772
-- จำนวนแถวผลลัพธ์: 1,772
-- จำนวนแถวที่ถูกลบระหว่างการแปลง: 0
-- จำนวนคอลัมน์ผลลัพธ์สุดท้าย: 9
+**Important:** Input Datasets เป็นข้อมูลที่ผ่าน Cleaning และ Validation มาแล้ว ขั้น Transformation จึงเน้นการจัดรูปแบบ การแปลงชนิดข้อมูล การตรวจสอบ และการเชื่อมโยงข้อมูล ไม่ได้ทำหน้าที่แทนกระบวนการ Cleaning ต้นทางทั้งหมด
 
-### 5.2 Flood Village Stats
+---
 
-สคริปต์:
-- `transform_flood_village_stats.py`
+# 5. Data Transformation
 
-การประมวลผล:
-- ปรับชื่อคอลัมน์ให้เป็นมาตรฐาน
-- แปลงคอลัมน์ข้อความเป็นชนิด String
-- คงรหัสพื้นที่ไว้เป็นชนิด String
-- แปลงคอลัมน์รายปี `Y2562–Y2567` เป็นจำนวนเต็มที่รองรับค่าว่าง (nullable integer)
-- คงค่ารายปีที่หายไปไว้
-- สร้างคอลัมน์ `years_with_reported_value`
+## 5.1 Flood Data Transformation
 
-ผลลัพธ์:
-- `flood_village_stats_transformed.csv`
-- `flood_village_stats_transformed.parquet`
+**Script:** `scripts/transform_flood.py`
 
-ผลการประมวลผล:
-- จำนวนแถวนำเข้า: 57,024
-- จำนวนแถวผลลัพธ์: 57,024
-- จำนวนแถวที่ถูกลบ: 0
-- จำนวนคอลัมน์ผลลัพธ์: 19
+**Input:**
+- `validation/cleaned/flood_2566_cleaned.csv`
+- `validation/cleaned/flood_2567_cleaned.csv`
 
-### 5.3 NSO Household Income
+**Output:**
+- `output/flood_2566_transformed.csv`
+- `output/flood_2567_transformed.csv`
+- `output/flood_chiangmai_combined.csv`
 
-สคริปต์:
-- `transform_nso_income.py`
+**Report:**
+- `reports/flood_transformation_report.json`
 
-การประมวลผล:
-- ปรับคอลัมน์ข้อความให้เป็นมาตรฐาน
-- แปลง `year` เป็นจำนวนเต็มที่รองรับค่าว่าง
-- แปลง `value` เป็นตัวเลข
-- คงค่าศูนย์และค่าติดลบไว้
-- คงค่าที่หายไปในคอลัมน์ `attribute` ไว้
-- ไม่รวม (aggregate) หมวดหมู่รายได้
+### Objective
 
-ผลลัพธ์:
-- `nso_household_income_transformed.csv`
-- `nso_household_income_transformed.parquet`
+เตรียมข้อมูลเหตุการณ์น้ำท่วมจากสองปีให้อยู่ในรูปแบบที่สอดคล้องกัน และคัดเลือกข้อมูลเฉพาะจังหวัดเชียงใหม่เพื่อใช้ในการวิเคราะห์
 
-ผลการประมวลผล:
-- จำนวนแถวนำเข้า: 15,400
-- จำนวนแถวผลลัพธ์: 15,400
-- จำนวนแถวที่ถูกลบ: 0
-- จำนวนคอลัมน์ผลลัพธ์: 11
+### Transformation Rules
 
-ข้อจำกัดสำคัญ:
-- ข้อมูลรายได้จำแนกตามกลุ่มเศรษฐสังคมในระดับจังหวัด
-- ไม่ได้แสดงรายได้ของครัวเรือนรายครัวเรือน
-- จังหวัดยโสธรมี 100 ระเบียนในปี 2568 แต่ระเบียนเหล่านี้แทนหมวดหมู่รายได้และกลุ่มเศรษฐสังคมที่แตกต่างกัน
+1. **Data Type Standardization**
 
-### 5.4 Disaster Budget 2564
+   จัดชนิดข้อมูลให้เหมาะสมกับการนำไปวิเคราะห์ เช่น ข้อมูลตัวเลขและวันที่
 
-สคริปต์:
-- `transform_disaster_budget.py`
+   เหตุผล:
+   - ป้องกันปัญหาการนำข้อมูลตัวเลขที่ถูกเก็บเป็นข้อความไปคำนวณ
+   - ทำให้สามารถกรอง เรียงลำดับ และคำนวณข้อมูลได้ถูกต้อง
+   - ทำให้ข้อมูลจากสองปีมีรูปแบบที่สอดคล้องกัน
 
-การประมวลผล:
-- เลือกระเบียนระดับจังหวัดจากส่วนที่ 1 (วงเงินจังหวัด)
-- ตัดแถวสรุปและระเบียนที่อยู่นอกส่วนที่ 1 ออก
-- ลบเครื่องหมายจุลภาคก่อนแปลงเป็นตัวเลข
-- แปลงค่าขีด (`-` และ `--`) เป็นค่าที่หายไป
-- เพิ่มปีพุทธศักราช 2564
-- คงข้อมูลงบประมาณระดับจังหวัดไว้
+2. **Preserving Identification Codes**
 
-ผลลัพธ์:
-- `disaster_budget_2564_transformed.csv`
-- `disaster_budget_2564_transformed.parquet`
+   เก็บรหัสหมู่บ้าน (`village_code`) เป็นข้อมูลประเภท String
 
-ผลการประมวลผล:
-- จำนวนแถวต้นฉบับ: 83
-- จำนวนแถวที่แปลงแล้ว: 76
-- จำนวนจังหวัด: 76
-- จำนวนแถวที่ถูกตัดออก: 7
-- จำนวนคอลัมน์ผลลัพธ์: 17
+   เหตุผล:
+   - รหัสหมู่บ้านเป็น Identifier ไม่ใช่ตัวเลขสำหรับคำนวณ
+   - การเก็บเป็นตัวเลขอาจทำให้เลขศูนย์ด้านหน้าหายไป
+   - ต้องรักษารหัสให้ตรงกับ Village Mapping เพื่อใช้ Join ในภายหลัง
 
-ข้อจำกัดสำคัญ:
-- ชุดข้อมูลนี้แสดงข้อมูลงบประมาณระดับจังหวัดของปี 2564
-- ตัดกรุงเทพมหานครจากส่วนที่ 2 และระเบียนสรุปที่ไม่ใช่จังหวัดออก
+3. **Province Filtering**
 
-### 5.5 Flood Affected Households
+   เลือกเฉพาะข้อมูลจังหวัดเชียงใหม่สำหรับชุดข้อมูลที่จะใช้วิเคราะห์ในโครงงาน
 
-สคริปต์:
-- `transform_flood_affected_households.py`
+   เหตุผล:
+   - ขอบเขตการศึกษาของโครงงานคือจังหวัดเชียงใหม่
+   - การใช้ข้อมูลจังหวัดอื่นอาจทำให้ผลการวิเคราะห์ไม่ตรงกับขอบเขตการศึกษา
+   - ลดข้อมูลที่ไม่เกี่ยวข้องกับ Research Questions
 
-การประมวลผล:
-- ปรับค่าข้อความให้เป็นมาตรฐาน
-- แปลงปีและจำนวนครัวเรือนเป็นจำนวนเต็มที่รองรับค่าว่าง
-- คงค่าศูนย์และค่าที่หายไปไว้
-- ไม่รวมระเบียนข้ามพื้นที่
+4. **Combining Multiple Years**
 
-ผลลัพธ์:
-- `flood_affected_households_transformed.csv`
-- `flood_affected_households_transformed.parquet`
+   รวมข้อมูล Flood ปี 2566 และ 2567 หลังจากแปลงให้อยู่ในรูปแบบมาตรฐานแล้ว
 
-ผลการประมวลผล:
-- จำนวนแถวนำเข้า: 144
-- จำนวนแถวผลลัพธ์: 144
-- จำนวนแถวที่ถูกลบ: 0
-- จำนวนคอลัมน์ผลลัพธ์: 7
+   เหตุผล:
+   - ต้องการเปรียบเทียบรูปแบบผลกระทบระหว่างปี
+   - ใช้โครงสร้างข้อมูลที่สอดคล้องกัน
+   - ยังคงเก็บข้อมูลปีต้นทางไว้ ไม่รวมข้อมูลโดยทำให้แยกปีไม่ได้
 
-ข้อจำกัดสำคัญ:
-- ชุดข้อมูลนี้มีระเบียนครัวเรือนที่ได้รับผลกระทบจากอุทกภัยของจังหวัดพังงา
-- ซึ่งเป็นพื้นที่ต่างจาก Geographic Data ของจังหวัดยโสธร
+5. **Missing Value Preservation**
 
-### 5.6 Affected Households Summary
+   ไม่แทนค่าที่ไม่มีข้อมูลด้วยศูนย์โดยอัตโนมัติ
 
-สคริปต์:
-- `transform_affected_households_summary.py`
+   เหตุผล:
+   - ค่าศูนย์หมายถึงไม่มีเหตุการณ์หรือไม่มีปริมาณ
+   - Missing หมายถึงไม่มีข้อมูลหรือไม่ได้ระบุ
+   - สองกรณีนี้มีความหมายต่างกันในการวิเคราะห์
 
-การประมวลผล:
-- อ่านข้อมูลจากชีต Excel `Sheet2`
-- ปรับคอลัมน์ข้อความให้เป็นมาตรฐาน
-- แปลง `จำนวน` เป็นจำนวนเต็มที่รองรับค่าว่าง
-- คงรอบเหตุการณ์และหน่วยวัดต้นฉบับไว้
-- ไม่รวมค่าที่มีหน่วยวัดต่างกัน
-- ไม่สร้างคอลัมน์ปี เนื่องจากข้อมูลต้นทางไม่ได้ระบุปีไว้
+### Results
 
-ผลลัพธ์:
-- `affected_households_summary_transformed.csv`
-- `affected_households_summary_transformed.parquet`
+| Dataset | Input Rows | Output Rows |
+|---|---:|---:|
+| Flood 2566 | 19,584 | 1,198 |
+| Flood 2567 | 34,875 | 3,556 |
+| Combined | - | 4,754 |
 
-ผลการประมวลผล:
-- จำนวนแถวนำเข้า: 48
-- จำนวนแถวผลลัพธ์: 48
-- จำนวนแถวที่ถูกลบ: 0
-- จำนวนคอลัมน์ผลลัพธ์: 5
+ผลลัพธ์ Combined มีทั้งหมด 4,754 แถว
 
-ข้อจำกัดสำคัญ:
-- ชุดข้อมูลมีหน่วยวัดที่แตกต่างกัน 3 หน่วย:
-  - ตำบล
-  - หมู่บ้าน
-  - ครัวเรือน
-- ต้องตีความค่าแยกกันตามหน่วยวัดของแต่ละค่า
+ข้อมูลรหัสหมู่บ้านไม่มี Missing Value ในชุด Combined ที่ใช้ทำ Integration
 
-## 6. ข้อพิจารณาในการรวมข้อมูล (Integration)
+---
 
-ควรเชื่อม (join) ชุดข้อมูลเฉพาะเมื่อระดับพื้นที่ ช่วงเวลา และความละเอียดของข้อมูลสอดคล้องกันเท่านั้น
+## 5.2 Damage Data Transformation
 
-ข้อพิจารณาในปัจจุบัน:
+**Script:** `scripts/transform_damage.py`
 
-- Geographic Data มีข้อมูลความเสี่ยงระดับตำบลและหมู่บ้านของจังหวัดยโสธร
-- NSO Household Income มีข้อมูลกลุ่มเศรษฐสังคมระดับจังหวัด อาจพิจารณาความสัมพันธ์เชิงบริบทระดับจังหวัด-ปีสำหรับยโสธรในปี 2568 ได้ แต่ห้ามตีความว่าเป็นรายได้ระดับครัวเรือน
-- Disaster Budget มีข้อมูลระดับจังหวัดของปี 2564 สามารถใช้วิเคราะห์ระดับจังหวัดได้เมื่อระบุข้อจำกัดด้านพื้นที่และช่วงเวลาไว้อย่างชัดเจน
-- Flood Affected Households เป็นข้อมูลของจังหวัดพังงา จึงไม่ควรเชื่อมโดยตรงกับ Geographic Data ของยโสธร
-- Affected Households Summary มีข้อมูลระดับอำเภอของจังหวัดหนองคายและมีหน่วยวัดหลายหน่วย ต้องยืนยันความสอดคล้องด้านปีและพื้นที่ก่อนนำไปรวม
-- `pdpm_gd015.csv` ซ้ำซ้อนกับ Flood Village Stats และไม่มีค่ารายปีที่ไม่ว่างเพิ่มเติมสำหรับระเบียนที่ตรงกัน จึงไม่ใช้เป็นแหล่งข้อมูลเสริม
+**Input:**
+- `validation/cleaned/chiangmai_damage_cleaned.csv`
 
-ได้สร้างชุดข้อมูลที่รวมแล้วหนึ่งชุด คือ `geographic_nso_integrated` (`integrate_data.py`)
+**Output:**
+- `output/chiangmai_damage_transformed.csv`
 
-- คีย์ที่ใช้เชื่อม: `จังหวัด` + `ปี` (ยโสธร, 2568) โดยกลุ่มเศรษฐสังคมของ NSO หลายกลุ่มเชื่อมกับสรุปความเสี่ยงเชิงพื้นที่หนึ่งชุด (ตรวจสอบแล้วว่าเป็นแบบ many-to-one)
-- ข้อมูลนำเข้า: Geographic 1,772 แถว (เหลือ 886 แถวหลังกรองปี 2568) และ NSO 15,400 แถว (เหลือ 10 แถวหลังกรองยโสธร ปี 2568 และ `รายได้ทั้งสิ้นต่อเดือน`)
-- ผลลัพธ์: 10 แถว แถวละหนึ่งกลุ่มเศรษฐสังคม โดยแต่ละแถวมีจำนวนและร้อยละของระดับความเสี่ยงชุดเดียวกัน
-- รายงาน: `transformation/reports/geographic_nso_integration_report.json`
+**Report:**
+- `reports/damage_transformation_report.json`
 
-ตารางนี้เป็นตารางบริบทระดับจังหวัด-ปี ไม่ใช่ fact table ระดับครัวเรือนหรือหมู่บ้าน จึงไม่สามารถแสดงความสัมพันธ์ระหว่างรายได้กับความเสี่ยงอุทกภัยภายในจังหวัดได้ การเชื่อมข้อมูลอื่น ๆ ยังอยู่นอกขอบเขตจนกว่าระดับพื้นที่และช่วงเวลาจะสอดคล้องกัน
+### Objective
 
-## 7. คุณภาพข้อมูลและข้อจำกัด
+จัดรูปแบบข้อมูลความเสียหายให้อยู่ในโครงสร้างมาตรฐาน โดยรักษาข้อมูลเกี่ยวกับผู้ได้รับผลกระทบ การอพยพ การสูญเสียชีวิต และความเสียหายต่อบ้านเรือน
 
-- ไม่มีการแก้ไขไฟล์ดิบต้นฉบับ
-- คงค่าที่หายไปไว้เมื่อค่านั้นหมายถึงข้อมูลที่ไม่มีหรือไม่ได้รายงาน
-- คงค่าศูนย์ไว้เมื่อเป็นค่าที่รายงานจริง
-- ค่าขีดในชุดข้อมูลงบประมาณถือเป็นค่าที่หายไป ไม่ใช่ศูนย์
-- ไม่รวมหมวดหมู่รายได้เป็นรายได้ระดับครัวเรือน
-- ไม่นำค่าที่มีหน่วยวัดต่างกันมารวมกัน
-- ต้องระบุความไม่สอดคล้องด้านพื้นที่และช่วงเวลาไว้ก่อนการรวมข้อมูล
-- รายงานการแปลงข้อมูลบันทึกจำนวนแถว ค่าที่หายไป และรายละเอียดการแปลง
+### Transformation Rules
 
-## 8. วิธีการรัน
+1. **Column Standardization**
 
-รันคำสั่งจากไดเรกทอรีรากของ repository
+   เปลี่ยนชื่อคอลัมน์ให้สื่อความหมายและใช้งานสะดวกขึ้น เช่น
 
-### 8.1 สิ่งที่ต้องเตรียม
+   | Original Column | Transformed Column |
+   |---|---|
+   | ปี | `source_year` |
+   | อำเภอ | `district` |
+   | ตำบล | `subdistrict_id` |
+   | หมู่บ้าน | `village_id` |
+   | วันที่เกิดภัย | `disaster_date` |
+   | ราษฎร(คน) | `affected_people` |
+   | ราษฎร(ครัวเรือน) | `affected_households` |
+   | อพยพ(ครัวเรือน) | `evacuated_households` |
+   | อพยพ(คน) | `evacuated_people` |
+   | เสียชีวิต(คน) | `deaths` |
+   | สูญหาย(คน) | `missing_people` |
+   | บาดเจ็บ(คน) | `injured_people` |
+   | บ้านพักอาศัย(หลัง) | `houses_damaged` |
+   | บ้านเรือนบางส่วน(หลัง) | `partially_damaged_houses` |
 
-```bash
-python -m pip install -r requirements.txt
+2. **Source Record Identification**
+
+   สร้าง `source_record_id` เพื่อใช้ระบุแถวข้อมูลต้นทาง
+
+   เหตุผล:
+   - ช่วยติดตามข้อมูลกลับไปยังรายการต้นทาง
+   - ช่วยตรวจสอบข้อมูลที่มีลักษณะซ้ำกัน
+   - ไม่จำเป็นต้องลบข้อมูลที่มีตำแหน่งและวันที่เหมือนกันทันที
+
+3. **Date Conversion**
+
+   แปลงวันที่เกิดภัยให้อยู่ในรูปแบบวันที่ที่สามารถประมวลผลได้
+
+   ผลตรวจสอบ:
+   - วันที่แปลงไม่สำเร็จ: 0
+   - วันที่หายไป: 0
+
+4. **Numeric Conversion**
+
+   แปลงจำนวนประชากร จำนวนครัวเรือน และตัวเลขความเสียหายให้เป็นข้อมูลตัวเลข
+
+   ผลตรวจสอบ:
+   - ไม่พบ Numeric Conversion Errors ในคอลัมน์ที่ตรวจสอบ
+
+5. **Missing Values**
+
+   พบค่า Missing ใน `partially_damaged_houses` จำนวน 302 แถว
+
+   การตัดสินใจ:
+   - ไม่แทนค่า Missing ด้วย 0
+   - ไม่สมมติว่าบ้านเรือนบางส่วนไม่มีความเสียหาย
+   - เก็บ Missing ไว้เพื่อสะท้อนข้อจำกัดของข้อมูลต้นทาง
+
+   เหตุผล:
+   การไม่มีข้อมูลจำนวนบ้านเรือนที่เสียหายบางส่วนไม่ได้หมายความว่าค่าความเสียหายเป็นศูนย์ หากเติม 0 โดยไม่มีหลักฐาน อาจทำให้การประเมินความเสียหายต่ำกว่าความเป็นจริง
+
+6. **Duplicate Investigation**
+
+   พบรายการที่มีลักษณะซ้ำกันตามเกณฑ์ Location/Date จำนวน 25 รายการในรายงาน
+
+   การตัดสินใจ:
+   - ไม่ลบรายการเหล่านี้โดยอัตโนมัติ
+   - เก็บข้อมูลทั้งหมดไว้
+   - ต้องตรวจสอบบริบทของเหตุการณ์ก่อนสรุปว่าเป็น Duplicate จริง
+
+   เหตุผล:
+   พื้นที่เดียวกันอาจเกิดเหตุการณ์หรือมีรายงานความเสียหายหลายรายการได้ การลบข้อมูลเพียงเพราะมีตำแหน่งและวันที่ตรงกันอาจทำให้ข้อมูลจริงสูญหาย
+
+### Results
+
+| Metric | Result |
+|---|---:|
+| Input Rows | 866 |
+| Output Rows | 866 |
+| Output Columns | 15 |
+| Missing `partially_damaged_houses` | 302 |
+| Missing `disaster_date` | 0 |
+| Date Conversion Errors | 0 |
+| Numeric Conversion Errors | 0 |
+| Potential Duplicate Location/Date Records | 25 |
+
+**Important limitation:**
+
+`subdistrict_id` และ `village_id` ใน Damage Dataset เป็นรหัสท้องถิ่นแบบสั้น ไม่ใช่ `village_code` เต็มรูปแบบของ Village Mapping
+
+ดังนั้นจึงยังไม่นำ Damage Dataset ไป Join กับ Village Mapping โดยตรง เพราะอาจเกิดการจับคู่ผิดพื้นที่
+
+การเชื่อมโยงในอนาคตต้องมีตารางอ้างอิงหรือหลักฐานที่ยืนยันความสัมพันธ์ของรหัสก่อน
+
+---
+
+## 5.3 Household Income Transformation
+
+**Script:** `scripts/transform_household_income.py`
+
+**Input:**
+- `validation/cleaned/household_income_cleaned.csv`
+
+**Output:**
+- `output/household_income_transformed.csv`
+
+**Report:**
+- `reports/household_income_transformation_report.json`
+
+### Objective
+
+เตรียมข้อมูลรายได้ครัวเรือนให้อยู่ในรูปแบบที่สามารถนำไปวิเคราะห์ร่วมกับข้อมูลประชากรและภูมิศาสตร์ได้
+
+### Transformation Rules
+
+1. **Column Standardization**
+
+   จัดชื่อคอลัมน์ให้อยู่ในรูปแบบที่สอดคล้องกัน เช่น
+
+   - `statistic`
+   - `district`
+   - `subdistrict`
+   - `area`
+   - `households`
+   - `income`
+   - `unit`
+
+2. **Numeric Conversion**
+
+   แปลงจำนวนครัวเรือนและรายได้ให้เป็นตัวเลข
+
+   ผลตรวจสอบ:
+   - `households` conversion errors = 0
+   - `income` conversion errors = 0
+
+3. **Preserving Measurement Unit**
+
+   เก็บข้อมูลหน่วยรายได้เป็น `บาท/ปี`
+
+   เหตุผล:
+   - หน่วยเป็นส่วนสำคัญของความหมายของข้อมูล
+   - ป้องกันการตีความรายได้ผิดช่วงเวลา
+   - ทำให้ผู้วิเคราะห์ทราบว่าค่ารายได้เป็นข้อมูลต่อปี
+
+4. **Preserving Original Area Names**
+
+   รักษาชื่อพื้นที่จากต้นทาง เช่น `ทุ่งปี๊`
+
+   ไม่เปลี่ยนเป็นชื่อที่ดูคล้ายกัน เช่น `ทุ่งปี้` โดยไม่มีหลักฐานยืนยัน
+
+   เหตุผล:
+   - ชื่อพื้นที่เป็นข้อมูลสำคัญสำหรับการ Join
+   - การแก้ชื่อเองอาจทำให้ข้อมูลถูกจับคู่กับพื้นที่ผิด
+   - ต้องรักษาความถูกต้องของข้อมูลต้นทาง
+
+5. **No Year Assignment**
+
+   Dataset นี้ไม่มีคอลัมน์ปี
+
+   จึงไม่กำหนดปีให้ข้อมูลรายได้เอง และไม่ถือว่าข้อมูลนี้เป็นรายได้ของปี 2566 หรือ 2567
+
+   ข้อมูลรายได้จะถูกใช้เป็นบริบทด้านเศรษฐกิจและสังคมเท่านั้น
+
+### Results
+
+| Metric | Result |
+|---|---:|
+| Input Rows | 2,154 |
+| Output Rows | 2,154 |
+| Output Columns | 7 |
+| Households Conversion Errors | 0 |
+| Income Conversion Errors | 0 |
+
+---
+
+## 5.4 Village Mapping Transformation
+
+**Script:** `scripts/transform_village_mapping.py`
+
+**Input:**
+- `validation/cleaned/village_mapping_cleaned.csv`
+
+**Output:**
+- `output/village_mapping_transformed.csv`
+
+**Report:**
+- `reports/village_mapping_transformation_report.json`
+
+### Objective
+
+เตรียมข้อมูลหมู่บ้านให้เป็นตารางอ้างอิงกลางสำหรับเชื่อมโยงข้อมูล Flood และ Household Income
+
+ข้อมูลสำคัญประกอบด้วย:
+- Administrative Codes
+- Village Names
+- Latitude / Longitude
+- Population
+- Households
+- Geographic Features
+
+### Transformation Rules
+
+1. **Identifier Preservation**
+
+   เก็บรหัสพื้นที่ เช่น `province_code`, `district_code`, `subdistrict_code` และ `village_code` เป็น String
+
+   เหตุผล:
+   - เป็นรหัสสำหรับระบุพื้นที่ ไม่ใช่ตัวเลขสำหรับคำนวณ
+   - ป้องกันการสูญเสียเลขศูนย์ด้านหน้า
+   - รักษาความถูกต้องในการเชื่อมโยงข้อมูล
+
+2. **Coordinate Preservation**
+
+   เก็บ `latitude` และ `longitude` สำหรับใช้ระบุตำแหน่งหมู่บ้าน
+
+   ผลตรวจสอบ:
+   - ไม่พบพิกัดที่ Missing ในชุดข้อมูลที่ผ่าน Transformation
+
+3. **Population and Household Conversion**
+
+   แปลงข้อมูลประชากรและจำนวนครัวเรือนให้เหมาะสมกับการคำนวณ
+
+   เช่น:
+   - `population_total`
+   - `women`
+   - `men`
+   - `households`
+
+4. **Geographic Feature Standardization**
+
+   รักษาข้อมูลลักษณะทางภูมิศาสตร์ เช่น
+   - River
+   - Mountain
+   - Swamp
+   - Dam
+   - Reservoir
+
+   โดยเก็บทั้ง Flag และ Name เช่น `river_flag` และ `river_name`
+
+   เหตุผล:
+   - Flag ใช้ระบุว่ามีคุณลักษณะนั้นหรือไม่
+   - Name ใช้ระบุรายละเอียดของคุณลักษณะ
+   - ไม่ควรแทนข้อมูลชื่อด้วยค่า Flag เพียงอย่างเดียว
+
+5. **Road Number Data Type Decision**
+
+   ในการตรวจสอบพบว่า `road_number` และ `road_number_2` มีข้อมูลหลายรูปแบบ เช่น
+
+   - `ชม. 4016`
+   - `107,1178`
+   - `ถนนทางหลวงชนบท ชม.3009`
+   - `-`
+
+   การตัดสินใจ:
+   - เก็บสองคอลัมน์นี้เป็นข้อความ (String)
+   - ไม่บังคับแปลงเป็นตัวเลข
+
+   เหตุผล:
+   - ข้อมูลถนนมีทั้งตัวเลข ตัวอักษร เครื่องหมาย และรายละเอียดชื่อถนน
+   - ไม่ใช่ตัวเลขเชิงปริมาณที่นำไปคำนวณโดยตรง
+   - การบังคับแปลงอาจทำให้ข้อมูลสูญหายหรือเกิด Conversion Errors
+
+6. **Mountain Elevation Conversion**
+
+   พบค่า `mountain_elevation` ที่มีเครื่องหมายคอมมาคั่นหลักพัน เช่น `1,100`
+
+   จึงลบเครื่องหมายคอมมาก่อนแปลงเป็นตัวเลข
+
+   เหตุผล:
+   - เครื่องหมายคอมมาเป็นตัวคั่นหลักพัน ไม่ใช่ส่วนหนึ่งของค่าความสูง
+   - ต้องการให้ข้อมูลอยู่ในรูปแบบ Numeric สำหรับการวิเคราะห์
+
+7. **Duplicate and Missing Identifier Checks**
+
+   ตรวจสอบ `mcode` และรหัสหมู่บ้านที่ใช้เป็น Identifier
+
+   ผลตรวจสอบ:
+   - ไม่มี Missing `mcode`
+   - ไม่มี Duplicate `mcode`
+   - ไม่มี Missing Coordinates
+
+8. **Quarantine Handling**
+
+   ไม่รวมข้อมูลจาก `village_mapping_quarantine.json` เข้ามาใน Mapping หลัก
+
+   เหตุผล:
+   - Quarantine เป็นข้อมูลที่ถูกแยกออกจากชุดข้อมูลหลัก
+   - ยังไม่ควรนำข้อมูลที่ยังไม่ผ่านเกณฑ์มาใช้เป็นข้อมูลอ้างอิงที่เชื่อถือได้
+   - ป้องกันการสร้างความสัมพันธ์ระหว่างพื้นที่โดยไม่มีหลักฐานเพียงพอ
+
+### Results
+
+| Metric | Result |
+|---|---:|
+| Input Rows | 2,184 |
+| Output Rows | 2,184 |
+| Output Columns | 75 |
+| Province Code | 50 for all records |
+| Missing `mcode` | 0 |
+| Duplicate `mcode` | 0 |
+| Missing Coordinates | 0 |
+| Road Number Conversion Errors | 0 |
+| Mountain Elevation Conversion Errors | 0 |
+
+---
+
+# 6. Data Integration
+
+Data Integration เป็นขั้นตอนเชื่อมโยงข้อมูลจากหลาย Dataset เข้าด้วยกัน โดยใช้ Village Mapping เป็นข้อมูลอ้างอิงด้านพื้นที่
+
+การเลือก Join Key ต้องพิจารณาจากความหมายของข้อมูล ความถูกต้องของ Identifier และความสามารถในการยืนยันว่าข้อมูลสองชุดอ้างถึงพื้นที่เดียวกันจริง
+
+ไม่ใช้เพียงการทำให้ชื่อคล้ายกันเพื่อเพิ่ม Match Rate
+
+---
+
+## 6.1 Flood and Village Mapping Integration
+
+**Script:** `scripts/integrate_flood_mapping.py`
+
+**Input:**
+- `output/flood_chiangmai_combined.csv`
+- `output/village_mapping_transformed.csv`
+
+**Output:**
+- `output/flood_mapping_integrated.csv`
+
+**Report:**
+- `reports/flood_mapping_integration_report.json`
+
+### Objective
+
+เชื่อมโยงข้อมูลน้ำท่วมกับข้อมูลหมู่บ้าน เพื่อเพิ่มบริบทด้านตำแหน่ง ประชากร และลักษณะทางภูมิศาสตร์ให้กับ Flood Records
+
+### Join Key Decision
+
+เลือก `village_code` เป็น Join Key
+
+เหตุผล:
+1. เป็นรหัสที่ใช้ระบุหมู่บ้านโดยตรง
+2. มีอยู่ในทั้ง Flood และ Village Mapping
+3. มีความน่าเชื่อถือมากกว่าการใช้ชื่อหมู่บ้านเพียงอย่างเดียว
+4. ลดปัญหาชื่อซ้ำหรือชื่อสะกดต่างกัน
+
+ก่อน Join มีการตรวจสอบว่า:
+- Mapping ไม่มี Missing `village_code`
+- Mapping ไม่มี Duplicate `village_code`
+- Flood ไม่มี Missing `village_code`
+
+หากพบข้อผิดพลาดดังกล่าว Script จะหยุดทำงานด้วย ValueError แทนการ Join ต่อโดยไม่ตรวจสอบ
+
+### Join Type Decision: Left Join
+
+เลือกใช้ Left Join โดยกำหนด Flood เป็น Left Dataset และ Village Mapping เป็น Right Dataset
+
+เหตุผล:
+- Flood เป็นข้อมูลหลักที่ต้องการศึกษา
+- ต้องเก็บทุกเหตุการณ์น้ำท่วมไว้
+- แม้บางเหตุการณ์จะไม่มีข้อมูล Mapping ก็ไม่ควรถูกลบออก
+- การใช้ Inner Join อาจทำให้ Flood Records ที่ไม่สามารถจับคู่ได้สูญหาย
+
+### Join Validation: many_to_one
+
+ใช้ `validate="many_to_one"`
+
+ความหมาย:
+- Flood หลายรายการสามารถอ้างถึงหมู่บ้านเดียวกันได้
+- แต่ Mapping หนึ่ง `village_code` ต้องมีเพียงหนึ่งรายการ
+
+เหตุผล:
+- เหตุการณ์น้ำท่วมหลายครั้งสามารถเกิดในหมู่บ้านเดียวกันได้
+- ไม่ควรมี Mapping หลายแถวสำหรับรหัสหมู่บ้านเดียวกัน เพราะจะทำให้ข้อมูล Flood เพิ่มจำนวนแถวโดยไม่ตั้งใจ
+
+### Selected Mapping Attributes
+
+เลือกเฉพาะข้อมูลที่มีประโยชน์ต่อการวิเคราะห์ ได้แก่
+
+**Village Identification**
+- `village_name`
+
+**Coordinates**
+- `latitude`
+- `longitude`
+
+**Demographics**
+- `population_total`
+- `women`
+- `men`
+- `households`
+
+**Geographic Features**
+- `river_flag`
+- `river_name`
+- `mountain_flag`
+- `mountain_name`
+- `swamp_flag`
+- `swamp_name`
+- `dam_flag`
+- `dam_name`
+- `reservoir_flag`
+- `reservoir_name`
+
+เหตุผลที่เลือกเฉพาะบางคอลัมน์:
+- ลดข้อมูลที่ไม่จำเป็นต่อการวิเคราะห์
+- ลดความซ้ำซ้อนของข้อมูลระหว่าง Dataset
+- เพิ่มเฉพาะคุณลักษณะที่เกี่ยวข้องกับ Research Questions
+
+### Match Status
+
+สร้างคอลัมน์ `mapping_match_status`
+
+| Status | Meaning |
+|---|---|
+| `matched` | พบ Village Mapping ที่ตรงกับ `village_code` |
+| `unmatched` | ไม่พบ Village Mapping ที่ตรงกับ `village_code` |
+
+ไม่เติมข้อมูลที่ไม่มีใน Mapping และไม่สร้างค่าพิกัดหรือข้อมูลประชากรขึ้นเอง
+
+### Integration Results
+
+| Metric | Result |
+|---|---:|
+| Flood Input Rows | 4,754 |
+| Mapping Input Rows | 2,184 |
+| Integrated Output Rows | 4,754 |
+| Matched Rows | 4,721 |
+| Unmatched Rows | 33 |
+| Match Rate | 99.31% |
+| Unmatched Unique Village Codes | 13 |
+| Output Columns | 69 |
+
+### Interpretation
+
+Match Rate 99.31% หมายถึง 4,721 จาก 4,754 Flood Records สามารถเชื่อมโยงกับ Village Mapping ได้
+
+มี 33 Records ที่ไม่สามารถจับคู่ได้ โดยมีรหัสหมู่บ้านที่ไม่ซ้ำกัน 13 รหัส
+
+จำนวน 33 คือจำนวนแถวข้อมูล ส่วน 13 คือจำนวนรหัสที่ไม่ซ้ำกัน จึงเป็นคนละตัวชี้วัด
+
+การตัดสินใจ:
+- เก็บ Unmatched Records ไว้
+- ไม่ลบข้อมูล
+- ไม่เติมค่าจากพื้นที่อื่น
+- ไม่ใช้ข้อมูล Quarantine เป็นข้อมูล Mapping หลัก
+
+---
+
+## 6.2 Household Income and Village Mapping Integration
+
+**Script:** `scripts/integrate_household_income_mapping.py`
+
+**Input:**
+- `output/household_income_transformed.csv`
+- `output/village_mapping_transformed.csv`
+
+**Output:**
+- `output/household_income_mapping_integrated.csv`
+
+**Report:**
+- `reports/household_income_mapping_integration_report.json`
+
+### Objective
+
+เชื่อมโยงรายได้ครัวเรือนกับข้อมูลประชากรและภูมิศาสตร์ของหมู่บ้าน เพื่อเตรียมข้อมูลบริบทด้านเศรษฐกิจและสังคมสำหรับการวิเคราะห์
+
+### Challenge: No Direct Village Code
+
+Household Income Dataset ไม่มี `village_code` ที่สามารถใช้ Join กับ Village Mapping ได้โดยตรง
+
+จึงต้องใช้ข้อมูลชื่อพื้นที่แทน
+
+การใช้ชื่อพื้นที่มีความเสี่ยง เช่น:
+- ชื่อหมู่บ้านเหมือนกันในตำบลเดียวกัน
+- ชื่อหมู่บ้านมีข้อความเพิ่มเติมในวงเล็บ
+- การสะกดชื่อแตกต่างกัน
+- ชื่อชุมชนไม่ตรงกับชื่อหมู่บ้านใน Mapping
+
+ดังนั้นจึงต้องสร้าง Matching Key และกำหนดเกณฑ์ความน่าเชื่อถือก่อน Join
+
+### Matching Key Decision
+
+ใช้ข้อมูล 3 ส่วนร่วมกัน ได้แก่
+
+1. `district`
+2. `subdistrict`
+3. `area`
+
+สร้าง Composite Key จากทั้งสามฟิลด์
+
+เหตุผล:
+- การใช้ชื่อหมู่บ้านเพียงอย่างเดียวมีโอกาสชนกันสูง
+- การเพิ่มอำเภอและตำบลช่วยจำกัดขอบเขตพื้นที่
+- ลดโอกาสจับคู่หมู่บ้านชื่อเดียวกันที่อยู่คนละพื้นที่
+
+ตัวอย่างแนวคิด:
+
+```text
+(district, subdistrict, area)
 ```
 
-ต้องใช้ Python 3.11 ขึ้นไป (pandas 3.x) และ `openpyxl` (สำหรับไฟล์ `.xlsx`) รวมอยู่ใน `requirements.txt` แล้ว
+### Normalization Rules
 
-### 8.2 วิธีด่วน: คำสั่งเดียว
+กำหนดกฎการปรับข้อความดังนี้
 
-```bash
-python run_all.py
+**1. Trim Whitespace**
+
+ตัดช่องว่างด้านหน้าและด้านหลังของข้อความ
+
+ตัวอย่าง:
+
+```text
+" สารภี " → "สารภี"
 ```
 
-`run_all.py` จะเตรียมไฟล์ดิบ รัน validation รันสคริปต์แปลงข้อมูลทุกตัวตามลำดับที่ถูกต้อง และตรวจสอบจำนวนแถวของผลลัพธ์เทียบกับค่าที่ระบุใน README นี้ โดยจะหยุดทันทีเมื่อขั้นตอนใดล้มเหลว เพิ่ม `--verbose` เพื่อดูผลลัพธ์ของแต่ละสคริปต์
+เหตุผล:
+ช่องว่างที่ไม่จำเป็นไม่ควรทำให้ข้อมูลที่มีชื่อเดียวกันกลายเป็นคนละ Key
 
-### 8.3 ทีละขั้นตอน
+**2. Remove Leading บ้าน**
 
-สคริปต์แปลงข้อมูลบางตัวอ่านไฟล์ดิบจาก `ingestion/data/raw/...` (โครงสร้างเดียวกับ S3 และ working directory ของ Lambda) โดย `prepare_local_data.py` จะคัดลอกไฟล์ที่ดาวน์โหลดไว้ใน `ingestion/data/` ไปยังโครงสร้างดังกล่าว ให้รันหนึ่งครั้งก่อนรันสคริปต์แปลงข้อมูล
+ตัดคำว่า `บ้าน` เฉพาะกรณีที่อยู่ด้านหน้าของชื่อพื้นที่
 
-```bash
-python prepare_local_data.py
-python ingestion/validate_data.py
-python transformation/scripts/clean_data.py
-python transformation/scripts/standardize.py
-python transformation/scripts/create_features.py
-python transformation/scripts/transform_flood_village_stats.py
-python transformation/scripts/transform_nso_income.py
-python transformation/scripts/transform_disaster_budget.py
-python transformation/scripts/transform_flood_affected_households.py
-python transformation/scripts/transform_affected_households_summary.py
-python transformation/scripts/integrate_data.py
+ตัวอย่าง:
+
+```text
+"บ้าน ป่าป้อง" → "ป่าป้อง"
+"ป่าป้อง"      → "ป่าป้อง"
 ```
 
-ลำดับมีความสำคัญ: `integrate_data.py` ต้องใช้ผลลัพธ์จาก `create_features.py` และ `transform_nso_income.py` ส่วน `clean_data.py` อ่านไฟล์ `validation/cleaned/Geographic_Data_deduplicated.csv` ที่สร้างโดย `validate_data.py`
+เหตุผล:
+ข้อมูลจากสอง Dataset อาจมีรูปแบบการเขียนคำนำหน้าหมู่บ้านต่างกัน
 
-ต้องใช้ `pandas`, `pyarrow` และ `openpyxl` (`python -m pip install -r requirements.txt`) สคริปต์สามตัวแรกต้องการเพียงไฟล์ใน `validation/cleaned/` ที่ commit ไว้แล้ว ส่วนสคริปต์ `transform_*.py` ต้องมีไฟล์ดิบใน `ingestion/data/raw/...` (สร้างโดย `prepare_local_data.py`)
+**3. Preserve Parentheses**
 
-### 8.4 พฤติกรรมเมื่อรันซ้ำ
+เก็บข้อความในวงเล็บไว้ ไม่ลบออก
 
-สคริปต์จะเขียนทับผลลัพธ์เดิม การรันซ้ำจึงได้ไฟล์ CSV เหมือนเดิม ไฟล์ Parquet อาจมีไบต์ต่างกัน (metadata ของไฟล์ขึ้นกับเวอร์ชันของไลบรารีหรือสภาพแวดล้อม) แต่ข้อมูลภายในเหมือนกัน ให้เปรียบเทียบด้วย `pd.read_parquet(...).equals(...)` แทนการเทียบ checksum ส่วนรายงาน JSON จะต่างกันเฉพาะตัวคั่น path (Windows กับ macOS/Linux) และลำดับไฟล์
+ตัวอย่าง:
 
-## 9. รูปแบบผลลัพธ์
+```text
+"บ้าน ป่าป้อง (หมู่ 3)"
+"บ้าน ป่าป้อง (หมู่ 4)"
+```
 
-- CSV: เหมาะสำหรับการตรวจดูข้อมูลและการแลกเปลี่ยนข้อมูล
-- Parquet: เหมาะสำหรับการประมวลผลเชิงวิเคราะห์และการจัดเก็บข้อมูล
-- JSON: รายงานการแปลงข้อมูลที่มีผลการประมวลผลและข้อมูลด้านคุณภาพข้อมูล
+ไม่เปลี่ยนทั้งสองรายการให้เป็นชื่อเดียวกัน
 
-## 10. เครื่องมือ
+เหตุผล:
+ข้อความในวงเล็บอาจมีข้อมูลสำคัญ เช่น หมู่ที่ หรือชื่อหน่วยงาน การลบออกอาจทำให้หมู่บ้านที่แตกต่างกันกลายเป็น Matching Key เดียวกัน
 
-- Python
-- Pandas
-- PyArrow
-- Boto3 (สำหรับเชื่อมต่อ AWS S3 เมื่อจำเป็น)
+**4. No Automatic Spelling Correction**
+
+ไม่แก้ชื่อพื้นที่ที่สะกดแตกต่างกันโดยอัตโนมัติ
+
+เหตุผล:
+ชื่อที่คล้ายกันไม่ได้หมายความว่าเป็นพื้นที่เดียวกัน การแก้ชื่อโดยไม่มีหลักฐานอาจทำให้เกิด False Match
+
+### Matching Classification
+
+ก่อน Join จะนับจำนวน Mapping Records ที่มี Composite Key เดียวกัน
+
+จากนั้นแบ่งออกเป็น 3 สถานะ
+
+**1. Unique Match**
+
+กำหนดเมื่อ Matching Key พบใน Village Mapping เพียงหนึ่งรายการ
+
+```text
+Mapping Key Count = 1
+```
+
+การตัดสินใจ:
+- สามารถ Join ข้อมูล Mapping ได้
+- ใช้ข้อมูลจาก Mapping แถวนั้นเพียงรายการเดียว
+- ตรวจสอบด้วย `validate="many_to_one"`
+
+เหตุผล:
+มี Mapping Candidate เพียงหนึ่งรายการ จึงไม่มีความกำกวมจากการเลือกหลายหมู่บ้านที่ใช้ชื่อเดียวกันภายใต้ Key เดียวกัน
+
+**2. Ambiguous**
+
+กำหนดเมื่อ Matching Key พบใน Village Mapping มากกว่าหนึ่งรายการ
+
+```text
+Mapping Key Count > 1
+```
+
+การตัดสินใจ:
+- ไม่เลือก Mapping แถวแรก
+- ไม่สุ่มเลือก Village Code
+- ไม่ Join ข้อมูล Mapping ให้กับ Income Record
+- เก็บ Income Record ไว้และกำหนดสถานะ `ambiguous`
+
+เหตุผล:
+การเลือก Mapping เพียงหนึ่งรายการจากหลาย Candidate โดยไม่มีหลักฐานอาจทำให้รายได้ถูกเชื่อมกับประชากรหรือพิกัดของหมู่บ้านผิดแห่ง
+
+**3. Unmatched**
+
+กำหนดเมื่อไม่พบ Matching Key ใน Village Mapping
+
+```text
+Mapping Key Count = 0
+```
+
+การตัดสินใจ:
+- เก็บ Income Record ไว้
+- กำหนดสถานะ `unmatched`
+- ไม่เติม Village Code หรือข้อมูลภูมิศาสตร์
+
+เหตุผล:
+ชื่อที่ไม่ตรงกันอาจเป็นชื่อชุมชน ชื่อท้องถิ่น หรือชื่อที่มีรูปแบบแตกต่างกัน จึงไม่ควรบังคับจับคู่
+
+### Left Join Decision
+
+เลือกใช้ Left Join โดยกำหนด Household Income เป็น Left Dataset
+
+เหตุผล:
+- ต้องการเก็บข้อมูลรายได้ทุกแถว
+- ไม่ควรทำให้ข้อมูลต้นทางสูญหายเพราะ Mapping ไม่ตรง
+- ต้องการให้ผู้วิเคราะห์สามารถแยกข้อมูลที่ Match และไม่ Match ได้
+
+ก่อน Join จะเลือกเฉพาะ Mapping Records ที่มี Unique Key เท่านั้น
+
+จึงไม่ทำให้แถว Income เพิ่มขึ้นจาก Mapping ที่มีชื่อซ้ำ
+
+### Selected Mapping Attributes
+
+เพิ่มข้อมูลจาก Village Mapping ได้แก่
+
+**Identification**
+- `village_code`
+- `district_code`
+- `subdistrict_code`
+
+**Coordinates**
+- `latitude`
+- `longitude`
+
+**Demographics**
+- `population_total`
+- `women`
+- `men`
+
+**Household Information**
+- `mapping_households`
+
+**Geographic Features**
+- `river_flag`
+- `river_name`
+- `mountain_flag`
+- `mountain_name`
+- `swamp_flag`
+- `swamp_name`
+- `dam_flag`
+- `dam_name`
+- `reservoir_flag`
+- `reservoir_name`
+
+เพื่อป้องกันชื่อคอลัมน์ชนกันระหว่าง Income และ Mapping:
+
+- `households` หมายถึงจำนวนครัวเรือนจาก Household Income
+- `mapping_households` หมายถึงจำนวนครัวเรือนจาก Village Mapping
+
+### Integration Results
+
+| Metric | Result |
+|---|---:|
+| Income Input Rows | 2,154 |
+| Mapping Input Rows | 2,184 |
+| Integrated Output Rows | 2,154 |
+| Unique Match Rows | 1,448 |
+| Ambiguous Rows | 28 |
+| Unmatched Rows | 678 |
+| Unique Match Rate | 67.22% |
+| Ambiguous Rate | 1.30% |
+| Unmatched Rate | 31.48% |
+| Unique Matched Village Codes | 1,446 |
+| Output Columns | 27 |
+
+### Interpretation
+
+จาก Income ทั้งหมด 2,154 Records:
+
+- 1,448 Records สามารถจับคู่กับ Mapping ที่มี Candidate เพียงหนึ่งรายการ
+- 28 Records มี Mapping Candidate มากกว่าหนึ่งรายการ
+- 678 Records ไม่พบ Mapping ที่ตรงกับ Composite Key
+
+มี Unique Match 1,448 Records แต่มี Unique Village Codes 1,446 รหัส เนื่องจาก Income มีบางพื้นที่ปรากฏซ้ำหลายแถว
+
+ตัวอย่างที่ตรวจพบคือ:
+
+```text
+อำเภอ: สารภี
+ตำบล: หนองแฝก
+พื้นที่: บ้าน หนองแฝก
+จำนวนรายการ: 3 แถว
+```
+
+การตัดสินใจ:
+- เก็บทั้ง 3 แถว
+- ไม่ลบข้อมูลซ้ำโดยอัตโนมัติ
+- เนื่องจากยังไม่มีหลักฐานยืนยันว่าเป็นข้อมูลซ้ำที่ผิดพลาด
+
+### Why Match Rate Is Not Forced to 100%
+
+การได้ Match Rate สูงไม่ได้หมายความว่าข้อมูลถูกต้องเสมอไป
+
+สำหรับ Income Dataset การใช้กฎที่เข้มงวดมีความสำคัญกว่าการจับคู่ให้ได้มากที่สุด
+
+หากลบวงเล็บ แก้ชื่อสะกดเอง หรือเลือก Mapping Candidate แบบสุ่ม อาจเพิ่มจำนวน Match แต่ทำให้ข้อมูลรายได้ถูกเชื่อมกับหมู่บ้านผิดแห่ง
+
+ดังนั้นจึงเลือกเก็บข้อมูลที่ยังจับคู่ไม่ได้ไว้ และแสดงสถานะให้ตรวจสอบภายหลัง
+
+---
+
+# 7. Data Quality and Validation Strategy
+
+การตรวจสอบคุณภาพข้อมูลใช้หลักการดังต่อไปนี้
+
+## 7.1 Row Count Preservation
+
+ตรวจสอบจำนวนแถวก่อนและหลัง Transformation หรือ Integration
+
+เหตุผล:
+- ตรวจจับข้อมูลสูญหาย
+- ตรวจจับการเพิ่มแถวจาก Join ที่ไม่ถูกต้อง
+- ยืนยันว่ากระบวนการไม่ทำให้ข้อมูลต้นทางเปลี่ยนจำนวนโดยไม่ตั้งใจ
+
+ผลตรวจสอบ:
+
+| Dataset | Input Rows | Output Rows |
+|---|---:|---:|
+| Damage | 866 | 866 |
+| Household Income | 2,154 | 2,154 |
+| Village Mapping | 2,184 | 2,184 |
+| Flood Integration | 4,754 | 4,754 |
+| Income Integration | 2,154 | 2,154 |
+
+## 7.2 Identifier Validation
+
+ตรวจสอบรหัสที่ใช้ระบุพื้นที่ว่า:
+- ไม่มี Missing Identifier
+- ไม่มี Duplicate Identifier ในตารางอ้างอิง
+- มีชนิดข้อมูลเหมาะสม
+- ไม่สูญเสียเลขศูนย์ด้านหน้า
+
+เหตุผล:
+Identifier เป็นพื้นฐานของการเชื่อมโยงข้อมูล หากรหัสผิดเพียงบางหลักอาจทำให้ข้อมูลเชื่อมผิดพื้นที่ได้
+
+## 7.3 Data Type Validation
+
+ตรวจสอบว่าข้อมูลแต่ละประเภทถูกแปลงอย่างเหมาะสม
+
+ตัวอย่าง:
+- จำนวนประชากรเป็น Numeric
+- รายได้เป็น Numeric
+- วันที่เป็น Date
+- รหัสพื้นที่เป็น String
+- ชื่อถนนเป็น String
+
+ไม่บังคับให้ทุกคอลัมน์ที่มีตัวเลขต้องเป็น Numeric เพราะต้องพิจารณาความหมายของข้อมูลด้วย
+
+## 7.4 Missing Value Validation
+
+ตรวจสอบจำนวน Missing Values และพิจารณาความหมายก่อนตัดสินใจจัดการ
+
+หลักการ:
+- Missing ไม่เท่ากับ Zero
+- ไม่เติมค่าที่ไม่มีหลักฐาน
+- เก็บ Missing ที่มีความหมายต่อการตีความข้อมูล
+- รายงานข้อจำกัดของข้อมูลให้ผู้วิเคราะห์ทราบ
+
+## 7.5 Join Validation
+
+ตรวจสอบว่า:
+- จำนวนแถวหลัง Join ถูกต้อง
+- Join Key ตรงกับข้อมูลอ้างอิง
+- Mapping ไม่มี Duplicate Key ในกรณีที่ต้องการ Many-to-One
+- Unmatched Records ยังคงอยู่
+- Ambiguous Records ไม่ได้รับการเลือก Mapping โดยพลการ
+
+## 7.6 Report Validation
+
+สร้าง JSON Report เพื่อเก็บรายละเอียด เช่น:
+- Input Rows
+- Output Rows
+- Output Columns
+- Matched Rows
+- Unmatched Rows
+- Match Rate
+- Data Quality Notes
+
+Report ใช้สำหรับตรวจสอบผลการประมวลผลและช่วยให้สามารถย้อนกลับมาทบทวนเหตุผลในการตัดสินใจได้
+
+---
+
+# 8. Important Data Limitations
+
+ข้อจำกัดต่อไปนี้ควรได้รับการพิจารณาก่อนนำข้อมูลไปวิเคราะห์
+
+## 8.1 Household Income Has No Year Field
+
+Household Income Dataset ไม่มีข้อมูลปี
+
+ดังนั้น:
+- ไม่สามารถระบุได้จาก Dataset นี้เพียงอย่างเดียวว่ารายได้เป็นของปีใด
+- ไม่ควรนำไปเปรียบเทียบรายได้ปี 2566 กับ 2567 โดยตรง
+- ควรใช้เป็นบริบทด้านเศรษฐกิจและสังคมตามขอบเขตที่ข้อมูลรองรับ
+
+## 8.2 Unmatched Income Records
+
+มี Income Records จำนวน 678 แถวที่ไม่พบ Matching Key ใน Village Mapping
+
+สาเหตุที่เป็นไปได้ ได้แก่:
+- ชื่อหมู่บ้านไม่ตรงกัน
+- ชื่อชุมชนแตกต่างจากชื่อหมู่บ้าน
+- รูปแบบชื่อแตกต่างกัน
+- ข้อมูลต้นทางใช้ชื่อพื้นที่คนละรูปแบบ
+
+ยังไม่สรุปว่าข้อมูลเหล่านี้เป็นข้อมูลผิดพลาดทั้งหมด
+
+ควรตรวจสอบเพิ่มเติมก่อนกำหนด Mapping ใหม่
+
+## 8.3 Ambiguous Income Records
+
+มี Income Records จำนวน 28 แถวที่มี Mapping Candidate มากกว่าหนึ่งรายการ
+
+ยังไม่นำข้อมูลเหล่านี้ไปใช้เป็นข้อมูลที่จับคู่กับหมู่บ้านใดหมู่บ้านหนึ่งโดยตรง
+
+หากต้องการแก้ไข ควรใช้หลักฐานเพิ่มเติม เช่น:
+- หมู่ที่
+- รหัสหมู่บ้าน
+- เอกสารอ้างอิงจากหน่วยงาน
+- พิกัดที่ยืนยันได้
+
+## 8.4 Flood Unmatched Records
+
+มี Flood Records จำนวน 33 แถวที่ไม่พบ Mapping โดยมีรหัสหมู่บ้านที่ไม่ซ้ำกัน 13 รหัส
+
+ไม่ควรเติมข้อมูลภูมิศาสตร์จากพื้นที่ใกล้เคียงโดยอัตโนมัติ
+
+## 8.5 Damage Local Identifiers
+
+รหัส `subdistrict_id` และ `village_id` ใน Damage Dataset ไม่ใช่รหัสเดียวกับ `village_code` ของ Village Mapping
+
+ต้องมี Reference Table ก่อนจึงจะสามารถ Join ได้อย่างน่าเชื่อถือ
+
+## 8.6 Damage Missing Values
+
+พบ Missing `partially_damaged_houses` จำนวน 302 แถว
+
+ไม่ควรตีความว่าเป็นบ้านที่ไม่มีความเสียหายบางส่วน
+
+## 8.7 Quarantined Mapping Records
+
+ข้อมูล Quarantine ไม่ได้รวมอยู่ใน Village Mapping หลักที่ใช้ Integration
+
+หากจะนำกลับมาใช้ต้องผ่านการตรวจสอบและยืนยันข้อมูลก่อน
+
+## 8.8 Duplicate Records
+
+การพบชื่อพื้นที่หรือวันที่เหมือนกันไม่ได้แปลว่าข้อมูลเป็น Duplicate ที่ต้องลบทิ้งเสมอไป
+
+ควรพิจารณาความหมายของแต่ละรายการและ Source Record ก่อนลบข้อมูล
+
+---
+
+# 9. Execution Guide
+
+## 9.1 Environment
+
+ใช้ Python Virtual Environment และติดตั้ง Dependencies ที่โปรเจกต์กำหนด
+
+ตัวอย่างการเปิด Environment:
+
+```bash
+source .venv/Scripts/activate
+```
+
+สำหรับ Windows Git Bash
+
+ตรวจสอบ Python:
+
+```bash
+python --version
+```
+
+ตรวจสอบ pandas:
+
+```bash
+python -c "import pandas as pd; print(pd.__version__)"
+```
+
+## 9.2 Recommended Execution Order
+
+ให้รัน Transformation ก่อน Integration ตามลำดับดังนี้
+
+### Step 1: Transform Flood
+
+```bash
+python transformation/scripts/transform_flood.py
+```
+
+สร้าง:
+- Flood 2566 Transformed
+- Flood 2567 Transformed
+- Flood Chiang Mai Combined
+
+### Step 2: Transform Damage
+
+```bash
+python transformation/scripts/transform_damage.py
+```
+
+สร้าง:
+- Chiang Mai Damage Transformed
+
+### Step 3: Transform Household Income
+
+```bash
+python transformation/scripts/transform_household_income.py
+```
+
+สร้าง:
+- Household Income Transformed
+
+### Step 4: Transform Village Mapping
+
+```bash
+python transformation/scripts/transform_village_mapping.py
+```
+
+สร้าง:
+- Village Mapping Transformed
+
+### Step 5: Integrate Flood and Mapping
+
+```bash
+python transformation/scripts/integrate_flood_mapping.py
+```
+
+สร้าง:
+- Flood Mapping Integrated
+- Flood Mapping Integration Report
+
+### Step 6: Integrate Household Income and Mapping
+
+```bash
+python transformation/scripts/integrate_household_income_mapping.py
+```
+
+สร้าง:
+- Household Income Mapping Integrated
+- Household Income Mapping Integration Report
+
+**Important:** Integration Scripts ต้องใช้ Output จาก Transformation ก่อนหน้า ดังนั้นไม่ควรรัน Integration ก่อนที่ Input Files จะถูกสร้างหรืออัปเดตแล้ว
+
+---
+
+# 10. Final Output Summary
+
+| Output Dataset | Rows | Purpose |
+|---|---:|---|
+| `flood_2566_transformed.csv` | 1,198 | Chiang Mai Flood 2566 |
+| `flood_2567_transformed.csv` | 3,556 | Chiang Mai Flood 2567 |
+| `flood_chiangmai_combined.csv` | 4,754 | Combined Flood Records |
+| `chiangmai_damage_transformed.csv` | 866 | Damage Records |
+| `household_income_transformed.csv` | 2,154 | Household Income |
+| `village_mapping_transformed.csv` | 2,184 | Village Reference Data |
+| `flood_mapping_integrated.csv` | 4,754 | Flood + Village Mapping |
+| `household_income_mapping_integrated.csv` | 2,154 | Income + Village Mapping |
+
+---
+
+# 11. Integration Results Summary
+
+| Integration | Total Rows | Matched | Ambiguous | Unmatched | Match Rate |
+|---|---:|---:|---:|---:|---:|
+| Flood + Mapping | 4,754 | 4,721 | - | 33 | 99.31% |
+| Income + Mapping | 2,154 | 1,448 | 28 | 678 | 67.22% |
+
+หมายเหตุ:
+- Flood ใช้ `village_code` เป็น Join Key
+- Income ใช้ Composite Key จาก District, Subdistrict และ Area
+- Flood แสดงสถานะ `matched` และ `unmatched`
+- Income แสดงสถานะ `unique_match`, `ambiguous` และ `unmatched`
+- Match Rate ของทั้งสอง Integration ใช้จำนวนแถวที่จับคู่ได้หารด้วยจำนวนแถวต้นทาง
+- ผลลัพธ์ทั้งสองชุดรักษาจำนวนแถวต้นทางไว้ครบถ้วน
+
+---
+
+# 12. Design Decisions and Rationale
+
+สรุปการตัดสินใจสำคัญในงาน Transformation และ Integration
+
+| Decision | Reason |
+|---|---|
+| เก็บรหัสพื้นที่เป็น String | ป้องกันเลขศูนย์ด้านหน้าหายและรักษา Identifier |
+| ใช้ Left Join | รักษาข้อมูลต้นทางให้ครบ |
+| ใช้ `many_to_one` ใน Flood Integration | ป้องกัน Mapping ซ้ำทำให้จำนวนแถวเพิ่ม |
+| ใช้ Composite Key สำหรับ Income | ลดความเสี่ยงจากชื่อหมู่บ้านซ้ำ |
+| เก็บข้อความในวงเล็บของชื่อพื้นที่ | ป้องกันการรวมหมู่บ้านคนละหมู่เป็น Key เดียวกัน |
+| ไม่แก้ชื่อสะกดอัตโนมัติ | ป้องกัน False Match |
+| แยก Ambiguous ออกจาก Unique Match | ไม่เลือกพื้นที่โดยไม่มีหลักฐาน |
+| เก็บ Unmatched Records | ป้องกันข้อมูลสูญหาย |
+| ไม่แทน Missing ด้วย Zero | รักษาความหมายของข้อมูล |
+| เก็บ Duplicate Income Records | ไม่มีหลักฐานเพียงพอให้ลบ |
+| เก็บ Road Number เป็น String | ข้อมูลถนนมีตัวอักษรและรูปแบบผสม |
+| ไม่ Join Damage โดยตรง | รหัสพื้นที่ยังไม่มีความสัมพันธ์ที่ยืนยันกับ Village Code |
+| ไม่ใช้ Quarantine ใน Mapping หลัก | ป้องกันการใช้ข้อมูลที่ยังไม่ผ่านการยืนยัน |
+
+---
+
+# 13. Conclusion
+
+กระบวนการ Transformation และ Integration นี้ได้เตรียมข้อมูลหลักสำหรับการวิเคราะห์ผลกระทบจากอุทกภัยในจังหวัดเชียงใหม่ โดยแปลงข้อมูลจากหลายแหล่งให้อยู่ในรูปแบบที่เหมาะสมและเชื่อมโยงข้อมูลที่สามารถยืนยันความสัมพันธ์ได้
+
+ผลลัพธ์สำคัญ ได้แก่:
+
+1. เตรียม Flood Records ปี 2566 และ 2567 รวม 4,754 Records
+2. เตรียม Damage Records จำนวน 866 Records
+3. เตรียม Household Income จำนวน 2,154 Records
+4. เตรียม Village Mapping จำนวน 2,184 Records
+5. เชื่อม Flood กับ Village Mapping ได้ 4,721 Records จากทั้งหมด 4,754 Records
+6. เชื่อม Household Income กับ Village Mapping ได้อย่างมีเงื่อนไข 1,448 Records
+7. แยก Ambiguous และ Unmatched Records เพื่อป้องกันการจับคู่ผิด
+8. สร้าง JSON Reports สำหรับตรวจสอบผลการประมวลผล
+
+หลักการที่ใช้ตลอดกระบวนการคือ **Data Integrity over Forced Matching**
+
+กล่าวคือ ให้ความสำคัญกับความถูกต้องและความน่าเชื่อถือของข้อมูลมากกว่าการทำให้ข้อมูลทุกแถวสามารถจับคู่กันได้
+
+ข้อมูลที่ยังไม่สามารถยืนยันความสัมพันธ์ได้จะถูกเก็บไว้และระบุสถานะอย่างชัดเจน เพื่อให้สามารถตรวจสอบและปรับปรุงได้ในอนาคต โดยไม่ทำให้ข้อมูลต้นฉบับสูญหายหรือเกิดความสัมพันธ์ที่ไม่ถูกต้อง
+
+ข้อมูลที่ผ่านกระบวนการนี้พร้อมสำหรับนำไปใช้ในขั้นตอน Exploratory Data Analysis, Geographic Analysis และการศึกษาความสัมพันธ์ระหว่างลักษณะพื้นที่ ประชากร รายได้ และผลกระทบจากน้ำท่วม โดยต้องคำนึงถึงข้อจำกัดของแต่ละ Dataset ตามที่ระบุไว้ในเอกสารนี้

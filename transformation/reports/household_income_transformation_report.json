@@ -1,0 +1,47 @@
+{
+    "dataset": "Chiang Mai Household Income",
+    "input_file": "validation\\cleaned\\household_income_cleaned.csv",
+    "output_file": "transformation\\output\\household_income_transformed.csv",
+    "input_rows": 2154,
+    "output_rows": 2154,
+    "input_columns": 7,
+    "output_columns": 7,
+    "columns": [
+        "statistic",
+        "district",
+        "subdistrict",
+        "area",
+        "households",
+        "income",
+        "unit"
+    ],
+    "missing_values": {
+        "statistic": 0,
+        "district": 0,
+        "subdistrict": 0,
+        "area": 0,
+        "households": 0,
+        "income": 0,
+        "unit": 0
+    },
+    "numeric_conversion_errors": {
+        "households": 0,
+        "income": 0
+    },
+    "district_count": 25,
+    "subdistrict_count": 199,
+    "area_count": 1943,
+    "units": [
+        "บาท/ปี"
+    ],
+    "source_spelling_preserved": {
+        "ทุ่งปี๊": false
+    },
+    "notes": [
+        "All source rows are retained.",
+        "Missing numeric values are preserved and not replaced with zero.",
+        "Area names and source spelling are preserved.",
+        "No join with village mapping is performed in this script.",
+        "Income values retain the source unit and definition."
+    ]
+}
