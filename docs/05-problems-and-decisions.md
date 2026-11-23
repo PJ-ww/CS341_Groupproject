@@ -15,7 +15,7 @@
 | `Number_of_Affected_Households.xlsx` มี 3 หน่วย (ตำบล หมู่บ้าน ครัวเรือน) และไม่ระบุปี | ไม่รวมยอดข้ามหน่วย และไม่สร้างคอลัมน์ปี | การรวมต่างหน่วยทำให้ตัวเลขผิดความหมาย |
 | `pdpm_gd015.csv` ซ้อนกับสถิติอุทกภัยรายหมู่บ้านและไม่มีค่าปีที่ไม่ว่างเพิ่ม | ไม่ใช้เป็นแหล่งเสริม (ยังตรวจใน validation) | ไม่เพิ่มข้อมูลใหม่ |
 
-อ้างอิง: `docs/04-data-validation.md`, `docs/data-quality-summary.md`, `transformation/README.md` หัวข้อ 5–7
+อ้างอิง: `docs/04-data-validation.md`, `docs/06-storage-data-model-query.md`, `transformation/README.md` หัวข้อ 5–7
 
 ## 5.2 ปัญหาด้านการรันและวิธีแก้
 
@@ -35,4 +35,4 @@
 | เขียนผลลัพธ์เป็นทั้ง CSV และ Parquet | CSV ไว้ตรวจดู Parquet ไว้ให้ Athena ค้นหา |
 | ใช้ Lambda และ Step Functions ห่อสคริปต์เดิมโดยไม่แก้สคริปต์ (`orchestration/lambda_handlers.py`) | โค้ดชุดเดียวกันทำงานได้ทั้งในเครื่องและบน AWS |
 
-อ้างอิง: `docs/02-initial-data-architecture.md`, `docs/data-model.md`, `orchestration/`
+อ้างอิง: `docs/02-initial-data-architecture.md`, `docs/06-storage-data-model-query.md`, `orchestration/`

@@ -54,58 +54,83 @@
 | นางสาวพาขวัญ จุลโยธิน | 6709650532 |
 | นายภัทรดร ชีวชูเกียรติ | 6709650557 |
 
-## 8. How to Run (Local Run)
+## 8. How to Run
 
-ส่วน Validation → Transformation → Integration รันซ้ำได้บนเครื่องโดยไม่ต้องใช้ AWS (ต้องใช้ Python 3.11 ขึ้นไป) โดยต้องวางข้อมูลดิบ 8 ไฟล์ไว้ใน `ingestion/data/` ก่อน ข้อมูลดิบไม่ได้อยู่ใน Git สมาชิกทีมโหลดจาก S3 ได้ ส่วนคนนอกทีมให้ดาวน์โหลดจากเว็บต้นทางตาม [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6B
+ขอบเขตปัจจุบัน: น้ำท่วมจังหวัดเชียงใหม่ ปี 2566–2567 (ข้อมูลความเสียหาย 2563–2567)
+
+### 8.1 รันบนเครื่อง (ไม่ต้องใช้ AWS)
+
+ต้องใช้ Python 3.11 ขึ้นไป ข้อมูลที่ผ่าน validation แล้วอยู่ใน `validation/cleaned/` (commit ไว้แล้ว) จึงเริ่มจากขั้น Transformation ได้ทันที
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python run_all.py
+
+# Transformation + Integration (คนที่ 3)
+python transformation/scripts/transform_flood.py
+python transformation/scripts/transform_damage.py
+python transformation/scripts/transform_household_income.py
+python transformation/scripts/transform_village_mapping.py
+python transformation/scripts/integrate_flood_mapping.py
+python transformation/scripts/integrate_household_income_mapping.py
+
+# Storage + Query (คนที่ 4)
+python storage/build_curated.py        # CSV → Parquet แบ่ง partition + ตรวจจำนวนแถว/primary key
+python storage/run_local_queries.py    # รัน SQL ทั้งหมดใน sql/curated/ ด้วย DuckDB
 ```
 
-บน Windows ให้เปิดใช้ venv ด้วย `.venv\Scripts\Activate.ps1`
+`build_curated.py` ต้องขึ้น `all checks passed` ผลลัพธ์ query อยู่ใน `storage/query_results/` ผลลัพธ์ทุกขั้น commit ไว้แล้ว (`transformation/output/`, `storage/curated/`, `storage/query_results/`) จึงเปิดดูได้โดยไม่ต้องรันใหม่
 
-`run_all.py` จะจัดวางไฟล์ดิบ รัน validation และสคริปต์ transformation ทั้งหมดตามลำดับ แล้วตรวจจำนวนแถวของผลลัพธ์เทียบกับที่ทีมรายงานไว้ ใช้เวลาไม่กี่นาที คำอธิบายรายขั้นตอนอยู่ใน [`transformation/README.md`](transformation/README.md) หัวข้อ 8 และคู่มือสำหรับผู้ตรวจอยู่ใน [`RUN_INSTRUCTIONS.md`](RUN_INSTRUCTIONS.md)
+> `run_all.py` ยังเป็นเวอร์ชันขอบเขตเดิม (เรียกสคริปต์ใน `transformation/backup/`) ให้ใช้คำสั่งด้านบนแทนจนกว่าจะอัปเดต
 
-ส่วนที่ใช้ AWS (`ingestion/ingest.py`, `orchestration/`, Athena) ต้องใช้ AWS Credentials ดูวิธีตั้งค่าใน [`ingestion/README.md`](ingestion/README.md) วิธีสร้างตารางและ deploy บน account ของตัวเองอยู่ใน [`orchestration/README.md`](orchestration/README.md) และดูหลักฐานการทำงานได้ในวิดีโอเดโมด้านบน
+### 8.2 รันบน AWS (S3 + Athena)
 
-ปัญหาที่พบระหว่างทำและเหตุผลของการตัดสินใจสำคัญ สรุปไว้ใน [`docs/05-problems-and-decisions.md`](docs/05-problems-and-decisions.md)
+ต้องใช้ AWS Credentials ดูวิธีตั้งค่าใน [`ingestion/README.md`](ingestion/README.md)
 
-### รายละเอียดแต่ละขั้น
+```bash
+python storage/upload_to_s3.py                                              # → s3://cs341-flood-recovery/curated/
+python storage/run_athena.py --sql sql/curated/01_create_curated_tables.sql # ตาราง 4 ตารางใน Glue Data Catalog
+python storage/run_athena.py --sql sql/curated/02_create_views.sql          # view 2 ตัว
+python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/queries --save
+```
+
+หรือเปิด Athena Query Editor แล้วรันทีละ statement จากไฟล์เดียวกัน (database `flood_recovery_db`) ภาพหลักฐานการรันจริงอยู่ใน [`docs/evidence/`](docs/evidence/)
+
+### 8.3 รายละเอียดแต่ละขั้น
 
 | ขั้น | ทำอะไร | คู่มือ |
 |---|---|---|
 | 1 | สร้าง venv และติดตั้ง `python -m pip install -r requirements.txt` | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 3 |
-| 2 | วางไฟล์ดิบ 8 ไฟล์ไว้ใน `ingestion/data/` จาก S3 (สมาชิกทีม) หรือดาวน์โหลดจากเว็บต้นทาง (คนนอกทีม) | [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6 / 6B |
-| 3 | `python prepare_local_data.py` คัดลอกไฟล์ไปไว้ที่ `ingestion/data/raw/...` ซึ่งเป็นโครงสร้างที่สคริปต์ transformation อ่าน | [`RUN_INSTRUCTIONS.md`](RUN_INSTRUCTIONS.md) |
-| 4 | ตรวจข้อมูล `python ingestion/validate_data.py` | [`docs/04-data-validation.md`](docs/04-data-validation.md) |
-| 5 | แปลงข้อมูล `python transformation/scripts/<script>.py` ตามลำดับ (ขั้น 3-5 รวมอยู่ใน `run_all.py` แล้ว) | [`transformation/README.md`](transformation/README.md) หัวข้อ 8 |
-| 6 | อัปโหลด S3, สร้างตาราง Athena (`sql/setup/01_create_tables.sql`), deploy Lambda + Step Functions | [`orchestration/README.md`](orchestration/README.md) |
-| 7 | รัน query วิเคราะห์ใน `sql/analysis/` และ `sql/data_quality/` บน database `flood_recovery_db` | [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) |
+| 2 | Ingestion: นำข้อมูลดิบขึ้น S3 (`raw/`) | [`ingestion/README.md`](ingestion/README.md) |
+| 3 | Validation: `python ingestion/validate_data.py` → `validation/cleaned/`, `validation/quarantine/` | [`docs/04-data-validation.md`](docs/04-data-validation.md) |
+| 4 | Transformation + Integration: สคริปต์ 6 ไฟล์ตามข้อ 8.1 → `transformation/output/` | [`transformation/README.md`](transformation/README.md) |
+| 5 | Storage: `python storage/build_curated.py` → Parquet ใน `storage/curated/` แล้ว `upload_to_s3.py` → `s3://cs341-flood-recovery/curated/` | [`storage/README.md`](storage/README.md) |
+| 6 | Catalog + Query: สร้างตาราง/view และรัน data quality + query ตอบ Q1–Q3 จาก `sql/curated/` บน Athena | [`docs/06-storage-data-model-query.md`](docs/06-storage-data-model-query.md) |
 
-ผลลัพธ์ของขั้นที่ 4-5 commit ไว้แล้วใน `validation/` และ `transformation/output/` จึงเปิดดูได้โดยไม่ต้องรันใหม่
+ปัญหาที่พบระหว่างทำและเหตุผลของการตัดสินใจสำคัญ สรุปไว้ใน [`docs/05-problems-and-decisions.md`](docs/05-problems-and-decisions.md) และ [`docs/06-storage-data-model-query.md`](docs/06-storage-data-model-query.md) หัวข้อ 3
 
 ## 9. สิ่งที่ต้องทำต่อก่อน Final
 
-รวบรวมจาก [`docs/data-analysis-summary.md`](docs/data-analysis-summary.md) หัวข้อ 5.2 และข้อจำกัดของ pipeline ใน Issue #15
-
 **ด้านการวิเคราะห์**
-1. วิเคราะห์ข้ามตารางสำหรับ Q3 ระดับจังหวัด: เชื่อมความถี่น้ำท่วมจาก `flood_village_stats` กับรายได้จาก `nso_income` ปี 2566 (ปีเดียวที่ซ้อนกัน) โดยตรวจความตรงกันของชื่อจังหวัดก่อน JOIN แล้วนำเสนอเป็นตารางหรือกราฟ
-2. รัน query ใน `sql/analysis/` บน Athena อีกรอบ แล้วเทียบตัวเลขกับหัวข้อ 2 ของ `data-analysis-summary.md`
-3. ทีมยืนยันข้อสรุปเชิงตีความในหัวข้อ 3 ของ `data-analysis-summary.md` (ผลไหนตอบ Q1–Q3 ได้แค่ไหน)
-4. เตรียมหลักฐานการทำงานและผลลัพธ์สำหรับนำเสนอ
+1. ทีมตกลงน้ำหนักคะแนนจัดลำดับพื้นที่ช่วยเหลือใน `q3_1` (ตอนนี้ใช้ ความถี่น้ำท่วม 0.5 / จำนวนครัวเรือน 0.3 / รายได้ต่ำ 0.2) และระบุเหตุผลในรายงาน
+2. ทีมยืนยันการตีความผล Q1–Q3 จาก `storage/query_results/` (ผลไหนตอบคำถามได้แค่ไหน)
+3. เตรียมกราฟ/ตารางและเดโมสำหรับนำเสนอ
 
-**ด้าน pipeline (จาก Issue #15)**
-1. Step Functions ยังต้องกดรันเอง ยังไม่มี trigger อัตโนมัติ (ต่อยอดด้วย EventBridge)
-2. จำนวนแถวที่ `VerifyBatch` ใช้เทียบใส่ตายตัวไว้ในโค้ด (`DATASETS` ใน `orchestration/lambda_handlers.py`) ถ้าข้อมูลต้นทางเปลี่ยนต้องแก้ตาม
-3. ไฟล์ใน `processed/` ถูกเขียนทับทุกรอบ ประวัติของแต่ละ batch เก็บอยู่ที่ `validation/batch_id=<id>/` และ `_SUCCESS.json` เท่านั้น
-4. ตาราง `nso_income_partitioned` ไม่ถูกสร้างใหม่โดย pipeline ตอนนี้ DDL ของทุกตารางอยู่ใน [`sql/setup/01_create_tables.sql`](sql/setup/01_create_tables.sql) แล้ว แต่ CTAS ของตารางนี้ต้องรันเอง
+**ด้าน pipeline**
+1. อัปเดต `run_all.py` และ `orchestration/lambda_handlers.py` ให้เรียกสคริปต์ transformation ชุดใหม่ และเพิ่มขั้น `storage/build_curated.py` + อัปโหลด `curated/` (ตอนนี้ยังใช้ชุดขอบเขตเดิม)
+2. Step Functions ยังต้องกดรันเอง ยังไม่มี trigger อัตโนมัติ (ต่อยอดด้วย EventBridge)
+3. จำนวนแถวที่ `VerifyBatch` ใช้เทียบใส่ตายตัวไว้ในโค้ด (`DATASETS` ใน `orchestration/lambda_handlers.py`) ต้องแก้ให้ตรงกับตารางชุดใหม่
+4. ไฟล์บน S3 ถูกเขียนทับทุกรอบ ไม่เก็บประวัติแต่ละ batch (ทางเลือก: Iceberg snapshot ใน `sql/curated/03_iceberg_optional.sql`)
+5. หลังแก้ข้อ 1 แล้ว ลบตารางขอบเขตเดิมใน Athena (`geographic`, `flood_village_stats`, `nso_income`, `nso_income_partitioned`, `disaster_budget`, `flood_affected_households`, `affected_households_summary`, `geographic_nso_integrated`) และโฟลเดอร์ `processed/` บน S3
 
 **ข้อจำกัดของข้อมูลที่แก้ไม่ได้ในโครงงานนี้** (ต้องระบุในรายงาน Final)
-- ไม่มีข้อมูลระยะเวลาฟื้นตัว จึงตอบ Q2 ว่าความช่วยเหลือทำให้ฟื้นตัวเร็วขึ้นหรือไม่ได้โดยตรง
-- ข้อมูลความเสี่ยง (ยโสธร) และข้อมูลครัวเรือนที่ได้รับผลกระทบ (พังงา, หนองคาย) อยู่คนละจังหวัด จึง JOIN กันไม่ได้
+- ไม่มีข้อมูลระยะเวลาฟื้นตัว จึงตอบไม่ได้โดยตรงว่าความช่วยเหลือทำให้ฟื้นตัวเร็วขึ้นหรือไม่
+- ข้อมูลน้ำท่วมรายหมู่บ้านมี `affected_households` แค่ 15.9% (2566) และ 6.1% (2567) ของแถว จึงใช้จำนวนหมู่บ้านที่ถูกรายงานเป็นตัวชี้วัดหลัก ซึ่งสะท้อน "การถูกรายงาน" ไม่ใช่ความรุนแรงจริง และปี 2566 อาจรายงานไม่ครบเท่าปี 2567
+- ข้อมูลความเสียหายปี 2567 มี 29.7% ของแถวที่ตัวเลขเป็น 0 ทุกช่อง และ `partially_damaged_houses` ปี 2566–2567 ว่างทั้งหมด จึงไม่ควรสรุปว่าความเสียหายลดลง
+- ข้อมูลความเสียหายเชื่อมกับหมู่บ้านได้แค่ระดับอำเภอ เพราะ `subdistrict_id` / `village_id` ไม่ใช่รหัสมาตรฐาน
+- ข้อมูลรายได้ครัวเรือนไม่มีปีกำกับ และจับคู่กับหมู่บ้านได้แบบ unique 67.22% (ambiguous 28 แถว, unmatched 678 แถว)
+- ผล Q2 เป็นความสัมพันธ์เชิงพรรณนา ไม่ใช่เหตุและผล
 
 ## 10. Repository
 - **GitHub Repository:** https://github.com/PJ-ww/CS341_Groupproject
