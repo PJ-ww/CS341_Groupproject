@@ -1,24 +1,25 @@
 {
   "files_checked": 5,
-  "files_passed": 5,
-  "files_with_warnings": 0,
+  "files_passed": 0,
+  "files_with_warnings": 5,
   "files_failed": 0,
   "results": {
     "chiangmai_damage.xlsx": {
       "file_type": "XLSX",
-      "status": "PASS",
+      "status": "WARNING",
       "sheets": {
         "Sheet1": {
-          "status": "PASS",
+          "status": "WARNING",
           "issues": [],
           "notes": [
-            "Structural validation only; business rules are not yet defined.",
-            "Original column names and values are preserved."
+            "Schema, type, range and cross-field rules applied."
           ],
           "row_count": 883,
           "accepted_count": 866,
           "quarantined_count": 17,
           "duplicate_count": 17,
+          "duplicate_key_count": 16,
+          "warning_count": 88,
           "columns": [
             "ปี",
             "อำเภอ",
@@ -35,6 +36,119 @@
             "บ้านพักอาศัย(หลัง)",
             "บ้านเรือนบางส่วน(หลัง)"
           ],
+          "schema": {
+            "expected_columns": 14,
+            "missing_required_columns": [],
+            "missing_optional_columns": [],
+            "unexpected_columns": []
+          },
+          "rule_violations": {
+            "duplicate_key": {
+              "severity": "WARNING",
+              "count": 16,
+              "examples": [
+                {
+                  "source_row": 108,
+                  "detail": "key {'ปี': '2563', 'อำเภอ': 'เมืองเชียงใหม่', 'หมู่บ้าน': '7', 'วันที่เกิดภัย': '2020-09-24 00:00:00'} first seen at row 107"
+                },
+                {
+                  "source_row": 152,
+                  "detail": "key {'ปี': '2564', 'อำเภอ': 'ไชยปราการ', 'หมู่บ้าน': '1', 'วันที่เกิดภัย': '2021-11-01 00:00:00'} first seen at row 151"
+                },
+                {
+                  "source_row": 173,
+                  "detail": "key {'ปี': '2564', 'อำเภอ': 'ฝาง', 'หมู่บ้าน': '2', 'วันที่เกิดภัย': '2021-09-22 00:00:00'} first seen at row 172"
+                },
+                {
+                  "source_row": 266,
+                  "detail": "key {'ปี': '2565', 'อำเภอ': 'กัลยาณิวัฒนา', 'หมู่บ้าน': '3', 'วันที่เกิดภัย': '2022-07-29 00:00:00'} first seen at row 265"
+                },
+                {
+                  "source_row": 276,
+                  "detail": "key {'ปี': '2565', 'อำเภอ': 'จอมทอง', 'หมู่บ้าน': '21', 'วันที่เกิดภัย': '2022-05-20 00:00:00'} first seen at row 275"
+                }
+              ]
+            },
+            "exact_duplicate": {
+              "severity": "ERROR",
+              "count": 17,
+              "examples": [
+                {
+                  "source_row": 65,
+                  "detail": "identical to row 63"
+                },
+                {
+                  "source_row": 66,
+                  "detail": "identical to row 62"
+                },
+                {
+                  "source_row": 67,
+                  "detail": "identical to row 61"
+                },
+                {
+                  "source_row": 69,
+                  "detail": "identical to row 59"
+                },
+                {
+                  "source_row": 129,
+                  "detail": "identical to row 128"
+                }
+              ]
+            },
+            "number_stored_as_text": {
+              "severity": "WARNING",
+              "count": 58,
+              "examples": [
+                {
+                  "source_row": 127,
+                  "detail": "ราษฎร(คน): '5,294' has a thousands separator"
+                },
+                {
+                  "source_row": 127,
+                  "detail": "ราษฎร(ครัวเรือน): '1,586' has a thousands separator"
+                },
+                {
+                  "source_row": 130,
+                  "detail": "ราษฎร(คน): '1,500' has a thousands separator"
+                },
+                {
+                  "source_row": 132,
+                  "detail": "ราษฎร(คน): '13,187' has a thousands separator"
+                },
+                {
+                  "source_row": 132,
+                  "detail": "ราษฎร(ครัวเรือน): '4,287' has a thousands separator"
+                }
+              ]
+            },
+            "subset_exceeds_total": {
+              "severity": "WARNING",
+              "count": 14,
+              "examples": [
+                {
+                  "source_row": 377,
+                  "detail": "ราษฎร(ครัวเรือน) (100) > ราษฎร(คน) (0)"
+                },
+                {
+                  "source_row": 457,
+                  "detail": "ราษฎร(ครัวเรือน) (20) > ราษฎร(คน) (0)"
+                },
+                {
+                  "source_row": 472,
+                  "detail": "ราษฎร(ครัวเรือน) (109) > ราษฎร(คน) (0)"
+                },
+                {
+                  "source_row": 583,
+                  "detail": "ราษฎร(ครัวเรือน) (50) > ราษฎร(คน) (0)"
+                },
+                {
+                  "source_row": 584,
+                  "detail": "ราษฎร(ครัวเรือน) (5904) > ราษฎร(คน) (0)"
+                }
+              ]
+            }
+          },
+          "type_failures_by_column": {},
           "missing_values_by_column": {
             "ปี": 0,
             "อำเภอ": 0,
@@ -50,6 +164,22 @@
             "บาดเจ็บ(คน)": 0,
             "บ้านพักอาศัย(หลัง)": 0,
             "บ้านเรือนบางส่วน(หลัง)": 302
+          },
+          "missing_pct_by_column": {
+            "ปี": 0.0,
+            "อำเภอ": 0.0,
+            "ตำบล": 0.0,
+            "หมู่บ้าน": 0.0,
+            "วันที่เกิดภัย": 0.0,
+            "ราษฎร(คน)": 0.0,
+            "ราษฎร(ครัวเรือน)": 0.0,
+            "อพยพ(ครัวเรือน)": 0.0,
+            "อพยพ(คน)": 0.0,
+            "เสียชีวิต(คน)": 0.0,
+            "สูญหาย(คน)": 0.0,
+            "บาดเจ็บ(คน)": 0.0,
+            "บ้านพักอาศัย(หลัง)": 0.0,
+            "บ้านเรือนบางส่วน(หลัง)": 34.2
           },
           "unique_values_by_column": {
             "ปี": 5,
@@ -67,6 +197,7 @@
             "บ้านพักอาศัย(หลัง)": 51,
             "บ้านเรือนบางส่วน(หลัง)": 69
           },
+          "cleaned_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\cleaned\\chiangmai_damage_cleaned.csv",
           "file_type": "XLSX",
           "sheet_name": "Sheet1"
         }
@@ -75,19 +206,20 @@
       "accepted_count": 866,
       "quarantined_count": 17,
       "file_name": "chiangmai_damage.xlsx",
-      "quarantine_file": "/Users/chanipornkimprasert/Library/CloudStorage/OneDrive-ThammasatUniversity/cs341/CS341_Groupproject/validation/quarantine/chiangmai_damage_quarantine.json"
+      "quarantine_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\quarantine\\chiangmai_damage_quarantine.json"
     },
     "flood_2566.csv": {
-      "status": "PASS",
+      "status": "WARNING",
       "issues": [],
       "notes": [
-        "Structural validation only; business rules are not yet defined.",
-        "Original column names and values are preserved."
+        "Schema, type, range and cross-field rules applied."
       ],
       "row_count": 19607,
-      "accepted_count": 19585,
-      "quarantined_count": 22,
+      "accepted_count": 19584,
+      "quarantined_count": 23,
       "duplicate_count": 22,
+      "duplicate_key_count": 295,
+      "warning_count": 309,
       "columns": [
         "Incident Name",
         "Disaster Date",
@@ -129,6 +261,222 @@
         "Other Public Benefits",
         "Govt Property Damage"
       ],
+      "schema": {
+        "expected_columns": 34,
+        "missing_required_columns": [],
+        "missing_optional_columns": [],
+        "unexpected_columns": [
+          "Municipal Code",
+          "Municipality",
+          "Community",
+          "Zone Center Name",
+          "Cause"
+        ]
+      },
+      "rule_violations": {
+        "date_order": {
+          "severity": "WARNING",
+          "count": 4,
+          "examples": [
+            {
+              "source_row": 111,
+              "detail": "End Disaster Date is before Disaster Date"
+            },
+            {
+              "source_row": 4769,
+              "detail": "End Disaster Date is before Disaster Date"
+            },
+            {
+              "source_row": 6681,
+              "detail": "End Disaster Date is before Disaster Date"
+            },
+            {
+              "source_row": 11190,
+              "detail": "End Disaster Date is before Disaster Date"
+            }
+          ]
+        },
+        "duplicate_key": {
+          "severity": "WARNING",
+          "count": 295,
+          "examples": [
+            {
+              "source_row": 49,
+              "detail": "key {'Village Code': '71120114', 'Disaster Date': '5/10/2023', 'Incident Name': 'อุทกภัย'} first seen at row 48"
+            },
+            {
+              "source_row": 54,
+              "detail": "key {'Village Code': '71120119', 'Disaster Date': '5/10/2023', 'Incident Name': 'อุทกภัย'} first seen at row 53"
+            },
+            {
+              "source_row": 61,
+              "detail": "key {'Village Code': '71120104', 'Disaster Date': '5/10/2023', 'Incident Name': 'อุทกภัย'} first seen at row 60"
+            },
+            {
+              "source_row": 64,
+              "detail": "key {'Village Code': '71120108', 'Disaster Date': '5/10/2023', 'Incident Name': 'อุทกภัย'} first seen at row 63"
+            },
+            {
+              "source_row": 113,
+              "detail": "key {'Village Code': '71070701', 'Disaster Date': '26/10/2023', 'Incident Name': 'อุทกภัย'} first seen at row 112"
+            }
+          ]
+        },
+        "exact_duplicate": {
+          "severity": "ERROR",
+          "count": 22,
+          "examples": [
+            {
+              "source_row": 115,
+              "detail": "identical to row 114"
+            },
+            {
+              "source_row": 117,
+              "detail": "identical to row 116"
+            },
+            {
+              "source_row": 5537,
+              "detail": "identical to row 5536"
+            },
+            {
+              "source_row": 5539,
+              "detail": "identical to row 5538"
+            },
+            {
+              "source_row": 5541,
+              "detail": "identical to row 5540"
+            }
+          ]
+        },
+        "invalid_date": {
+          "severity": "ERROR",
+          "count": 5,
+          "examples": [
+            {
+              "source_row": 2,
+              "detail": "Disaster Date: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Relief Declared Date: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Disaster Area Date: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Other Announce Date: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "End Disaster Date: invalid date"
+            }
+          ]
+        },
+        "invalid_number": {
+          "severity": "ERROR",
+          "count": 25,
+          "examples": [
+            {
+              "source_row": 2,
+              "detail": "Province Code: not a number ('รหัสจังหวัด')"
+            },
+            {
+              "source_row": 2,
+              "detail": "District Code: not a number ('รหัสอำเภอ')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Subdistrict Code: not a number ('รหัสตำบล')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Moo: not a number ('หมู่ที่')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Village Code: not a number ('รหัสหมู่บ้าน')"
+            }
+          ]
+        },
+        "subset_exceeds_total": {
+          "severity": "WARNING",
+          "count": 7,
+          "examples": [
+            {
+              "source_row": 136,
+              "detail": "Affected Households (100) > Affected People (75)"
+            },
+            {
+              "source_row": 1127,
+              "detail": "Affected Households (51) > Affected People (30)"
+            },
+            {
+              "source_row": 6027,
+              "detail": "Affected Households (30) > Affected People (10)"
+            },
+            {
+              "source_row": 6192,
+              "detail": "Affected Households (29) > Affected People (25)"
+            },
+            {
+              "source_row": 11953,
+              "detail": "Affected Households (190) > Affected People (16)"
+            }
+          ]
+        },
+        "suspiciously_large_value": {
+          "severity": "WARNING",
+          "count": 3,
+          "examples": [
+            {
+              "source_row": 3650,
+              "detail": "Affected People=28407 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 4370,
+              "detail": "Affected People=15006 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 4437,
+              "detail": "Affected People=28765 exceeds 15000 for one village"
+            }
+          ]
+        }
+      },
+      "type_failures_by_column": {
+        "Disaster Date": 1,
+        "Province Code": 1,
+        "District Code": 1,
+        "Subdistrict Code": 1,
+        "Moo": 1,
+        "Village Code": 1,
+        "Relief Declared Date": 1,
+        "Disaster Area Date": 1,
+        "Other Announce Date": 1,
+        "End Disaster Date": 1,
+        "Affected People": 1,
+        "Affected Households": 1,
+        "Evacuated People": 1,
+        "Evacuated Households": 1,
+        "Deaths": 1,
+        "Missing": 1,
+        "Injured": 1,
+        "Housing Damage": 1,
+        "Business Damage": 1,
+        "Agriculture Damage": 1,
+        "Livestock Damage": 1,
+        "Fishing Damage": 1,
+        "Transport Damage": 1,
+        "Health Damage": 1,
+        "Culture Damage": 1,
+        "Education/Sports": 1,
+        "Utilities Damage": 1,
+        "Govt. Locations Damage": 1,
+        "Other Public Benefits": 1,
+        "Govt Property Damage": 1
+      },
       "missing_values_by_column": {
         "Incident Name": 0,
         "Disaster Date": 0,
@@ -169,6 +517,47 @@
         "Govt. Locations Damage": 19584,
         "Other Public Benefits": 19408,
         "Govt Property Damage": 19593
+      },
+      "missing_pct_by_column": {
+        "Incident Name": 0.0,
+        "Disaster Date": 0.0,
+        "Province Code": 0.0,
+        "Province": 0.0,
+        "District Code": 0.0,
+        "District": 0.0,
+        "Subdistrict Code": 1.28,
+        "Subdistrict": 1.28,
+        "Moo": 1.28,
+        "Municipal Code": 98.71,
+        "Municipality": 98.71,
+        "Community": 98.71,
+        "Village Code": 0.0,
+        "Zone Center Name": 0.0,
+        "Cause": 28.15,
+        "Relief Declared Date": 15.87,
+        "Disaster Area Date": 0.0,
+        "Other Announce Date": 99.99,
+        "End Disaster Date": 14.34,
+        "Affected People": 73.35,
+        "Affected Households": 72.99,
+        "Evacuated People": 99.99,
+        "Evacuated Households": 72.99,
+        "Deaths": 72.99,
+        "Missing": 72.99,
+        "Injured": 72.99,
+        "Housing Damage": 92.54,
+        "Business Damage": 99.92,
+        "Agriculture Damage": 86.0,
+        "Livestock Damage": 99.8,
+        "Fishing Damage": 98.56,
+        "Transport Damage": 96.05,
+        "Health Damage": 99.97,
+        "Culture Damage": 99.87,
+        "Education/Sports": 99.88,
+        "Utilities Damage": 99.93,
+        "Govt. Locations Damage": 99.88,
+        "Other Public Benefits": 98.99,
+        "Govt Property Damage": 99.93
       },
       "unique_values_by_column": {
         "Incident Name": 2,
@@ -211,22 +600,24 @@
         "Other Public Benefits": 20,
         "Govt Property Damage": 6
       },
+      "cleaned_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\cleaned\\flood_2566_cleaned.csv",
       "encoding": "utf-8-sig",
       "file_type": "CSV",
       "file_name": "flood_2566.csv",
-      "quarantine_file": "/Users/chanipornkimprasert/Library/CloudStorage/OneDrive-ThammasatUniversity/cs341/CS341_Groupproject/validation/quarantine/flood_2566_quarantine.json"
+      "quarantine_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\quarantine\\flood_2566_quarantine.json"
     },
     "flood_2567.csv": {
-      "status": "PASS",
+      "status": "WARNING",
       "issues": [],
       "notes": [
-        "Structural validation only; business rules are not yet defined.",
-        "Original column names and values are preserved."
+        "Schema, type, range and cross-field rules applied."
       ],
       "row_count": 34882,
-      "accepted_count": 34882,
-      "quarantined_count": 0,
+      "accepted_count": 34875,
+      "quarantined_count": 7,
       "duplicate_count": 0,
+      "duplicate_key_count": 0,
+      "warning_count": 267,
       "columns": [
         "_id",
         "Situation name",
@@ -274,6 +665,206 @@
         "Other Public Benefit (Sites)",
         "Gov./Private Property (Units)"
       ],
+      "schema": {
+        "expected_columns": 33,
+        "missing_required_columns": [],
+        "missing_optional_columns": [],
+        "unexpected_columns": [
+          "Disaster Type",
+          "region",
+          "Sub-district",
+          "Municipal Code",
+          "Municipality",
+          "Community",
+          "District Center",
+          "Title",
+          "Nature/Cause",
+          "status",
+          "situation",
+          "Other Declarations"
+        ]
+      },
+      "rule_violations": {
+        "code_hierarchy": {
+          "severity": "ERROR",
+          "count": 6,
+          "examples": [
+            {
+              "source_row": 860,
+              "detail": "Sub-district Code=220605 does not start with District Code=2201"
+            },
+            {
+              "source_row": 3793,
+              "detail": "Sub-district Code=710506 does not start with District Code=7101"
+            },
+            {
+              "source_row": 8679,
+              "detail": "Sub-district Code=412503 does not start with District Code=4119"
+            },
+            {
+              "source_row": 9460,
+              "detail": "Sub-district Code=670102 does not start with District Code=6710"
+            },
+            {
+              "source_row": 14151,
+              "detail": "Sub-district Code=630704 does not start with District Code=6305"
+            }
+          ]
+        },
+        "date_order": {
+          "severity": "WARNING",
+          "count": 4,
+          "examples": [
+            {
+              "source_row": 3793,
+              "detail": "Situation Ended is before Disaster Date"
+            },
+            {
+              "source_row": 22530,
+              "detail": "Situation Ended is before Disaster Date"
+            },
+            {
+              "source_row": 24628,
+              "detail": "Situation Ended is before Disaster Date"
+            },
+            {
+              "source_row": 26844,
+              "detail": "Situation Ended is before Disaster Date"
+            }
+          ]
+        },
+        "invalid_date": {
+          "severity": "ERROR",
+          "count": 4,
+          "examples": [
+            {
+              "source_row": 2,
+              "detail": "Disaster Date: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Aid Zone Declaration: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Disaster Declaration: invalid date"
+            },
+            {
+              "source_row": 2,
+              "detail": "Situation Ended: invalid date"
+            }
+          ]
+        },
+        "invalid_number": {
+          "severity": "ERROR",
+          "count": 25,
+          "examples": [
+            {
+              "source_row": 2,
+              "detail": "Province Code: not a number ('รหัสจังหวัด')"
+            },
+            {
+              "source_row": 2,
+              "detail": "District Code: not a number ('รหัสอำเภอ')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Sub-district Code: not a number ('รหัสตำบล')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Moo: not a number ('หมู่ที่')"
+            },
+            {
+              "source_row": 2,
+              "detail": "Village Code: not a number ('รหัสหมู่บ้าน')"
+            }
+          ]
+        },
+        "subset_exceeds_total": {
+          "severity": "WARNING",
+          "count": 221,
+          "examples": [
+            {
+              "source_row": 233,
+              "detail": "Affected Households (120) > Affected People (0)"
+            },
+            {
+              "source_row": 234,
+              "detail": "Affected Households (70) > Affected People (0)"
+            },
+            {
+              "source_row": 235,
+              "detail": "Affected Households (26) > Affected People (0)"
+            },
+            {
+              "source_row": 237,
+              "detail": "Affected Households (15) > Affected People (0)"
+            },
+            {
+              "source_row": 478,
+              "detail": "Affected Households (12) > Affected People (0)"
+            }
+          ]
+        },
+        "suspiciously_large_value": {
+          "severity": "WARNING",
+          "count": 42,
+          "examples": [
+            {
+              "source_row": 579,
+              "detail": "Affected People=60000 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 1096,
+              "detail": "Affected People=30611 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 4786,
+              "detail": "Affected People=35648 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 5964,
+              "detail": "Affected People=28704 exceeds 15000 for one village"
+            },
+            {
+              "source_row": 12564,
+              "detail": "Affected People=15405 exceeds 15000 for one village"
+            }
+          ]
+        }
+      },
+      "type_failures_by_column": {
+        "Disaster Date": 1,
+        "Province Code": 1,
+        "District Code": 1,
+        "Sub-district Code": 1,
+        "Moo": 1,
+        "Village Code": 1,
+        "Aid Zone Declaration": 1,
+        "Disaster Declaration": 1,
+        "Situation Ended": 1,
+        "Affected People": 1,
+        "Affected Households": 1,
+        "Evacuees": 1,
+        "Evacuees (Households)": 1,
+        "fatalities_count": 1,
+        "Missing Persons": 1,
+        "injuries_count": 1,
+        "Housing (Units)": 1,
+        "Business (Sites)": 1,
+        "Agriculture (Acres)": 1,
+        "Livestock (Head)": 1,
+        "Fisheries (Ponds)": 1,
+        "Transportation (Sites)": 1,
+        "Health (Sites)": 1,
+        "Religion/Culture (Sites)": 1,
+        "Education/Sports (Sites)": 1,
+        "Utilities (Sites)": 1,
+        "Government Sites": 1,
+        "Other Public Benefit (Sites)": 1,
+        "Gov./Private Property (Units)": 1
+      },
       "missing_values_by_column": {
         "_id": 0,
         "Situation name": 0,
@@ -320,6 +911,53 @@
         "Government Sites": 34851,
         "Other Public Benefit (Sites)": 34749,
         "Gov./Private Property (Units)": 34831
+      },
+      "missing_pct_by_column": {
+        "_id": 0.0,
+        "Situation name": 0.0,
+        "Disaster Type": 0.0,
+        "Disaster Date": 0.0,
+        "region": 0.0,
+        "Province Code": 0.0,
+        "Province": 0.0,
+        "District Code": 0.0,
+        "District": 0.0,
+        "Sub-district Code": 4.47,
+        "Sub-district": 4.47,
+        "Moo": 4.48,
+        "Municipal Code": 95.52,
+        "Municipality": 95.52,
+        "Community": 95.52,
+        "Village Code": 0.0,
+        "District Center": 0.01,
+        "Title": 0.0,
+        "Nature/Cause": 42.74,
+        "status": 0.0,
+        "situation": 0.0,
+        "Aid Zone Declaration": 23.32,
+        "Disaster Declaration": 19.04,
+        "Other Declarations": 100.0,
+        "Situation Ended": 33.06,
+        "Affected People": 81.13,
+        "Affected Households": 76.93,
+        "Evacuees": 99.97,
+        "Evacuees (Households)": 76.93,
+        "fatalities_count": 76.93,
+        "Missing Persons": 76.93,
+        "injuries_count": 76.93,
+        "Housing (Units)": 92.35,
+        "Business (Sites)": 99.93,
+        "Agriculture (Acres)": 93.01,
+        "Livestock (Head)": 99.79,
+        "Fisheries (Ponds)": 99.21,
+        "Transportation (Sites)": 97.52,
+        "Health (Sites)": 99.97,
+        "Religion/Culture (Sites)": 99.88,
+        "Education/Sports (Sites)": 99.85,
+        "Utilities (Sites)": 99.95,
+        "Government Sites": 99.91,
+        "Other Public Benefit (Sites)": 99.62,
+        "Gov./Private Property (Units)": 99.85
       },
       "unique_values_by_column": {
         "_id": 34882,
@@ -368,25 +1006,28 @@
         "Other Public Benefit (Sites)": 18,
         "Gov./Private Property (Units)": 9
       },
+      "cleaned_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\cleaned\\flood_2567_cleaned.csv",
       "encoding": "utf-8-sig",
       "file_type": "CSV",
-      "file_name": "flood_2567.csv"
+      "file_name": "flood_2567.csv",
+      "quarantine_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\quarantine\\flood_2567_quarantine.json"
     },
     "household_income.xlsx": {
       "file_type": "XLSX",
-      "status": "PASS",
+      "status": "WARNING",
       "sheets": {
         "Sheet1": {
-          "status": "PASS",
+          "status": "WARNING",
           "issues": [],
           "notes": [
-            "Structural validation only; business rules are not yet defined.",
-            "Original column names and values are preserved."
+            "Schema, type, range and cross-field rules applied."
           ],
           "row_count": 2167,
-          "accepted_count": 2167,
-          "quarantined_count": 0,
+          "accepted_count": 2154,
+          "quarantined_count": 13,
           "duplicate_count": 0,
+          "duplicate_key_count": 14,
+          "warning_count": 14,
           "columns": [
             "รายการสถิติ",
             "อำเภอ",
@@ -396,6 +1037,69 @@
             "รายได้",
             "หน่วย"
           ],
+          "schema": {
+            "expected_columns": 7,
+            "missing_required_columns": [],
+            "missing_optional_columns": [],
+            "unexpected_columns": []
+          },
+          "rule_violations": {
+            "duplicate_key": {
+              "severity": "WARNING",
+              "count": 14,
+              "examples": [
+                {
+                  "source_row": 939,
+                  "detail": "key {'อำเภอ': 'แม่แจ่ม', 'ตำบล': 'แม่ศึก', 'พื้นที่': 'บ้าน ปางอุ๋งใหม่'} first seen at row 922"
+                },
+                {
+                  "source_row": 1477,
+                  "detail": "key {'อำเภอ': 'สันกำแพง', 'ตำบล': 'ร้องวัวแดง', 'พื้นที่': 'บ้าน ใหม่'} first seen at row 1469"
+                },
+                {
+                  "source_row": 1643,
+                  "detail": "key {'อำเภอ': 'สันทราย', 'ตำบล': 'เมืองเล็น', 'พื้นที่': 'บ้านเมืองวะ'} first seen at row 1640"
+                },
+                {
+                  "source_row": 1679,
+                  "detail": "key {'อำเภอ': 'สันป่าตอง', 'ตำบล': 'ทุ่งต้อม', 'พื้นที่': 'บ้าน แม่กุ้งน้อย'} first seen at row 1678"
+                },
+                {
+                  "source_row": 1804,
+                  "detail": "key {'อำเภอ': 'สารภี', 'ตำบล': 'ขัวมุง', 'พื้นที่': 'บ้านหัวดง'} first seen at row 1803"
+                }
+              ]
+            },
+            "invalid_number": {
+              "severity": "ERROR",
+              "count": 13,
+              "examples": [
+                {
+                  "source_row": 1545,
+                  "detail": "รายได้: below minimum 1000 ('372.827')"
+                },
+                {
+                  "source_row": 1550,
+                  "detail": "รายได้: below minimum 1000 ('427.785')"
+                },
+                {
+                  "source_row": 1559,
+                  "detail": "รายได้: below minimum 1000 ('293.668')"
+                },
+                {
+                  "source_row": 1564,
+                  "detail": "รายได้: below minimum 1000 ('283.541')"
+                },
+                {
+                  "source_row": 1569,
+                  "detail": "รายได้: below minimum 1000 ('400.856')"
+                }
+              ]
+            }
+          },
+          "type_failures_by_column": {
+            "รายได้": 13
+          },
           "missing_values_by_column": {
             "รายการสถิติ": 0,
             "อำเภอ": 0,
@@ -404,6 +1108,15 @@
             "ครัวเรือน": 0,
             "รายได้": 0,
             "หน่วย": 0
+          },
+          "missing_pct_by_column": {
+            "รายการสถิติ": 0.0,
+            "อำเภอ": 0.0,
+            "ตำบล": 0.0,
+            "พื้นที่": 0.0,
+            "ครัวเรือน": 0.0,
+            "รายได้": 0.0,
+            "หน่วย": 0.0
           },
           "unique_values_by_column": {
             "รายการสถิติ": 1,
@@ -414,26 +1127,29 @@
             "รายได้": 2161,
             "หน่วย": 1
           },
+          "cleaned_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\cleaned\\household_income_cleaned.csv",
           "file_type": "XLSX",
           "sheet_name": "Sheet1"
         }
       },
       "row_count": 2167,
-      "accepted_count": 2167,
-      "quarantined_count": 0,
-      "file_name": "household_income.xlsx"
+      "accepted_count": 2154,
+      "quarantined_count": 13,
+      "file_name": "household_income.xlsx",
+      "quarantine_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\quarantine\\household_income_quarantine.json"
     },
     "village_mapping.json": {
-      "status": "PASS",
+      "status": "WARNING",
       "issues": [],
       "notes": [
-        "Structural validation only; business rules are not yet defined.",
-        "Original column names and values are preserved."
+        "Schema, type, range and cross-field rules applied."
       ],
       "row_count": 2198,
-      "accepted_count": 2198,
-      "quarantined_count": 0,
+      "accepted_count": 2184,
+      "quarantined_count": 14,
       "duplicate_count": 0,
+      "duplicate_key_count": 0,
+      "warning_count": 11,
       "columns": [
         "pcode",
         "pname",
@@ -511,6 +1227,133 @@
         "oct_side15_condos",
         "oct_side15_condos_total"
       ],
+      "schema": {
+        "expected_columns": 13,
+        "missing_required_columns": [],
+        "missing_optional_columns": [],
+        "unexpected_columns": [
+          "mname",
+          "oct_side15_distance",
+          "oct_side15_road",
+          "oct_side15_road_name",
+          "oct_side15_road_num",
+          "oct_side15_road_distance",
+          "oct_side15_road_name2",
+          "oct_side15_road_num2",
+          "oct_side15_leader",
+          "oct_side15_leader_cause",
+          "oct_side15_local",
+          "oct_side15_local_name",
+          "oct_side15_local2",
+          "oct_side15_local2_name",
+          "oct_side15_local3",
+          "oct_side15_local3_name",
+          "oct_side15_local4",
+          "oct_side15_local4_name",
+          "oct_side15_local5",
+          "oct_side15_local5_name",
+          "oct_side15_river",
+          "oct_side15_river_name",
+          "oct_side15_sea",
+          "oct_side15_sea_name",
+          "oct_side15_lagoon",
+          "oct_side15_lagoon_name",
+          "oct_side15_mangrove",
+          "oct_side15_mangrove_name",
+          "oct_side15_mangrove_area",
+          "oct_side15_swamp",
+          "oct_side15_swamp_name",
+          "oct_side15_swamp_area",
+          "oct_side15_island",
+          "oct_side15_island_name",
+          "oct_side15_foth",
+          "oct_side15_foth_name",
+          "oct_side15_mountain",
+          "oct_side15_mountain_name",
+          "oct_side15_mountain_sea_leval",
+          "oct_side15_border",
+          "oct_side15_border_name1",
+          "oct_side15_border_distance1",
+          "oct_side15_border_name2",
+          "oct_side15_border_distance2",
+          "oct_side15_mm_type1",
+          "oct_side15_mm_type2",
+          "oct_side15_mm_type2_name",
+          "oct_side15_mm_type3",
+          "oct_side15_mm_type3_name",
+          "oct_side15_power",
+          "oct_side15_power_name",
+          "oct_side15_highvoltage",
+          "oct_side15_dam",
+          "oct_side15_dam_name",
+          "oct_side15_reservoir",
+          "oct_side15_reservoir_name",
+          "oct_side15_weir",
+          "oct_side15_weir_name",
+          "oct_side15_housing",
+          "oct_side15_housing_total",
+          "oct_side15_condos",
+          "oct_side15_condos_total"
+        ]
+      },
+      "rule_violations": {
+        "invalid_number": {
+          "severity": "ERROR",
+          "count": 23,
+          "examples": [
+            {
+              "source_row": 609,
+              "detail": "oct_side15_lat: above maximum 20.5 ('19129941542442918')"
+            },
+            {
+              "source_row": 623,
+              "detail": "oct_side15_lat: below minimum 16.5 ('13.72706875088845')"
+            },
+            {
+              "source_row": 623,
+              "detail": "oct_side15_lon: above maximum 99.8 ('100.5340875685215')"
+            },
+            {
+              "source_row": 1062,
+              "detail": "oct_side15_lat: below minimum 16.5 ('13.72706875088845')"
+            },
+            {
+              "source_row": 1062,
+              "detail": "oct_side15_lon: above maximum 99.8 ('100.5340875685215')"
+            }
+          ]
+        },
+        "total_mismatch": {
+          "severity": "WARNING",
+          "count": 11,
+          "examples": [
+            {
+              "source_row": 314,
+              "detail": "oct_side15_total != sum(oct_side15_men, oct_side15_wmen)"
+            },
+            {
+              "source_row": 653,
+              "detail": "oct_side15_total != sum(oct_side15_men, oct_side15_wmen)"
+            },
+            {
+              "source_row": 660,
+              "detail": "oct_side15_total != sum(oct_side15_men, oct_side15_wmen)"
+            },
+            {
+              "source_row": 1067,
+              "detail": "oct_side15_total != sum(oct_side15_men, oct_side15_wmen)"
+            },
+            {
+              "source_row": 1222,
+              "detail": "oct_side15_total != sum(oct_side15_men, oct_side15_wmen)"
+            }
+          ]
+        }
+      },
+      "type_failures_by_column": {
+        "oct_side15_lat": 10,
+        "oct_side15_lon": 13
+      },
       "missing_values_by_column": {
         "pcode": 0,
         "pname": 0,
@@ -587,6 +1430,83 @@
         "oct_side15_housing_total": 1792,
         "oct_side15_condos": 0,
         "oct_side15_condos_total": 2109
+      },
+      "missing_pct_by_column": {
+        "pcode": 0.0,
+        "pname": 0.0,
+        "tname": 0.0,
+        "acode": 0.0,
+        "aname": 0.0,
+        "tcode": 0.0,
+        "mcode": 0.0,
+        "mname": 0.0,
+        "oct_side15_lat": 0.0,
+        "oct_side15_lon": 0.0,
+        "oct_side15_distance": 0.82,
+        "oct_side15_road": 0.0,
+        "oct_side15_road_name": 58.46,
+        "oct_side15_road_num": 58.78,
+        "oct_side15_road_distance": 44.18,
+        "oct_side15_road_name2": 44.27,
+        "oct_side15_road_num2": 44.36,
+        "oct_side15_wmen": 0.41,
+        "oct_side15_men": 0.41,
+        "oct_side15_total": 0.41,
+        "oct_side15_house": 0.68,
+        "oct_side15_leader": 0.0,
+        "oct_side15_leader_cause": 99.36,
+        "oct_side15_local": 0.0,
+        "oct_side15_local_name": 58.69,
+        "oct_side15_local2": 0.0,
+        "oct_side15_local2_name": 50.77,
+        "oct_side15_local3": 0.0,
+        "oct_side15_local3_name": 96.31,
+        "oct_side15_local4": 0.0,
+        "oct_side15_local4_name": 95.68,
+        "oct_side15_local5": 0.0,
+        "oct_side15_local5_name": 100.0,
+        "oct_side15_river": 0.0,
+        "oct_side15_river_name": 31.12,
+        "oct_side15_sea": 0.0,
+        "oct_side15_sea_name": 100.0,
+        "oct_side15_lagoon": 0.0,
+        "oct_side15_lagoon_name": 99.86,
+        "oct_side15_mangrove": 0.0,
+        "oct_side15_mangrove_name": 100.0,
+        "oct_side15_mangrove_area": 100.0,
+        "oct_side15_swamp": 0.0,
+        "oct_side15_swamp_name": 99.95,
+        "oct_side15_swamp_area": 99.95,
+        "oct_side15_island": 0.0,
+        "oct_side15_island_name": 100.0,
+        "oct_side15_foth": 0.0,
+        "oct_side15_foth_name": 86.31,
+        "oct_side15_mountain": 0.0,
+        "oct_side15_mountain_name": 89.67,
+        "oct_side15_mountain_sea_leval": 90.08,
+        "oct_side15_border": 0.0,
+        "oct_side15_border_name1": 98.73,
+        "oct_side15_border_distance1": 98.73,
+        "oct_side15_border_name2": 100.0,
+        "oct_side15_border_distance2": 100.0,
+        "oct_side15_mm_type1": 0.0,
+        "oct_side15_mm_type2": 0.0,
+        "oct_side15_mm_type2_name": 99.59,
+        "oct_side15_mm_type3": 0.0,
+        "oct_side15_mm_type3_name": 98.04,
+        "oct_side15_power": 0.0,
+        "oct_side15_power_name": 98.23,
+        "oct_side15_highvoltage": 0.0,
+        "oct_side15_dam": 0.0,
+        "oct_side15_dam_name": 99.23,
+        "oct_side15_reservoir": 0.0,
+        "oct_side15_reservoir_name": 77.71,
+        "oct_side15_weir": 0.0,
+        "oct_side15_weir_name": 71.25,
+        "oct_side15_housing": 0.0,
+        "oct_side15_housing_total": 81.53,
+        "oct_side15_condos": 0.0,
+        "oct_side15_condos_total": 95.95
       },
       "unique_values_by_column": {
         "pcode": 1,
@@ -665,8 +1585,36 @@
         "oct_side15_condos": 2,
         "oct_side15_condos_total": 14
       },
+      "cleaned_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\cleaned\\village_mapping_cleaned.csv",
       "file_type": "JSON",
-      "file_name": "village_mapping.json"
+      "file_name": "village_mapping.json",
+      "quarantine_file": "C:\\Users\\pukun\\CS341_Groupproject\\validation\\quarantine\\village_mapping_quarantine.json"
+    }
+  },
+  "cross_file_checks": {
+    "flood_2566": {
+      "mapping_provinces": [
+        "50"
+      ],
+      "rows_in_mapping_provinces": 1198,
+      "rows_with_village_code_in_mapping": 1198,
+      "match_pct": 100.0,
+      "unmatched_examples": []
+    },
+    "flood_2567": {
+      "mapping_provinces": [
+        "50"
+      ],
+      "rows_in_mapping_provinces": 3556,
+      "rows_with_village_code_in_mapping": 3550,
+      "match_pct": 99.83,
+      "unmatched_examples": [
+        "50100114",
+        "50100217",
+        "50100114",
+        "50100114",
+        "50100217"
+      ]
     }
   }
 }
