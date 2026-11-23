@@ -82,7 +82,7 @@ python storage/run_local_queries.py    # รัน SQL ทั้งหมดใ�
 
 `build_curated.py` ต้องขึ้น `all checks passed` ผลลัพธ์ query อยู่ใน `storage/query_results/` ผลลัพธ์ทุกขั้น commit ไว้แล้ว (`transformation/output/`, `storage/curated/`, `storage/query_results/`) จึงเปิดดูได้โดยไม่ต้องรันใหม่
 
-> `run_all.py` ยังเป็นเวอร์ชันขอบเขตเดิม (เรียกสคริปต์ใน `transformation/backup/`) ให้ใช้คำสั่งด้านบนแทนจนกว่าจะอัปเดต
+> **ทางลัด:** `python run_all.py` รันคำสั่งทั้งหมดด้านบนตามลำดับในคำสั่งเดียว แล้วตรวจจำนวนแถวของผลลัพธ์ให้อัตโนมัติ (ใช้ `--from-raw` ถ้าต้องการรัน validation จากไฟล์ดิบใน `ingestion/data/` ก่อน และ `--verbose` เพื่อดูข้อความของแต่ละสคริปต์)
 
 ### 8.2 รันบน AWS (S3 + Athena)
 
@@ -118,7 +118,7 @@ python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/qu
 3. เตรียมกราฟ/ตารางและเดโมสำหรับนำเสนอ
 
 **ด้าน pipeline**
-1. อัปเดต `run_all.py` และ `orchestration/lambda_handlers.py` ให้เรียกสคริปต์ transformation ชุดใหม่ และเพิ่มขั้น `storage/build_curated.py` + อัปโหลด `curated/` (ตอนนี้ยังใช้ชุดขอบเขตเดิม)
+1. อัปเดต `orchestration/lambda_handlers.py` ให้เรียกสคริปต์ transformation ชุดใหม่ และเพิ่มขั้น `storage/build_curated.py` + อัปโหลด `curated/` (ตอนนี้ยังใช้ชุดขอบเขตเดิม ส่วน `run_all.py` อัปเดตแล้ว)
 2. Step Functions ยังต้องกดรันเอง ยังไม่มี trigger อัตโนมัติ (ต่อยอดด้วย EventBridge)
 3. จำนวนแถวที่ `VerifyBatch` ใช้เทียบใส่ตายตัวไว้ในโค้ด (`DATASETS` ใน `orchestration/lambda_handlers.py`) ต้องแก้ให้ตรงกับตารางชุดใหม่
 4. ไฟล์บน S3 ถูกเขียนทับทุกรอบ ไม่เก็บประวัติแต่ละ batch (ทางเลือก: Iceberg snapshot ใน `sql/curated/03_iceberg_optional.sql`)

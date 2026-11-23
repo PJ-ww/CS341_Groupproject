@@ -24,7 +24,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ถ้าเปลี่ยนชื่อ bucket ต้องแก้ 3 ที่ให้ตรงกัน:
 
 1. `BUCKET` ใน [`ingestion/config.py`](../ingestion/config.py)
-2. `LOCATION` ทุกตารางใน [`sql/setup/01_create_tables.sql`](../sql/setup/01_create_tables.sql)
+2. `BUCKET` ใน [`storage/schema.py`](../storage/schema.py) แล้วรัน `python storage/generate_ddl.py` เพื่อสร้าง `LOCATION` ใน [`sql/curated/01_create_curated_tables.sql`](../sql/curated/01_create_curated_tables.sql) ใหม่
 3. ค่า `"bucket"` ใน input ตอนสั่งรัน state machine (ขั้นที่ 6)
 
 ## 1. สร้าง S3 bucket และอัปโหลดข้อมูลดิบ
@@ -56,23 +56,20 @@ aws s3 cp $OUT/geographic_nso_integrated.parquet                  s3://$BUCKET/p
 
 ## 3. สร้าง Glue Data Catalog / ตาราง Athena
 
-**วิธีที่ 1: DDL (แนะนำ เพราะ schema คงที่)**
+ก่อนเริ่ม ให้เปิด Athena console ที่ region `us-east-1` ไปที่ Settings แล้วตั้ง Query result location เป็น `s3://<BUCKET>/athena-results/`
 
-1. เปิด Athena console ที่ region `us-east-1` ไปที่ Settings แล้วตั้ง Query result location เป็น `s3://<BUCKET>/athena-results/`
-2. รัน statement ใน [`sql/setup/01_create_tables.sql`](../sql/setup/01_create_tables.sql) ทีละ statement (`CREATE DATABASE` แล้วตามด้วย `CREATE EXTERNAL TABLE` ทั้ง 7 ตาราง)
-3. รัน query ท้ายไฟล์ จำนวนแถวต้องได้ `1772 / 57024 / 15400 / 76 / 144 / 48 / 10`
+ใน database `flood_recovery_db` มีตาราง 2 ชุด:
 
-หรือรันจาก CLI ทีละ statement:
+| ชุด | ตาราง | ใช้ทำอะไร | วิธีสร้าง |
+|---|---|---|---|
+| 3A processed | 7 ตารางตามชื่อโฟลเดอร์ใน `processed/` | `VerifyBatch` นับแถวเทียบกับ `DATASETS` ใน [`lambda_handlers.py`](lambda_handlers.py) | Glue Crawler |
+| 3B curated | `dim_village`, `fact_*` 3 ตาราง และ view 2 ตัว | Query ตอบ Q1–Q3 และ data quality | DDL ใน [`sql/curated/`](../sql/curated/) |
 
-```bash
-aws athena start-query-execution \
-  --query-string "CREATE DATABASE IF NOT EXISTS flood_recovery_db" \
-  --result-configuration OutputLocation=s3://$BUCKET/athena-results/
-```
-
-**วิธีที่ 2: Glue Crawler (วิธีที่ทีมใช้ตอนพัฒนา)**
+### 3A. ตาราง processed (Glue Crawler)
 
 ต้องมีไฟล์ใน `processed/` แล้ว (ทำขั้นที่ 2 ก่อน หรือรัน state machine ครั้งแรกให้ผ่าน TransformBatch)
+
+DDL แบบเขียนเองของ 7 ตารางนี้ (`sql/setup/01_create_tables.sql`) ถูกลบออกจาก repo แล้ว ถ้าต้องการใช้ DDL แทน crawler ให้ดึงไฟล์จากประวัติ git ด้วย `git show b3c801f^:sql/setup/01_create_tables.sql`
 
 ```bash
 aws glue create-database --database-input Name=flood_recovery_db
@@ -94,7 +91,21 @@ aws glue start-crawler --name cs341-processed-crawler
 aws glue get-tables --database-name flood_recovery_db --query "TableList[].Name"
 ```
 
-ชื่อตารางที่ crawler สร้างต้องตรงกับชื่อโฟลเดอร์ทั้ง 7 ชื่อข้างบน ถ้าไม่ตรง (เช่นมี suffix) ให้ใช้วิธีที่ 1 แทน
+ตรวจจำนวนแถวด้วย `SELECT COUNT(*)` ทีละตาราง ต้องได้ `1772 / 57024 / 15400 / 76 / 144 / 48 / 10` ตามลำดับใน `DATASETS`
+
+### 3B. ตาราง curated (DDL)
+
+```bash
+python storage/build_curated.py
+python storage/upload_to_s3.py
+python storage/run_athena.py --sql sql/curated/01_create_curated_tables.sql
+python storage/run_athena.py --sql sql/curated/02_create_views.sql
+python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/queries --save
+```
+
+หรือเปิด Athena Query Editor แล้วรันทีละ statement จากไฟล์เดียวกัน รายละเอียดอยู่ใน [`storage/README.md`](../storage/README.md)
+
+ชื่อตารางที่ crawler สร้างต้องตรงกับชื่อโฟลเดอร์ทั้ง 7 ชื่อข้างบน ถ้าไม่ตรง (เช่นมี suffix) ให้ใช้ DDL จากประวัติ git ตามที่เขียนไว้ข้างบนแทน
 
 ## 4. สร้าง IAM roles
 

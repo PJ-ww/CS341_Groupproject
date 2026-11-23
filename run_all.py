@@ -1,10 +1,11 @@
-"""รัน Pipeline ส่วน Validation -> Transformation -> Integration ในเครื่อง ด้วยคำสั่งเดียว
+"""รัน Pipeline ส่วน Transformation -> Integration -> Storage -> Query ในเครื่อง ด้วยคำสั่งเดียว
 
-ไม่ใช้ AWS: อ่านข้อมูลดิบจาก ingestion/data/ แล้วเขียนผลลัพธ์ที่
-  validation/ และ transformation/output/, transformation/reports/
+ไม่ใช้ AWS: เริ่มจาก validation/cleaned/ (commit ไว้แล้ว) แล้วเขียนผลลัพธ์ที่
+  transformation/output/, transformation/reports/, storage/curated/, storage/query_results/
 
 วิธีใช้ (รันจาก root ของโปรเจกต์):
-    python run_all.py              # รันทุกขั้น แสดงเฉพาะสถานะ
+    python run_all.py              # เริ่มจาก validation/cleaned/ แสดงเฉพาะสถานะ
+    python run_all.py --from-raw   # รัน validation จากไฟล์ดิบใน ingestion/data/ ก่อน
     python run_all.py --verbose    # แสดงข้อความที่แต่ละสคริปต์พิมพ์ออกมาด้วย
 
 หยุดทันทีเมื่อมีขั้นใดล้มเหลว (exit code 1) และจบด้วยการตรวจจำนวนแถวของผลลัพธ์
@@ -19,30 +20,33 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
-# ลำดับสำคัญ: integrate_data.py ต้องรันหลัง create_features.py และ transform_nso_income.py
-STEPS = [
-    "prepare_local_data.py",
+# ต้องมีไฟล์ดิบ 5 ไฟล์ใน ingestion/data/ (ดู ingestion/config.py)
+VALIDATION_STEPS = [
     "ingestion/validate_data.py",
-    "transformation/scripts/clean_data.py",
-    "transformation/scripts/standardize.py",
-    "transformation/scripts/create_features.py",
-    "transformation/scripts/transform_flood_village_stats.py",
-    "transformation/scripts/transform_nso_income.py",
-    "transformation/scripts/transform_disaster_budget.py",
-    "transformation/scripts/transform_flood_affected_households.py",
-    "transformation/scripts/transform_affected_households_summary.py",
-    "transformation/scripts/integrate_data.py",
 ]
 
-# ไฟล์ผลลัพธ์ -> จำนวนแถวที่คาดหวัง (ตรงกับ transformation/README.md)
+# ลำดับสำคัญ: integrate_* ต้องรันหลัง transform_* และ build_curated.py ต้องรันหลังสุดของ transformation
+STEPS = [
+    "transformation/scripts/transform_flood.py",
+    "transformation/scripts/transform_damage.py",
+    "transformation/scripts/transform_household_income.py",
+    "transformation/scripts/transform_village_mapping.py",
+    "transformation/scripts/integrate_flood_mapping.py",
+    "transformation/scripts/integrate_household_income_mapping.py",
+    "storage/build_curated.py",
+    "storage/run_local_queries.py",
+]
+
+# ไฟล์ผลลัพธ์ -> จำนวนแถวที่คาดหวัง (ตรงกับ transformation/README.md และ docs/06-storage-data-model-query.md)
 EXPECTED_ROWS = {
-    "geographic_data_features.csv": 1772,
-    "flood_village_stats_transformed.csv": 57024,
-    "nso_household_income_transformed.csv": 15400,
-    "disaster_budget_2564_transformed.csv": 76,
-    "flood_affected_households_transformed.csv": 144,
-    "affected_households_summary_transformed.csv": 48,
-    "geographic_nso_integrated.csv": 10,
+    "flood_2566_transformed.csv": 1198,
+    "flood_2567_transformed.csv": 3556,
+    "flood_chiangmai_combined.csv": 4754,
+    "chiangmai_damage_transformed.csv": 866,
+    "household_income_transformed.csv": 2154,
+    "village_mapping_transformed.csv": 2184,
+    "flood_mapping_integrated.csv": 4754,
+    "household_income_mapping_integrated.csv": 2154,
 }
 
 
@@ -73,7 +77,7 @@ def check_outputs():
             print(f"  [FAIL] {name}: ไม่พบไฟล์")
             all_ok = False
             continue
-        rows = len(pd.read_csv(path))
+        rows = len(pd.read_csv(path, dtype=str))
         status = "OK" if rows == expected else "FAIL"
         all_ok &= rows == expected
         print(f"  [{status}] {name}: {rows:,} แถว (คาดหวัง {expected:,})")
@@ -82,10 +86,13 @@ def check_outputs():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--from-raw", action="store_true",
+                        help="รัน validation จากไฟล์ดิบใน ingestion/data/ ก่อน (ค่าเริ่มต้นใช้ validation/cleaned/ ที่ commit ไว้)")
     parser.add_argument("--verbose", action="store_true", help="แสดงข้อความของแต่ละสคริปต์")
     args = parser.parse_args()
 
-    for step in STEPS:
+    steps = (VALIDATION_STEPS if args.from_raw else []) + STEPS
+    for step in steps:
         if not run_step(step, args.verbose):
             print(f"\nหยุดที่ขั้น {step} กรุณาแก้ปัญหาตามข้อความด้านบนแล้วรันใหม่")
             sys.exit(1)
