@@ -1,0 +1,54 @@
+{
+  "source_file": "ingestion\\data\\raw\\pdpm\\flood_relief\\pdpm_flood_affected_households.csv",
+  "output_csv": "transformation\\output\\flood_affected_households_transformed.csv",
+  "output_parquet": "transformation\\output\\flood_affected_households_transformed.parquet",
+  "original_rows": 144,
+  "transformed_rows": 144,
+  "original_columns": [
+    "ปี",
+    "รายการ",
+    "อำเภอ",
+    "ตำบล",
+    "จำนวน",
+    "หน่วย",
+    "ที่มา"
+  ],
+  "transformed_columns": [
+    "ปี",
+    "รายการ",
+    "อำเภอ",
+    "ตำบล",
+    "จำนวน",
+    "หน่วย",
+    "ที่มา"
+  ],
+  "rows_removed": 0,
+  "year_distribution": {
+    "2565": 48,
+    "2566": 48,
+    "2567": 48
+  },
+  "unit_distribution": {
+    "ครัวเรือน": 144
+  },
+  "missing_values": {
+    "ปี": 0,
+    "รายการ": 0,
+    "อำเภอ": 0,
+    "ตำบล": 0,
+    "จำนวน": 0,
+    "หน่วย": 0,
+    "ที่มา": 0
+  },
+  "duplicate_rows": 0,
+  "notes": [
+    "Column names and text values were stripped of whitespace.",
+    "Year was converted to nullable integer.",
+    "Household count was converted to nullable integer.",
+    "Zero values were preserved.",
+    "Missing values were preserved.",
+    "No rows were removed.",
+    "Data represents flood-affected households in Phang Nga province.",
+    "Data was not joined with Yasothon geographic data because the geographic areas differ."
+  ]
+}

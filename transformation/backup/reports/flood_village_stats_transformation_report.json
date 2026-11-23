@@ -1,0 +1,91 @@
+{
+  "input_file": "ingestion\\data\\raw\\pdpm\\flood_stats\\pdpm_flood_village_stats.xlsx",
+  "input_status": "Raw source used because a separate Accepted file was not available locally; see validation report.",
+  "sheet_name": "_SELECT_PROVINCE_CODE_PROVINCE_",
+  "output_rows": 57024,
+  "input_rows": 57024,
+  "rows_removed": 0,
+  "original_columns": [
+    "PROVINCE_CODE",
+    "PROVINCE_NAME",
+    "AMPHUR_CODE",
+    "AMPHUR_NAME     ",
+    "DISTRICT_CODE",
+    "DISTRICT_NAME   ",
+    "MOO_NO",
+    "ORG_CODE",
+    "ORG_NAME",
+    "COMMUNITY_NAME",
+    "MOO_ID    ",
+    "DIS_TYPE_NAME",
+    "Y2562",
+    "Y2563",
+    "Y2564",
+    "Y2565",
+    "Y2566",
+    "Y2567"
+  ],
+  "column_mapping": {
+    "PROVINCE_CODE": "PROVINCE_CODE",
+    "PROVINCE_NAME": "PROVINCE_NAME",
+    "AMPHUR_CODE": "AMPHUR_CODE",
+    "AMPHUR_NAME     ": "AMPHUR_NAME",
+    "DISTRICT_CODE": "DISTRICT_CODE",
+    "DISTRICT_NAME   ": "DISTRICT_NAME",
+    "MOO_NO": "MOO_NO",
+    "ORG_CODE": "ORG_CODE",
+    "ORG_NAME": "ORG_NAME",
+    "COMMUNITY_NAME": "COMMUNITY_NAME",
+    "MOO_ID    ": "MOO_ID",
+    "DIS_TYPE_NAME": "DIS_TYPE_NAME",
+    "Y2562": "Y2562",
+    "Y2563": "Y2563",
+    "Y2564": "Y2564",
+    "Y2565": "Y2565",
+    "Y2566": "Y2566",
+    "Y2567": "Y2567"
+  },
+  "year_columns": [
+    "Y2562",
+    "Y2563",
+    "Y2564",
+    "Y2565",
+    "Y2566",
+    "Y2567"
+  ],
+  "code_columns": [
+    "PROVINCE_CODE",
+    "AMPHUR_CODE",
+    "DISTRICT_CODE",
+    "MOO_NO",
+    "ORG_CODE",
+    "MOO_ID"
+  ],
+  "year_missing_counts": {
+    "Y2562": 42729,
+    "Y2563": 40317,
+    "Y2564": 30675,
+    "Y2565": 20670,
+    "Y2566": 35933,
+    "Y2567": 56817
+  },
+  "feature_created": {
+    "years_with_reported_value": {
+      "description": "Number of year columns containing a reported value",
+      "minimum": 1,
+      "maximum": 6
+    }
+  },
+  "output_files": [
+    "transformation\\output\\flood_village_stats_transformed.csv",
+    "transformation\\output\\flood_village_stats_transformed.parquet"
+  ],
+  "notes": [
+    "No source rows were intentionally removed.",
+    "Blank yearly values remain missing, not zero.",
+    "Area codes are stored as strings.",
+    "Text columns are normalized to string type.",
+    "Original column names are recorded in column_mapping.",
+    "The feature counts reported yearly values, not flood events."
+  ]
+}

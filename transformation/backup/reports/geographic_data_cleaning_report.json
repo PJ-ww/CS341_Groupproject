@@ -1,0 +1,44 @@
+{
+    "dataset": "Geographic_Data",
+    "input_file": "validation\\cleaned\\Geographic_Data_deduplicated.csv",
+    "output_file": "transformation\\output\\geographic_data_cleaned.csv",
+    "original_rows": 1772,
+    "output_rows": 1772,
+    "rows_removed": 0,
+    "columns": [
+        "ปี",
+        "รายการ",
+        "อำเภอ",
+        "ตำบล",
+        "หมู่ที่",
+        "ความเสี่ยง",
+        "เหล่งที่มา"
+    ],
+    "missing_values_before": {
+        "ปี": 0,
+        "รายการ": 0,
+        "อำเภอ": 0,
+        "ตำบล": 0,
+        "หมู่ที่": 2,
+        "ความเสี่ยง": 0,
+        "เหล่งที่มา": 0
+    },
+    "missing_values_after": {
+        "ปี": 0,
+        "รายการ": 0,
+        "อำเภอ": 0,
+        "ตำบล": 0,
+        "หมู่ที่": 2,
+        "ความเสี่ยง": 0,
+        "เหล่งที่มา": 0
+    },
+    "duplicate_rows_found": 0,
+    "transformations": [
+        "Removed leading and trailing whitespace from text values",
+        "Converted year to nullable integer",
+        "Converted หมู่ที่ to nullable integer",
+        "Preserved missing values",
+        "Preserved original column names",
+        "Did not remove rows"
+    ]
+}

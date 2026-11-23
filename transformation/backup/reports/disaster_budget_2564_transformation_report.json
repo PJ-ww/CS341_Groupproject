@@ -1,0 +1,37 @@
+{
+  "source_file": "ingestion\\data\\raw\\pdpm\\flood_stats\\pdpm_2564_by_disaster_type.csv",
+  "output_csv": "transformation\\output\\disaster_budget_2564_transformed.csv",
+  "output_parquet": "transformation\\output\\disaster_budget_2564_transformed.parquet",
+  "original_rows": 83,
+  "transformed_rows": 76,
+  "rows_excluded": 7,
+  "province_count": 76,
+  "year": 2564,
+  "missing_values": {
+    "ปี": 0,
+    "ที่": 0,
+    "จังหวัด": 0,
+    "ด้านดำรงชีพ": 37,
+    "ด้านสังคมสงเคราะห์": 76,
+    "ด้านการแพทย์": 76,
+    "ด้านเกษตรพืช": 25,
+    "ด้านเกษตรประมง": 34,
+    "ด้านเกษตรปศุสัตว์": 52,
+    "ด้านเกษตรอื่น": 76,
+    "ด้านบรรเทา": 48,
+    "ด้านการปฏิบัติงานให้": 65,
+    "ป้องกันหรือยับยั้ง": 4,
+    "รวมทั้งสิ้น": 1,
+    "วงเงิน": 2,
+    "วงเงินอนุมัติ": 7,
+    "วงเงินไม่อนุมัติ": 68
+  },
+  "notes": [
+    "Only province rows from section 1 (วงเงินจังหวัด) were selected.",
+    "Summary rows and non-province rows were excluded.",
+    "Commas were removed before numeric conversion.",
+    "Dash values (- and --) were treated as missing, not zero.",
+    "Original source data was not modified.",
+    "The dataset represents province-level budget data for Buddhist year 2564."
+  ]
+}
