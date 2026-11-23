@@ -1,0 +1,54 @@
+{
+    "dataset": "Chiang Mai Damage",
+    "input_file": "validation\\cleaned\\chiangmai_damage_cleaned.csv",
+    "output_file": "transformation\\output\\chiangmai_damage_transformed.csv",
+    "input_rows": 866,
+    "output_rows": 866,
+    "input_columns": 14,
+    "output_columns": 15,
+    "rows_by_year": {
+        "2563": 121,
+        "2564": 134,
+        "2565": 309,
+        "2566": 120,
+        "2567": 182
+    },
+    "missing_values": {
+        "source_record_id": 0,
+        "source_year": 0,
+        "district": 0,
+        "subdistrict_id": 0,
+        "village_id": 0,
+        "disaster_date": 0,
+        "affected_people": 0,
+        "affected_households": 0,
+        "evacuated_households": 0,
+        "evacuated_people": 0,
+        "deaths": 0,
+        "missing_people": 0,
+        "injured_people": 0,
+        "houses_damaged": 0,
+        "partially_damaged_houses": 302
+    },
+    "numeric_conversion_errors": {
+        "source_year": 0,
+        "affected_people": 0,
+        "affected_households": 0,
+        "evacuated_households": 0,
+        "evacuated_people": 0,
+        "deaths": 0,
+        "missing_people": 0,
+        "injured_people": 0,
+        "houses_damaged": 0,
+        "partially_damaged_houses": 0
+    },
+    "date_conversion_errors": 0,
+    "duplicate_location_date_rows": 25,
+    "processing_notes": [
+        "All source records are retained.",
+        "Subdistrict and village identifiers are preserved as strings.",
+        "Numeric values are converted without replacing missing values with zero.",
+        "Disaster dates are standardized to YYYY-MM-DD.",
+        "Records are not aggregated across different disaster dates."
+    ]
+}
