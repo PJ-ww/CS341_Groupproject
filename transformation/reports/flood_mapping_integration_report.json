@@ -1,0 +1,25 @@
+{
+    "dataset": "Flood and Village Mapping Integration",
+    "flood_input": "transformation\\output\\flood_chiangmai_combined.csv",
+    "mapping_input": "transformation\\output\\village_mapping_transformed.csv",
+    "output_file": "transformation\\output\\flood_mapping_integrated.csv",
+    "join_key": "village_code",
+    "join_type": "left",
+    "validation": "many_to_one",
+    "flood_input_rows": 4754,
+    "mapping_input_rows": 2184,
+    "output_rows": 4754,
+    "output_columns": 69,
+    "matched_rows": 4721,
+    "unmatched_rows": 33,
+    "match_rate_percent": 99.31,
+    "unmatched_unique_village_codes": 13,
+    "notes": [
+        "Left join preserves all flood records.",
+        "Mapping village codes must be unique.",
+        "Unmatched flood records are retained.",
+        "No mapping values are invented or filled.",
+        "Quarantined mapping records are not included.",
+        "Only selected village mapping attributes are added."
+    ]
+}

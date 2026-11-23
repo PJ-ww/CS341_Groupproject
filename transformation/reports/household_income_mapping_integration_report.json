@@ -1,0 +1,40 @@
+{
+    "dataset": "Household Income and Village Mapping Integration",
+    "income_input": "transformation\\output\\household_income_transformed.csv",
+    "mapping_input": "transformation\\output\\village_mapping_transformed.csv",
+    "output_file": "transformation\\output\\household_income_mapping_integrated.csv",
+    "join_keys": [
+        "district",
+        "subdistrict",
+        "area"
+    ],
+    "normalization_rules": [
+        "Trim leading and trailing whitespace.",
+        "Remove only the leading Thai word 'บ้าน' from area names.",
+        "Preserve parentheses and their contents.",
+        "Do not automatically correct spelling differences."
+    ],
+    "join_type": "left",
+    "matching_rule": "Join only when the normalized location key matches exactly one mapping record.",
+    "income_input_rows": 2154,
+    "mapping_input_rows": 2184,
+    "output_rows": 2154,
+    "output_columns": 27,
+    "unique_match_rows": 1448,
+    "ambiguous_rows": 28,
+    "unmatched_rows": 678,
+    "unique_match_rate_percent": 67.22,
+    "ambiguous_rate_percent": 1.3,
+    "unmatched_rate_percent": 31.48,
+    "unique_matched_village_codes": 1446,
+    "notes": [
+        "Left join preserves all household income records.",
+        "Only uniquely matched location keys receive mapping attributes.",
+        "Ambiguous location keys are not arbitrarily assigned.",
+        "Unmatched records are retained without mapping attributes.",
+        "Duplicate income records are preserved.",
+        "No mapping values are invented or filled.",
+        "Household income data has no year field.",
+        "Parenthetical text in area names is preserved."
+    ]
+}
