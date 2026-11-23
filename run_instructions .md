@@ -155,7 +155,7 @@ python orchestration/build_package.py
 |---|---|---|
 | อัปโหลดข้อมูลขึ้น S3 | `ingestion/ingest.py` | ต้องมี AWS Credentials; ถ้ารันโดยไม่มี จะขึ้น error ซึ่งเป็นเรื่องปกติ |
 | Orchestration | `orchestration/lambda_handlers.py`, `state_machine.asl.json` | ทำงานบน AWS Lambda และ Step Functions |
-| Query ด้วย Athena | `sql/analysis/*.sql`, `sql/data_quality/*.sql` | ต้องรันบน Athena (database `flood_recovery_db`); อาจารย์อ่านโค้ด SQL ได้โดยตรง |
+| Query ด้วย Athena | `sql/curated/` (ตาราง/view, `data_quality/`, `queries/`) | ต้องรันบน Athena (database `flood_recovery_db`); อาจารย์อ่านโค้ด SQL ได้โดยตรง |
 
 หลักฐานการทำงานบน AWS ดูได้จาก:
 - Demo Video: https://youtu.be/vEXtP3JA8TA

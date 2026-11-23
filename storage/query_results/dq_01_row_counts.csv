@@ -1,0 +1,10 @@
+﻿table_name,source_year,row_count
+dim_village,,2184
+fact_disaster_damage,2563,121
+fact_disaster_damage,2564,134
+fact_disaster_damage,2565,309
+fact_disaster_damage,2566,120
+fact_disaster_damage,2567,182
+fact_flood_report,2566,1198
+fact_flood_report,2567,3556
+fact_household_income,,2154

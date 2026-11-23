@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-11-23T18:32:21+00:00",
+  "output_dir": "storage/curated",
+  "tables": {
+    "dim_village": {
+      "source_file": "transformation/output/village_mapping_transformed.csv",
+      "grain": "1 แถว = 1 หมู่บ้านในจังหวัดเชียงใหม่ (ข้อมูล ณ ปีที่สำรวจ ไม่แยกปี)",
+      "primary_key": [
+        "village_code"
+      ],
+      "partition_column": null,
+      "partitions": null,
+      "source_rows": 2184,
+      "output_rows": 2184,
+      "columns": 75,
+      "parquet_files": [
+        "storage/curated/dim_village/part-0.parquet"
+      ],
+      "csv_bytes": 1041728,
+      "parquet_bytes": 241590,
+      "notes": [
+        "subdistrict_code แปลงจาก 8 หลัก (xxxxxx00) เป็น 6 หลักให้ตรงกับข้อมูลน้ำท่วม"
+      ]
+    },
+    "fact_flood_report": {
+      "source_file": "transformation/output/flood_chiangmai_combined.csv",
+      "grain": "1 แถว = 1 หมู่บ้านที่ถูกรายงานใน 1 เหตุการณ์อุทกภัย (ปภ.)",
+      "primary_key": [
+        "source_year",
+        "source_record_id"
+      ],
+      "partition_column": "source_year",
+      "partitions": {
+        "2566": 1198,
+        "2567": 3556
+      },
+      "source_rows": 4754,
+      "output_rows": 4754,
+      "columns": 51,
+      "parquet_files": [
+        "storage/curated/fact_flood_report/source_year=2566/part-0.parquet",
+        "storage/curated/fact_flood_report/source_year=2567/part-0.parquet"
+      ],
+      "csv_bytes": 1835951,
+      "parquet_bytes": 141173,
+      "notes": []
+    },
+    "fact_disaster_damage": {
+      "source_file": "transformation/output/chiangmai_damage_transformed.csv",
+      "grain": "1 แถว = 1 รายการความเสียหายจากภัยพิบัติ (อำเภอ/ตำบล/หมู่ ต่อวันที่เกิดเหตุ)",
+      "primary_key": [
+        "source_record_id"
+      ],
+      "partition_column": "source_year",
+      "partitions": {
+        "2563": 121,
+        "2564": 134,
+        "2565": 309,
+        "2566": 120,
+        "2567": 182
+      },
+      "source_rows": 866,
+      "output_rows": 866,
+      "columns": 16,
+      "parquet_files": [
+        "storage/curated/fact_disaster_damage/source_year=2563/part-0.parquet",
+        "storage/curated/fact_disaster_damage/source_year=2564/part-0.parquet",
+        "storage/curated/fact_disaster_damage/source_year=2565/part-0.parquet",
+        "storage/curated/fact_disaster_damage/source_year=2566/part-0.parquet",
+        "storage/curated/fact_disaster_damage/source_year=2567/part-0.parquet"
+      ],
+      "csv_bytes": 70218,
+      "parquet_bytes": 69792,
+      "notes": [
+        "เพิ่ม district_code โดยเทียบชื่ออำเภอกับ dim_village (ตรงกันครบทุกแถว)"
+      ]
+    },
+    "fact_household_income": {
+      "source_file": "transformation/output/household_income_mapping_integrated.csv",
+      "grain": "1 แถว = 1 พื้นที่ (บ้าน/ชุมชน) ในข้อมูลรายได้ครัวเรือนเฉลี่ย ไม่มีปีกำกับ",
+      "primary_key": [
+        "income_record_id"
+      ],
+      "partition_column": null,
+      "partitions": null,
+      "source_rows": 2154,
+      "output_rows": 2154,
+      "columns": 9,
+      "parquet_files": [
+        "storage/curated/fact_household_income/part-0.parquet"
+      ],
+      "csv_bytes": 652043,
+      "parquet_bytes": 78934,
+      "notes": [
+        "ตัดคอลัมน์ statistic/unit ที่มีค่าเดียวทั้งตาราง แล้วใส่หน่วยไว้ในชื่อคอลัมน์แทน",
+        "เก็บเฉพาะ village_code + mapping_match_status; คุณลักษณะหมู่บ้านดึงจาก dim_village ตอน query"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "dim_village: output rows == source rows (2184 vs 2184)",
+      "passed": true
+    },
+    {
+      "check": "dim_village: primary key ['village_code'] unique (duplicates=0)",
+      "passed": true
+    },
+    {
+      "check": "dim_village: primary key not null (null rows=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_flood_report: output rows == source rows (4754 vs 4754)",
+      "passed": true
+    },
+    {
+      "check": "fact_flood_report: primary key ['source_year', 'source_record_id'] unique (duplicates=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_flood_report: primary key not null (null rows=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_disaster_damage: output rows == source rows (866 vs 866)",
+      "passed": true
+    },
+    {
+      "check": "fact_disaster_damage: primary key ['source_record_id'] unique (duplicates=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_disaster_damage: primary key not null (null rows=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_household_income: output rows == source rows (2154 vs 2154)",
+      "passed": true
+    },
+    {
+      "check": "fact_household_income: primary key ['income_record_id'] unique (duplicates=0)",
+      "passed": true
+    },
+    {
+      "check": "fact_household_income: primary key not null (null rows=0)",
+      "passed": true
+    }
+  ]
+}

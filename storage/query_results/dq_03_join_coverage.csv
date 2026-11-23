@@ -1,0 +1,4 @@
+﻿relationship,fact_rows,matched_rows,match_pct
+fact_flood_report -> dim_village (village_code),4754,4721.0,99.31
+fact_household_income -> dim_village (unique_match only),2154,1448.0,67.22
+fact_disaster_damage -> dim_village (district_code),866,866.0,100.0

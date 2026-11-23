@@ -1,0 +1,8 @@
+﻿table_name,source_year,row_count,pct_affected_households_filled,pct_affected_people_filled,pct_housing_damage_filled
+fact_disaster_damage,2563,121,100.0,100.0,100.0
+fact_disaster_damage,2564,134,100.0,100.0,100.0
+fact_disaster_damage,2565,309,100.0,100.0,100.0
+fact_disaster_damage,2566,120,100.0,100.0,100.0
+fact_disaster_damage,2567,182,100.0,100.0,100.0
+fact_flood_report,2566,1198,15.9,10.6,1.5
+fact_flood_report,2567,3556,6.1,5.2,2.8

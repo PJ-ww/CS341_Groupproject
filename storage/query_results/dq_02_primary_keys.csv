@@ -1,0 +1,5 @@
+﻿table_name,duplicate_keys,null_keys
+dim_village,0,0.0
+fact_flood_report,0,0.0
+fact_disaster_damage,0,0.0
+fact_household_income,0,0.0
