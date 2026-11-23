@@ -1,5 +1,6 @@
 boto3==1.43.126
 botocore==1.43.126
+duckdb==2.0.1
 et-xmlfile==2.0.0
 jmespath==1.1.0
 numpy==2.4.6
