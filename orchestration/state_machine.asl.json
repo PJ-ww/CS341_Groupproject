@@ -9,6 +9,7 @@
       "ResultSelector": { "already_processed.$": "$.Payload.already_processed" },
       "ResultPath": "$.check",
       "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
+      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
       "Next": "AlreadyProcessed?"
     },
     "AlreadyProcessed?": {
@@ -28,6 +29,7 @@
       },
       "ResultPath": "$.validation",
       "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
+      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
       "Next": "Valid?"
     },
     "Valid?": {
@@ -40,6 +42,7 @@
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": { "FunctionName": "cs341-quarantine-batch", "Payload.$": "$" },
       "ResultPath": null,
+      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
       "Next": "BatchRejected"
     },
     "BatchRejected": {
@@ -53,6 +56,7 @@
       "Parameters": { "FunctionName": "cs341-transform-batch", "Payload.$": "$" },
       "ResultPath": null,
       "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
+      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
       "Next": "VerifyBatch"
     },
     "VerifyBatch": {
@@ -61,7 +65,13 @@
       "Parameters": { "FunctionName": "cs341-verify-batch", "Payload.$": "$" },
       "ResultPath": null,
       "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
+      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
       "End": true
+    },
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "PipelineExecutionFailed",
+      "Cause": "A Lambda task failed after retries. Check CloudWatch logs and the task error."
     }
   }
 }

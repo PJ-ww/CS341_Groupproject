@@ -1,4 +1,4 @@
-"""CS341 Flood Recovery - AWS Lambda handlers (Person 5).
+"""Chiang Mai Flood Recovery - AWS Lambda handlers (Person 5).
 
 Five handlers share this one file. Each Lambda wraps the existing scripts from
 ingestion/ and transformation/scripts/ WITHOUT changing them:
@@ -7,7 +7,8 @@ ingestion/ and transformation/scripts/ WITHOUT changing them:
   3. run the script with subprocess
   4. upload the outputs back to S3
 
-Step Functions passes the same input to every step:
+The current pipeline handles five Chiang Mai source files for Buddhist years
+2566-2567. Step Functions passes the same input to every step:
     {"bucket": "cs341-flood-recovery", "batch_id": "2026-11"}
 """
 import json
@@ -15,7 +16,6 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,29 +26,40 @@ PKG_DIR = Path(__file__).resolve().parent          # /var/task in Lambda
 WORK_DIR = Path(os.environ.get("WORK_DIR", "/tmp/work"))
 DEFAULT_BUCKET = os.environ.get("BUCKET", "cs341-flood-recovery")
 DATABASE = os.environ.get("ATHENA_DATABASE", "flood_recovery_db")
-ATHENA_OUTPUT_PREFIX = "athena-results/"
 
 s3 = boto3.client("s3")
-athena = boto3.client("athena")
 
-# order matters: integrate_data needs create_features + transform_nso_income first
+# order matters: integration runs after all four transformations
 TRANSFORM_SCRIPTS = [
-    "clean_data.py", "standardize.py", "create_features.py",
-    "transform_flood_village_stats.py", "transform_nso_income.py",
-    "transform_disaster_budget.py", "transform_flood_affected_households.py",
-    "transform_affected_households_summary.py", "integrate_data.py",
+    "transform_flood.py",
+    "transform_damage.py",
+    "transform_household_income.py",
+    "transform_village_mapping.py",
+    "integrate_flood_mapping.py",
+    "integrate_household_income_mapping.py",
 ]
 
-# athena table / processed folder, output file, expected rows (Person 3 + 4 reports)
+# output file and expected rows from the committed transformation reports.
+# Files are uploaded under transformation/output/ in S3.
 DATASETS = [
-    ("geographic", "geographic_data_features.csv", 1772),
-    ("flood_village_stats", "flood_village_stats_transformed.parquet", 57024),
-    ("nso_income", "nso_household_income_transformed.parquet", 15400),
-    ("disaster_budget", "disaster_budget_2564_transformed.parquet", 76),
-    ("flood_affected_households", "flood_affected_households_transformed.parquet", 144),
-    ("affected_households_summary", "affected_households_summary_transformed.parquet", 48),
-    ("geographic_nso_integrated", "geographic_nso_integrated.parquet", 10),
+    ("flood_2566_transformed.csv", 1198),
+    ("flood_2567_transformed.csv", 3556),
+    ("flood_chiangmai_combined.csv", 4754),
+    ("chiangmai_damage_transformed.csv", 866),
+    ("household_income_transformed.csv", 2154),
+    ("village_mapping_transformed.csv", 2184),
+    ("flood_mapping_integrated.csv", 4754),
+    ("household_income_mapping_integrated.csv", 2154),
 ]
+REPORTS = [
+    "damage_transformation_report.json",
+    "flood_mapping_integration_report.json",
+    "flood_transformation_report.json",
+    "household_income_mapping_integration_report.json",
+    "household_income_transformation_report.json",
+    "village_mapping_transformation_report.json",
+]
+TRANSFORMATION_PREFIX = "transformation/"
 
 
 # ---------------------------------------------------------------- helpers
@@ -61,7 +72,7 @@ def _params(event):
 
 
 def _marker_key(batch_id):
-    return f"processed/_success/batch_id={batch_id}/_SUCCESS.json"
+    return f"{TRANSFORMATION_PREFIX}_success/batch_id={batch_id}/_SUCCESS.json"
 
 
 def _key_exists(bucket, key):
@@ -146,9 +157,9 @@ def validate_batch(event, context):
     report_path = wd / "validation" / "reports" / "validation_report.json"
     quarantined = 0
     if report_path.exists():
-        for rep in json.loads(report_path.read_text(encoding="utf-8")):
-            for table in rep.get("sheets", {"csv": rep}).values():
-                quarantined += table.get("quarantined_count", 0) if isinstance(table, dict) else 0
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        if isinstance(report, dict):
+            quarantined = int(report.get("quarantined_count", 0))
 
     _upload_tree(wd / "validation", bucket, f"validation/batch_id={batch_id}/")
     reason = "ok" if valid else "validate_data.py failed: " + (proc.stdout + proc.stderr)[-500:]
@@ -179,11 +190,11 @@ def quarantine_batch(event, context):
 
 # ---------------------------------------------------------------- 4. TransformBatch
 def transform_batch(event, context):
-    """Run the 9 transformation scripts of Person 3, upload the 7 datasets to processed/."""
+    """Run Chiang Mai transformations and upload outputs/reports to S3."""
     bucket, batch_id = _params(event)
     wd = _prepare_workdir()
 
-    # raw/ -> ingestion/data/raw/...  (same layout the scripts expect)
+    # Download the five raw source files into the paths expected by config.py.
     paginator = s3.get_paginator("list_objects_v2")
     for page in paginator.paginate(Bucket=bucket, Prefix="raw/"):
         for obj in page.get("Contents", []):
@@ -194,7 +205,7 @@ def transform_batch(event, context):
             dest.parent.mkdir(parents=True, exist_ok=True)
             s3.download_file(bucket, key, str(dest))
 
-    # validation/cleaned -> validation/cleaned  (clean_data.py reads the deduplicated geographic file)
+    # Download validation outputs produced by ValidateBatch.
     cleaned_prefix = f"validation/batch_id={batch_id}/cleaned/"
     for page in paginator.paginate(Bucket=bucket, Prefix=cleaned_prefix):
         for obj in page.get("Contents", []):
@@ -208,40 +219,46 @@ def transform_batch(event, context):
             raise RuntimeError(f"{name} failed: {(proc.stderr or proc.stdout)[-800:]}")
 
     out_dir = wd / "transformation" / "output"
-    for folder, fname, _ in DATASETS:
-        s3.upload_file(str(out_dir / fname), bucket, f"processed/{folder}/{fname}")
-    _upload_tree(wd / "transformation" / "reports", bucket, f"reports/batch_id={batch_id}/")
-    return {"datasets_uploaded": len(DATASETS)}
+    report_dir = wd / "transformation" / "reports"
+    for fname, _ in DATASETS:
+        source = out_dir / fname
+        if not source.exists():
+            raise RuntimeError(f"missing transformation output: {source}")
+        s3.upload_file(str(source), bucket, f"{TRANSFORMATION_PREFIX}output/{fname}")
+    for fname in REPORTS:
+        source = report_dir / fname
+        if not source.exists():
+            raise RuntimeError(f"missing transformation report: {source}")
+        s3.upload_file(str(source), bucket, f"{TRANSFORMATION_PREFIX}reports/{fname}")
+    return {"datasets_uploaded": len(DATASETS), "reports_uploaded": len(REPORTS)}
 
 
 # ---------------------------------------------------------------- 5. VerifyBatch
 def verify_batch(event, context):
-    """Count rows of every table with Athena, compare with the expected numbers, write _SUCCESS.json."""
+    """Verify every uploaded CSV and report before writing the success marker."""
     bucket, batch_id = _params(event)
-    output = f"s3://{bucket}/{ATHENA_OUTPUT_PREFIX}"
-
-    ids = {}
-    for table, _, _ in DATASETS:
-        ids[table] = athena.start_query_execution(
-            QueryString=f"SELECT COUNT(*) AS n FROM {table}",
-            QueryExecutionContext={"Database": DATABASE},
-            ResultConfiguration={"OutputLocation": output})["QueryExecutionId"]
-
     counts, problems = {}, []
-    for table, _, expected in DATASETS:
-        qid = ids[table]
-        for _ in range(60):                       # wait up to ~2 minutes
-            state = athena.get_query_execution(QueryExecutionId=qid)["QueryExecution"]["Status"]
-            if state["State"] in ("SUCCEEDED", "FAILED", "CANCELLED"):
-                break
-            time.sleep(2)
-        if state["State"] != "SUCCEEDED":
-            problems.append(f"{table}: query {state['State']} {state.get('StateChangeReason', '')}")
+    local_dir = WORK_DIR / "verify"
+    local_dir.mkdir(parents=True, exist_ok=True)
+    for fname, expected in DATASETS:
+        key = f"{TRANSFORMATION_PREFIX}output/{fname}"
+        local_file = local_dir / fname
+        try:
+            s3.download_file(bucket, key, str(local_file))
+        except ClientError as exc:
+            problems.append(f"{key}: download failed ({exc})")
             continue
-        rows = athena.get_query_results(QueryExecutionId=qid)["ResultSet"]["Rows"]
-        counts[table] = int(rows[1]["Data"][0]["VarCharValue"])
-        if counts[table] != expected:
-            problems.append(f"{table}: {counts[table]} rows, expected {expected}")
+        with local_file.open(encoding="utf-8-sig", newline="") as stream:
+            rows = sum(1 for _ in stream) - 1
+        counts[fname] = rows
+        if rows != expected:
+            problems.append(f"{fname}: {rows} rows, expected {expected}")
+    for fname in REPORTS:
+        key = f"{TRANSFORMATION_PREFIX}reports/{fname}"
+        try:
+            s3.head_object(Bucket=bucket, Key=key)
+        except ClientError as exc:
+            problems.append(f"{key}: report missing ({exc})")
 
     if problems:
         raise RuntimeError("Verification failed: " + "; ".join(problems))

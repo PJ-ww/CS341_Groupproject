@@ -2,7 +2,7 @@
 
 Run from the project root:   python orchestration/build_package.py
 The zip contains lambda_handlers.py + ingestion/config.py + ingestion/validate_data.py
-+ transformation/scripts/*.py  (no data, no output files -> a few KB).
++ the current Chiang Mai transformation scripts (no data/output files).
 """
 import zipfile
 from pathlib import Path
