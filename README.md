@@ -2,7 +2,7 @@
 
 ## Architecture
 
-![Architecture Diagram](architechture/architecture_diagram.png)
+![Architecture Diagram](docs/architecture_diagram.png)
 
 ## Demo Video
 
