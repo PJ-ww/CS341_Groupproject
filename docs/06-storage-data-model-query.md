@@ -160,6 +160,10 @@ View สำหรับใช้งาน (Serving):
 
 ![q2_2](evidence/athena_q2_2.png)
 
+**q2_3 ตรวจความต่างด้วย z-test และเทียบภายในอำเภอเดียวกัน**
+
+![q2_3](evidence/athena_q2_3.png)
+
 **q3_1 คะแนนจัดลำดับช่วยเหลือรายหมู่บ้าน**
 
 ![q3_1](evidence/athena_q3_1.png)
@@ -167,6 +171,10 @@ View สำหรับใช้งาน (Serving):
 **q3_2 สรุปลำดับช่วยเหลือรายอำเภอ**
 
 ![q3_2](evidence/athena_q3_2.png)
+
+**q3_3 Sensitivity ของน้ำหนักคะแนน Q3**
+
+![q3_3](evidence/athena_q3_3.png)
 
 ### 6.4 Partition pruning
 
