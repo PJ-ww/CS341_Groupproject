@@ -57,7 +57,7 @@ python -m pip install -r requirements.txt
 
 `ingestion/requirements.txt` อ้างถึงไฟล์เดียวกันนี้ ติดตั้งจากไฟล์ไหนก็ได้ผลเหมือนกัน
 
-> **ไม่มี AWS Credentials ของทีม?** (เช่น ผู้ตรวจหรือคนนอกทีม) ข้ามหัวข้อ 4-6 ไปที่หัวข้อ **6B** ด้านล่าง แล้วโหลดไฟล์จากเว็บไซต์ต้นทางแทน
+> **ไม่มี AWS Credentials ของทีม?** (เช่น ผู้ตรวจหรือคนนอกทีม) ข้ามหัวข้อ 4-6 ไปที่หัวข้อ **6B** ด้านล่าง (ใช้ข้อมูลที่ผ่าน validation ซึ่ง commit ไว้แล้ว หรือโหลดไฟล์จากต้นทาง)
 
 ## 4. Configure AWS Credentials
 
@@ -133,72 +133,54 @@ aws s3 ls s3://cs341-flood-recovery/raw/ --recursive --profile cs341-team
 mkdir -p ingestion/data
 ```
 
-ดาวน์โหลด Dataset ทั้ง 8 ไฟล์จาก S3:
+ดาวน์โหลด Dataset ทั้ง 5 ไฟล์จาก S3 (S3 key กำหนดไว้ใน [`config.py`](config.py)):
 
 ```bash
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/pdpm_flood_village_stats.xlsx ingestion/data/STATISTIC_FLD.xlsx --profile cs341-team
+aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/flood_2566.csv ingestion/data/flood_2566.csv --profile cs341-team
 
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/pdpm_gd015.csv ingestion/data/dpm-gd015__1.csv --profile cs341-team
+aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/flood_2567.csv ingestion/data/flood_2567.csv --profile cs341-team
 
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/pdpm_2564_by_disaster_type.csv ingestion/data/2564_by_disaster_type1.csv --profile cs341-team
+aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_stats/chiangmai_damage.xlsx ingestion/data/chiangmai_damage.xlsx --profile cs341-team
 
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_relief/pdpm_affected_households.xlsx ingestion/data/Number_of_Affected_Households.xlsx --profile cs341-team
+aws s3 cp s3://cs341-flood-recovery/raw/nso/household_income.xlsx ingestion/data/household_income.xlsx --profile cs341-team
 
-aws s3 cp s3://cs341-flood-recovery/raw/nso/nso_household_income.csv ingestion/data/Salary.csv --profile cs341-team
-
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/geographic/pdpm_flood_risk_geographic.csv ingestion/data/Geographic_Data.csv --profile cs341-team
-
-aws s3 cp s3://cs341-flood-recovery/raw/pdpm/flood_relief/pdpm_flood_affected_households.csv "ingestion/data/Number_of Households_Affected_by_Flooding.csv" --profile cs341-team
-
-aws s3 cp s3://cs341-flood-recovery/raw/nso/nso_household_income_by_area.csv ingestion/data/Salary2.csv --profile cs341-team
+aws s3 cp s3://cs341-flood-recovery/raw/dopa/village_mapping.json ingestion/data/village_mapping.json --profile cs341-team
 ```
 
-## 6B. ดาวน์โหลดจากแหล่งต้นทาง (ไม่ต้องใช้ AWS)
+## 6B. ไม่มี AWS Credentials (ผู้ตรวจหรือคนนอกทีม)
 
-ข้อมูลดิบไม่ได้อยู่ใน Git (`ingestion/data/` อยู่ใน `.gitignore`) คนที่ไม่มี Credentials ของทีมจึงต้องดาวน์โหลดไฟล์เองจากหน้าชุดข้อมูลด้านล่าง (รายละเอียดเพิ่มเติมอยู่ใน [`data_catalog/sources.md`](../data_catalog/sources.md)) แล้ว**เปลี่ยนชื่อไฟล์ให้ตรงตามคอลัมน์ "บันทึกเป็น"** และวางไว้ในโฟลเดอร์ `ingestion/data/` โดยไม่สร้างโฟลเดอร์ย่อย
+ข้อมูลดิบไม่ได้อยู่ใน Git (`ingestion/data/` อยู่ใน `.gitignore`) รายละเอียดที่มา ช่วงเวลา และข้อจำกัดของแต่ละไฟล์อยู่ใน [`data_catalog/sources.md`](../data_catalog/sources.md)
 
-| # | หน้าชุดข้อมูล | บันทึกเป็น `ingestion/data/...` |
+**ทางที่ง่ายที่สุด: ไม่ต้องใช้ไฟล์ดิบ** `validation/cleaned/*_cleaned.csv` (commit ไว้แล้ว) คือข้อมูลทั้ง 5 ไฟล์หลังผ่าน validation และ `validation/quarantine/` เก็บแถวที่ถูกตัดพร้อมเหตุผล `python run_all.py` เริ่มจากไฟล์เหล่านี้ได้ทันที
+
+ถ้าต้องการรัน validation จากไฟล์ดิบด้วย (`python run_all.py --from-raw`) ให้เตรียมไฟล์ใน `ingestion/data/` โดยไม่สร้างโฟลเดอร์ย่อย:
+
+| # | ไฟล์ | วิธีได้ไฟล์ |
 |---|---|---|
-| 1 | https://data.go.th/dataset/gdpublish-dfs_21_02 (ไฟล์ตรง: https://drive.disaster.go.th/index.php/s/g8xpZR8TSWitRYf) | `STATISTIC_FLD.xlsx` |
-| 2 | https://catalog.disaster.go.th/dataset/dpm-gd015 | `dpm-gd015__1.csv` |
-| 3 | https://catalog.disaster.go.th/en/dataset/dpm-gd020 (ไฟล์ปี 2564 ตามประเภทภัย) | `2564_by_disaster_type1.csv` |
-| 4 | https://data.go.th/dataset/disaster_69_14 | `Number_of_Affected_Households.xlsx` |
-| 5 | https://data.go.th/th/dataset/flood01_30 | `Number_of Households_Affected_by_Flooding.csv` (มีช่องว่างหลัง `Number_of`) |
-| 6 | data.go.th: พื้นที่เสี่ยงน้ำท่วมรายหมู่ที่ จังหวัดยโสธร (สำนักงานป้องกันและบรรเทาสาธารณภัยจังหวัด) | `Geographic_Data.csv` |
-| 7 | https://data.go.th/en/dataset/ns_08_20241 (รายได้ครัวเรือน รายจังหวัด) | `Salary.csv` |
-| 8 | https://data.go.th/en/dataset/ns_08_20241 (รายได้ครัวเรือน รายภาค) | `Salary2.csv` |
+| 1 | `flood_2566.csv` | ดาวน์โหลด CSV ปี 2566 จาก ปภ. ชุด `dpm-gd027` สถิติรายปีการเกิดอุทกภัย: https://catalog.disaster.go.th/dataset/dpm-gd027/resource/af2370d1-d2d0-4844-a16d-e6af34926e71 แล้วเปลี่ยนชื่อ |
+| 2 | `flood_2567.csv` | ปภ. ชุด `dpm-gd027` ปี 2567: https://catalog.disaster.go.th/dataset/dpm-gd027/resource/dde2eddc-28f5-40bf-8a62-28bc68f02af8 (ต้นทางเป็น XLSX ต้องบันทึกเป็น CSV และต้องมีคอลัมน์ `_id` ดู `data_catalog/sources.md` หัวข้อ 2) |
+| 3 | `chiangmai_damage.xlsx` | ไม่มีลิงก์สาธารณะ ขอสำเนาจากทีม |
+| 4 | `household_income.xlsx` | ไม่มีลิงก์สาธารณะ ขอสำเนาจากทีม |
+| 5 | `village_mapping.json` | ไม่มีลิงก์สาธารณะ ขอสำเนาจากทีม |
 
-โครงสร้างที่ถูกต้องหลังดาวน์โหลดครบ:
+โครงสร้างที่ถูกต้องหลังเตรียมครบ:
 
 ```text
 ingestion/data/
-├── 2564_by_disaster_type1.csv
-├── dpm-gd015__1.csv
-├── Geographic_Data.csv
-├── Number_of Households_Affected_by_Flooding.csv
-├── Number_of_Affected_Households.xlsx
-├── Salary.csv
-├── Salary2.csv
-└── STATISTIC_FLD.xlsx
+├── chiangmai_damage.xlsx
+├── flood_2566.csv
+├── flood_2567.csv
+├── household_income.xlsx
+└── village_mapping.json
 ```
 
-`inspect_files.py`, `validate_data.py` และ `ingest.py` อ่านไฟล์จากชื่อเหล่านี้ใน `ingestion/data/` โดยตรง (ชื่อกำหนดไว้ที่คีย์ `local_file` ใน [`config.py`](config.py)) ส่วนสคริปต์ `transformation/scripts/transform_*.py` อ่านจาก `ingestion/data/raw/...` ซึ่งเป็นโครงสร้างเดียวกับ S3 จึงต้องรันคำสั่งนี้จาก root ของ repo ก่อน:
+`inspect_files.py`, `validate_data.py` และ `ingest.py` อ่านไฟล์จากชื่อเหล่านี้ใน `ingestion/data/` โดยตรง (ชื่อกำหนดไว้ที่คีย์ `local_file` ใน [`config.py`](config.py)) ส่วน `prepare_local_data.py` คัดลอกไฟล์ไปไว้ที่ `ingestion/data/raw/...` ตามโครงสร้าง S3 สำหรับกรณีที่ต้องจำลองโฟลเดอร์ทำงานของ Lambda
 
-```bash
-python prepare_local_data.py
-```
-
-หรือใช้ `python run_all.py` ที่รันขั้นนี้ให้อัตโนมัติ
-
-หมายเหตุ
-
-- ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด (6 พ.ย. 2569) จำนวนแถวจึงอาจไม่ตรงกับตัวเลขใน `data_catalog/sources.md` และรายงานใน repo
-- ถ้าต้องการลองเฉพาะ transformation ฝั่ง geographic (`clean_data.py` → `standardize.py` → `create_features.py`) ไม่ต้องโหลดไฟล์ดิบเลย เพราะสคริปต์เหล่านี้อ่าน `validation/cleaned/Geographic_Data_deduplicated.csv` ซึ่ง commit ไว้แล้ว
-- ผลลัพธ์ของทุกสคริปต์ commit ไว้แล้วใน `transformation/output/` จึงตรวจผลได้โดยไม่ต้องรันใหม่
+หมายเหตุ: ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด จำนวนแถวจึงอาจไม่ตรงกับตัวเลขใน `data_catalog/sources.md` และรายงานใน repo
 
 ## 7. Verify Downloaded Files
 
-ตรวจสอบว่า Dataset ถูกดาวน์โหลดครบทั้ง 8 ไฟล์:
+ตรวจสอบว่า Dataset ครบทั้ง 5 ไฟล์:
 
 ```bash
 ls -lh ingestion/data/
@@ -217,9 +199,9 @@ python ingestion/inspect_files.py
 | AWS Region | `us-east-1` |
 | S3 Bucket | `cs341-flood-recovery` |
 | Raw Data Location | `s3://cs341-flood-recovery/raw/` |
-| Number of Datasets | 8 |
+| Number of Datasets | 5 |
 
-เมื่อดำเนินการครบทุกขั้นตอนแล้ว สมาชิกจะมีโค้ดโปรเจกต์และ Dataset ทั้ง 8 ไฟล์พร้อมสำหรับทำ Data Validation, Data Cleaning และ Data Transformation ต่อไป
+เมื่อดำเนินการครบทุกขั้นตอนแล้ว สมาชิกจะมีโค้ดโปรเจกต์และ Dataset ทั้ง 5 ไฟล์พร้อมสำหรับทำ Data Validation และ Data Transformation ต่อไป
 
 ---
 

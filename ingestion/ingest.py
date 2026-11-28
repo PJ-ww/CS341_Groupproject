@@ -47,6 +47,7 @@ def main():
             "s3_key": key,
             "source": item.get("source", ""),
             "source_url": item.get("source_url", ""),
+            "period": item.get("period", ""),
         }
 
         try:
