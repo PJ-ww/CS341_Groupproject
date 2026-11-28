@@ -3,14 +3,14 @@
 -- รายได้: ใช้เฉพาะหมู่บ้านที่จับคู่รายได้ได้แบบ unique_match (ประมาณ 2 ใน 3 ของหมู่บ้าน)
 WITH pop AS (
   SELECT 'population' AS dimension,
-         NTILE(4) OVER (ORDER BY population_total) AS quartile,
+         NTILE(4) OVER (ORDER BY population_total, village_code) AS quartile,
          CAST(population_total AS DOUBLE) AS value, reports_total
   FROM flood_recovery_db.v_village_profile
   WHERE population_total IS NOT NULL
 ),
 inc AS (
   SELECT 'avg_household_income' AS dimension,
-         NTILE(4) OVER (ORDER BY avg_household_income) AS quartile,
+         NTILE(4) OVER (ORDER BY avg_household_income, village_code) AS quartile,
          avg_household_income AS value, reports_total
   FROM flood_recovery_db.v_village_profile
   WHERE avg_household_income IS NOT NULL

@@ -46,6 +46,6 @@
 | Transformation เขียนเป็น CSV ส่วน Curated Zone เป็น Parquet แบบ star schema แบ่ง partition ตาม `source_year` | CSV อ่านตรวจง่าย Parquet ให้ Athena อ่านเร็วและ prune partition ได้ |
 | ลงทะเบียนตารางด้วย DDL ที่ generate จาก `storage/schema.py` และใช้ partition projection | ชนิดข้อมูลในไฟล์กับใน Glue Catalog ตรงกันเสมอ และไม่ต้องลงทะเบียน partition เองเมื่อมีปีใหม่ (docs/06 D5–D6) |
 | ใช้ Lambda และ Step Functions ห่อสคริปต์เดิมโดยไม่แก้สคริปต์ (`orchestration/lambda_handlers.py`) | โค้ดชุดเดียวกันทำงานได้ทั้งในเครื่องและบน AWS |
-| สถานะปัจจุบัน: ขั้น Curated และ Query ยังรันด้วยมือหลัง batch สำเร็จ ไม่อยู่ใน Step Functions | แสดงไว้ในแผนภาพให้ชัด งานต่อคือเพิ่มเป็น state หลัง `VerifyBatch` (README ข้อ 9) |
+| เพิ่ม `CurateBatch` และ `QueryBatch` เป็น state ต่อจาก `VerifyBatch` และย้ายการเขียน `_SUCCESS.json` ไปไว้ที่ `QueryBatch` | ทั้ง pipeline รันจบในการสั่งครั้งเดียว และ batch ที่ล้มในขั้น Curated/Athena ยังรันซ้ำด้วย `batch_id` เดิมได้ (ถ้า marker ถูกเขียนตั้งแต่ `VerifyBatch` การรันซ้ำจะหยุดที่ `Stop` ทั้งที่ยังไม่เสร็จ) |
 
 อ้างอิง: `docs/06-storage-data-model-query.md` หัวข้อ 3, `orchestration/README.md`, แผนภาพใน `README.md`

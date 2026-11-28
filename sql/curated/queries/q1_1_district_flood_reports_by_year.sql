@@ -20,5 +20,5 @@ SELECT
   SUM(flood_reports) AS flood_reports_total
 FROM by_year
 GROUP BY district_code, district
-ORDER BY villages_2567 + villages_2566 DESC
+ORDER BY villages_2567 + villages_2566 DESC, district_code
 LIMIT 25;

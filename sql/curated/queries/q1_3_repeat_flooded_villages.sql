@@ -5,5 +5,5 @@ SELECT
   population_total, households, river_flag
 FROM flood_recovery_db.v_village_profile
 WHERE years_flooded = 2
-ORDER BY reports_total DESC, households DESC
+ORDER BY reports_total DESC, households DESC, village_code
 LIMIT 20;

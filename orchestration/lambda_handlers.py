@@ -1,7 +1,7 @@
 """Chiang Mai Flood Recovery - AWS Lambda handlers (Person 5).
 
-Five handlers share this one file. Each Lambda wraps the existing scripts from
-ingestion/ and transformation/scripts/ WITHOUT changing them:
+Seven handlers share this one file. Each Lambda wraps the existing scripts from
+ingestion/, transformation/scripts/ and storage/ WITHOUT changing them:
   1. copy the packaged scripts to /tmp/work (Lambda code dir is read-only)
   2. download the needed input files from S3 into the folders the scripts expect
   3. run the script with subprocess
@@ -10,6 +10,11 @@ ingestion/ and transformation/scripts/ WITHOUT changing them:
 The current pipeline handles five Chiang Mai source files for Buddhist years
 2566-2567. Step Functions passes the same input to every step:
     {"bucket": "cs341-flood-recovery", "batch_id": "2026-11"}
+
+Order: CheckBatch -> ValidateBatch -> (QuarantineBatch | TransformBatch) -> VerifyBatch
+       -> CurateBatch (Parquet in curated/) -> QueryBatch (Glue tables + Athena dq/Q1-Q3).
+QueryBatch is the last step, so it writes the _SUCCESS.json marker that CheckBatch looks for:
+a batch that fails in any step can simply be run again with the same batch_id.
 """
 import json
 import os
@@ -26,6 +31,8 @@ PKG_DIR = Path(__file__).resolve().parent          # /var/task in Lambda
 WORK_DIR = Path(os.environ.get("WORK_DIR", "/tmp/work"))
 DEFAULT_BUCKET = os.environ.get("BUCKET", "cs341-flood-recovery")
 DATABASE = os.environ.get("ATHENA_DATABASE", "flood_recovery_db")
+WORKGROUP = os.environ.get("ATHENA_WORKGROUP", "primary")
+DDL_BUCKET = "cs341-flood-recovery"   # bucket written into sql/curated/01_create_curated_tables.sql
 
 s3 = boto3.client("s3")
 
@@ -60,6 +67,7 @@ REPORTS = [
     "village_mapping_transformation_report.json",
 ]
 TRANSFORMATION_PREFIX = "transformation/"
+CURATED_PREFIX = "curated/"
 
 
 # ---------------------------------------------------------------- helpers
@@ -98,6 +106,8 @@ def _prepare_workdir():
     (WORK_DIR / "transformation").mkdir(parents=True)
     shutil.copytree(PKG_DIR / "ingestion", WORK_DIR / "ingestion", dirs_exist_ok=True)
     shutil.copytree(PKG_DIR / "transformation" / "scripts", WORK_DIR / "transformation" / "scripts")
+    if (PKG_DIR / "storage").exists():
+        shutil.copytree(PKG_DIR / "storage", WORK_DIR / "storage")
     return WORK_DIR
 
 
@@ -235,7 +245,7 @@ def transform_batch(event, context):
 
 # ---------------------------------------------------------------- 5. VerifyBatch
 def verify_batch(event, context):
-    """Verify every uploaded CSV and report before writing the success marker."""
+    """Verify every uploaded transformation CSV (row counts) and report."""
     bucket, batch_id = _params(event)
     counts, problems = {}, []
     local_dir = WORK_DIR / "verify"
@@ -262,9 +272,121 @@ def verify_batch(event, context):
 
     if problems:
         raise RuntimeError("Verification failed: " + "; ".join(problems))
+    return {"row_counts": counts}
 
-    marker = {"batch_id": batch_id, "status": "SUCCESS", "row_counts": counts,
+
+# ---------------------------------------------------------------- 6. CurateBatch
+def curate_batch(event, context):
+    """Build the curated Parquet tables (storage/build_curated.py) and upload them to curated/."""
+    bucket, batch_id = _params(event)
+    wd = _prepare_workdir()
+
+    out_dir = wd / "transformation" / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for fname, _ in DATASETS:
+        s3.download_file(bucket, f"{TRANSFORMATION_PREFIX}output/{fname}", str(out_dir / fname))
+
+    proc = _run(wd / "storage" / "build_curated.py", wd)
+    if proc.returncode != 0:
+        raise RuntimeError(f"build_curated.py failed: {(proc.stdout + proc.stderr)[-800:]}")
+    report_path = wd / "storage" / "reports" / "curated_build_report.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    # same behaviour as storage/upload_to_s3.py: clear each table prefix first,
+    # because Athena reads every file under a table LOCATION
+    curated_dir = wd / "storage" / "curated"
+    uploaded = 0
+    for table in report["tables"]:
+        prefix = f"{CURATED_PREFIX}{table}/"
+        stale = []
+        for page in s3.get_paginator("list_objects_v2").paginate(Bucket=bucket, Prefix=prefix):
+            stale += [{"Key": o["Key"]} for o in page.get("Contents", [])]
+        for i in range(0, len(stale), 1000):
+            s3.delete_objects(Bucket=bucket, Delete={"Objects": stale[i:i + 1000]})
+        for f in sorted((curated_dir / table).rglob("*.parquet")):
+            s3.upload_file(str(f), bucket, prefix + f.relative_to(curated_dir / table).as_posix())
+            uploaded += 1
+    s3.upload_file(str(report_path), bucket, f"storage/reports/batch_id={batch_id}/curated_build_report.json")
+
+    table_rows = {t: info["output_rows"] for t, info in report["tables"].items()}
+    return {"table_rows": table_rows, "parquet_files": uploaded}
+
+
+# ---------------------------------------------------------------- 7. QueryBatch
+def _sql_files():
+    sql_dir = PKG_DIR / "sql" / "curated"
+    setup = [sql_dir / "01_create_curated_tables.sql", sql_dir / "02_create_views.sql"]
+    checks = sorted((sql_dir / "data_quality").glob("*.sql")) + sorted((sql_dir / "queries").glob("*.sql"))
+    return setup, checks
+
+
+def _quality_problems(results, table_rows):
+    """dq_01 rows per table must equal what CurateBatch wrote; dq_02 keys must be unique and not null."""
+    problems = []
+    rows = results.get("dq_01_row_counts") or []
+    if len(rows) < 2:
+        return ["dq_01_row_counts returned no rows"]
+    athena_rows = {}
+    for r in rows[1:]:
+        rec = dict(zip(rows[0], r))
+        athena_rows[rec["table_name"]] = athena_rows.get(rec["table_name"], 0) + int(float(rec["row_count"]))
+    for table, expected in table_rows.items():
+        if athena_rows.get(table) != expected:
+            problems.append(f"{table}: Athena sees {athena_rows.get(table)} rows, curated has {expected}")
+    rows = results.get("dq_02_primary_keys") or []
+    for r in rows[1:]:
+        rec = dict(zip(rows[0], r))
+        if float(rec["duplicate_keys"] or 0) != 0 or float(rec["null_keys"] or 0) != 0:
+            problems.append(f"{rec['table_name']}: duplicate_keys={rec['duplicate_keys']}, "
+                            f"null_keys={rec['null_keys']}")
+    return problems
+
+
+def query_batch(event, context):
+    """Register the curated tables/views in the Glue Data Catalog through Athena DDL, run the
+    data quality checks and the Q1-Q3 queries, save every result to S3, then write the
+    success marker (only after everything passed)."""
+    import csv
+    import io
+
+    bucket, batch_id = _params(event)
+    sys.path.insert(0, str(PKG_DIR / "storage"))
+    import run_athena  # storage/run_athena.py: statements(), run(), fetch()
+
+    athena = boto3.client("athena")
+    output = f"s3://{bucket}/athena-results/"
+    setup, checks = _sql_files()
+
+    for f in setup:
+        for stmt in run_athena.statements(f):
+            run_athena.run(athena, stmt.replace(f"s3://{DDL_BUCKET}/", f"s3://{bucket}/"), output, WORKGROUP)
+        print(f"ok  {f.name}")
+
+    results, scanned_total = {}, 0
+    for f in checks:
+        qid = None
+        for stmt in run_athena.statements(f):
+            qid, scanned = run_athena.run(athena, stmt, output, WORKGROUP)
+            scanned_total += scanned
+        rows = run_athena.fetch(athena, qid)
+        results[f.stem] = rows
+        buf = io.StringIO()
+        csv.writer(buf).writerows(rows)
+        s3.put_object(Bucket=bucket, Key=f"query_results/batch_id={batch_id}/{f.stem}.csv",
+                      ContentType="text/csv", Body=buf.getvalue().encode("utf-8-sig"))
+        print(f"ok  {f.name:45s} rows={len(rows) - 1}")
+
+    table_rows = (event.get("curate") or {}).get("table_rows") or {}
+    problems = _quality_problems(results, table_rows)
+    if problems:
+        raise RuntimeError("Data quality failed: " + "; ".join(problems))
+
+    marker = {"batch_id": batch_id, "status": "SUCCESS",
+              "transformation_row_counts": (event.get("verify") or {}).get("row_counts"),
+              "curated_table_rows": table_rows,
+              "queries": sorted(results),
+              "athena_scanned_bytes": scanned_total,
               "time": datetime.now(timezone.utc).isoformat()}
     s3.put_object(Bucket=bucket, Key=_marker_key(batch_id), ContentType="application/json",
                   Body=json.dumps(marker, indent=2).encode("utf-8"))
-    return marker
+    return {"queries_saved": len(results), "athena_scanned_bytes": scanned_total}
