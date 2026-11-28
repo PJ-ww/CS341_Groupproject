@@ -103,7 +103,7 @@ python storage/run_local_queries.py    # รัน SQL ทั้งหมดใ�
 ```
 
 - `build_curated.py` ต้องขึ้น `all checks passed` ได้ตาราง `dim_village` (2,184), `fact_flood_report` (4,754), `fact_disaster_damage` (866), `fact_household_income` (2,154)
-- `run_local_queries.py` เขียนผลของ data quality `dq_01`–`dq_05` และ query ตอบ Q1–Q3 (7 ไฟล์) ไว้ใน `storage/query_results/` ผลต้องตรงกับที่รันบน Athena (ภาพใน `docs/evidence/`)
+- `run_local_queries.py` เขียนผลของ data quality `dq_01`–`dq_05` และ query ตอบ Q1–Q3 (9 ไฟล์ รวม `q2_3` และ `q3_3` ที่ใช้ตรวจความน่าเชื่อถือของผล) ไว้ใน `storage/query_results/` ผลต้องตรงกับที่รันบน Athena (ภาพใน `docs/evidence/`)
 
 > ไฟล์ผลลัพธ์ที่ทีมรันไว้แล้วมีอยู่ในโปรเจกต์ตั้งแต่ต้น การรันซ้ำจะได้ข้อมูลเหมือนเดิม (ไฟล์ Parquet อาจต่างกันที่ metadata และ `curated_build_report.json` ต่างกันที่เวลา)
 
@@ -141,7 +141,7 @@ python ingestion/validate_data.py
 python orchestration/build_package.py
 ```
 
-สร้างไฟล์ `orchestration/dist/cs341_pipeline.zip` ซึ่งเป็นแพ็กเกจโค้ดสำหรับ AWS Lambda ทั้ง 5 ฟังก์ชัน ไม่ต้องใช้ AWS
+สร้างไฟล์ `orchestration/dist/cs341_pipeline.zip` ซึ่งเป็นแพ็กเกจโค้ดสำหรับ AWS Lambda ทั้ง 7 ฟังก์ชัน ไม่ต้องใช้ AWS
 
 ---
 
@@ -152,7 +152,7 @@ python orchestration/build_package.py
 | ส่วน | ไฟล์ | หมายเหตุ |
 |---|---|---|
 | อัปโหลดข้อมูลดิบขึ้น S3 | `ingestion/ingest.py` | ต้องมี AWS Credentials ถ้ารันโดยไม่มีจะขึ้น error ซึ่งเป็นเรื่องปกติ |
-| Orchestration | `orchestration/lambda_handlers.py`, `state_machine.asl.json` | Lambda + Step Functions: CheckBatch → ValidateBatch → TransformBatch → VerifyBatch |
+| Orchestration | `orchestration/lambda_handlers.py`, `state_machine.asl.json` | Lambda + Step Functions: CheckBatch → ValidateBatch → TransformBatch → VerifyBatch → CurateBatch → QueryBatch |
 | อัปโหลด Curated Zone | `storage/upload_to_s3.py` | `storage/curated/` → `s3://cs341-flood-recovery/curated/` |
 | Glue Data Catalog + Athena | `storage/run_athena.py`, `sql/curated/` | ตาราง 4 ตาราง + view 2 ตัวใน `flood_recovery_db`, data quality และ query Q1–Q3 อ่าน SQL ได้โดยตรง |
 

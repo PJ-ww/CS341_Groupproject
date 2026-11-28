@@ -5,44 +5,110 @@
     "CheckBatch": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": { "FunctionName": "cs341-check-batch", "Payload.$": "$" },
-      "ResultSelector": { "already_processed.$": "$.Payload.already_processed" },
+      "Parameters": {
+        "FunctionName": "cs341-check-batch",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "already_processed.$": "$.Payload.already_processed"
+      },
       "ResultPath": "$.check",
-      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
-      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
       "Next": "AlreadyProcessed?"
     },
     "AlreadyProcessed?": {
       "Type": "Choice",
-      "Choices": [ { "Variable": "$.check.already_processed", "BooleanEquals": true, "Next": "Stop" } ],
+      "Choices": [
+        {
+          "Variable": "$.check.already_processed",
+          "BooleanEquals": true,
+          "Next": "Stop"
+        }
+      ],
       "Default": "ValidateBatch"
     },
-    "Stop": { "Type": "Succeed" },
+    "Stop": {
+      "Type": "Succeed"
+    },
     "ValidateBatch": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": { "FunctionName": "cs341-validate-batch", "Payload.$": "$" },
+      "Parameters": {
+        "FunctionName": "cs341-validate-batch",
+        "Payload.$": "$"
+      },
       "ResultSelector": {
         "valid.$": "$.Payload.valid",
         "quarantined_rows.$": "$.Payload.quarantined_rows",
         "reason.$": "$.Payload.reason"
       },
       "ResultPath": "$.validation",
-      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 } ],
-      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
       "Next": "Valid?"
     },
     "Valid?": {
       "Type": "Choice",
-      "Choices": [ { "Variable": "$.validation.valid", "BooleanEquals": true, "Next": "TransformBatch" } ],
+      "Choices": [
+        {
+          "Variable": "$.validation.valid",
+          "BooleanEquals": true,
+          "Next": "TransformBatch"
+        }
+      ],
       "Default": "QuarantineBatch"
     },
     "QuarantineBatch": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": { "FunctionName": "cs341-quarantine-batch", "Payload.$": "$" },
+      "Parameters": {
+        "FunctionName": "cs341-quarantine-batch",
+        "Payload.$": "$"
+      },
       "ResultPath": null,
-      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
       "Next": "BatchRejected"
     },
     "BatchRejected": {
@@ -53,25 +119,136 @@
     "TransformBatch": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": { "FunctionName": "cs341-transform-batch", "Payload.$": "$" },
+      "Parameters": {
+        "FunctionName": "cs341-transform-batch",
+        "Payload.$": "$"
+      },
       "ResultPath": null,
-      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
-      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
       "Next": "VerifyBatch"
     },
     "VerifyBatch": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": { "FunctionName": "cs341-verify-batch", "Payload.$": "$" },
-      "ResultPath": null,
-      "Retry": [ { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 2, "BackoffRate": 2 } ],
-      "Catch": [ { "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" } ],
+      "Parameters": {
+        "FunctionName": "cs341-verify-batch",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$.verify",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
+      "ResultSelector": {
+        "row_counts.$": "$.Payload.row_counts"
+      },
+      "Next": "CurateBatch"
+    },
+    "CurateBatch": {
+      "Type": "Task",
+      "Comment": "transformation/output CSV -> typed, partitioned Parquet in curated/ (storage/build_curated.py)",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "cs341-curate-batch",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "table_rows.$": "$.Payload.table_rows",
+        "parquet_files.$": "$.Payload.parquet_files"
+      },
+      "ResultPath": "$.curate",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
+      "Next": "QueryBatch"
+    },
+    "QueryBatch": {
+      "Type": "Task",
+      "Comment": "Glue Data Catalog tables/views via Athena DDL, then dq_01-dq_05 and Q1-Q3; writes _SUCCESS.json",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "cs341-query-batch",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "queries_saved.$": "$.Payload.queries_saved",
+        "athena_scanned_bytes.$": "$.Payload.athena_scanned_bytes"
+      },
+      "ResultPath": "$.query",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PipelineFailed"
+        }
+      ],
       "End": true
     },
     "PipelineFailed": {
       "Type": "Fail",
       "Error": "PipelineExecutionFailed",
-      "Cause": "A Lambda task failed after retries. Check CloudWatch logs and the task error."
+      "Cause": "A Lambda task failed after retries (incl. data quality in QueryBatch). Check CloudWatch logs and the task error."
     }
   }
 }
