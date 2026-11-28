@@ -1,10 +1,10 @@
-# คู่มือทดลองรันโปรเจกต์ CS341 Flood Impact & Recovery
+# คู่มือทดลองรันโปรเจกต์ CS341 Flood Impact & Recovery (เชียงใหม่)
 
-คู่มือนี้อธิบายวิธี clone repo แล้วรันส่วน **Validation → Transformation → Integration** บนเครื่องของตัวเอง **โดยไม่ต้องใช้ AWS Account หรือ Credentials**
+คู่มือนี้อธิบายวิธี clone repo แล้วรันส่วน **Transformation → Integration → Storage (Parquet) → Query** บนเครื่องของตัวเอง **โดยไม่ต้องใช้ AWS Account หรือ Credentials**
 
-ข้อมูลดิบ 8 ไฟล์**ไม่ได้อยู่ใน GitHub** (`ingestion/data/` อยู่ใน `.gitignore`) ต้องดาวน์โหลดจากเว็บต้นทางก่อน ตามขั้นตอนที่ 3 แต่ผลลัพธ์ที่ทีมรันไว้แล้วทั้งหมดอยู่ใน repo (`validation/`, `transformation/output/`, `transformation/reports/`) จึงเปิดตรวจได้ทันทีโดยไม่ต้องรัน
+ข้อมูลดิบ 5 ไฟล์**ไม่ได้อยู่ใน GitHub** (`ingestion/data/` อยู่ใน `.gitignore`) แต่ข้อมูลหลังผ่าน validation ของทั้ง 5 ไฟล์อยู่ใน `validation/cleaned/` จึงรันต่อได้ทันที และผลลัพธ์ทุกขั้นที่ทีมรันไว้ก็อยู่ใน repo (`transformation/output/`, `storage/curated/`, `storage/query_results/`) เปิดตรวจได้โดยไม่ต้องรัน ที่มาของข้อมูลแต่ละไฟล์ดูที่ [`data_catalog/sources.md`](data_catalog/sources.md)
 
-ใช้เวลาติดตั้งและรันประมาณ 5 นาที ไม่รวมเวลาดาวน์โหลดข้อมูลดิบ
+ใช้เวลาติดตั้งและรันประมาณ 5 นาที
 
 ---
 
@@ -43,119 +43,97 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-- `requirements.txt` มีครบทั้ง pandas, pyarrow, openpyxl (อ่าน `.xlsx`) และ boto3
-- หากติดตั้งเวอร์ชันที่ระบุใน `requirements.txt` ไม่ได้ ให้ใช้คำสั่งนี้แทน:
-  ```bash
-  python -m pip install pandas pyarrow openpyxl
-  ```
+`requirements.txt` มี pandas, pyarrow, openpyxl (อ่าน `.xlsx`), duckdb (รัน SQL ในเครื่อง) และ boto3
 
 ---
 
-## 3. เตรียมไฟล์ข้อมูลดิบ (ทำครั้งเดียว)
-
-**3.1 ดาวน์โหลดข้อมูลดิบ 8 ไฟล์**
-
-ดาวน์โหลดจากหน้าชุดข้อมูลต้นทาง แล้วเปลี่ยนชื่อและวางไว้ใน `ingestion/data/` ตามตารางใน [`ingestion/README.md`](ingestion/README.md) หัวข้อ **6B** (สมาชิกทีมที่มี AWS Credentials ใช้หัวข้อ 6 โหลดจาก S3 แทนได้)
-
-ถ้ายังไม่มีข้อมูลดิบ ยังรันได้บางส่วน:
-- `clean_data.py` → `standardize.py` → `create_features.py` รันได้เลย เพราะใช้ `validation/cleaned/Geographic_Data_deduplicated.csv` ที่อยู่ใน repo
-- ขั้นอื่นต้องมีข้อมูลดิบ ถ้าไม่มีจะขึ้น `[MISSING]` ในขั้น 3.2 และ `run_all.py` จะหยุดที่ขั้นแรก
-
-ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด (6 พ.ย. 2569) จำนวนแถวจึงอาจไม่ตรงกับตารางด้านล่างทุกค่า
-
-**3.2 จัดโครงสร้างโฟลเดอร์**
-
-สคริปต์ transformation 5 ตัวอ่านไฟล์จากโฟลเดอร์ `ingestion/data/raw/...` ซึ่งเลียนแบบโครงสร้างบน S3 ให้รันสคริปต์ช่วยที่อยู่ที่ root ของ repo:
+## 3. รันทั้ง pipeline ด้วยคำสั่งเดียว
 
 ```bash
-python prepare_local_data.py
+python run_all.py
 ```
 
-ผลลัพธ์ที่ถูกต้อง: ขึ้น `[OK] ...` ครบ 8 บรรทัด และไม่มี `[MISSING]`
+ผลที่ถูกต้อง: ทุกขั้นขึ้น `[OK]` และท้ายสุดขึ้น `เสร็จสมบูรณ์: ทุกขั้นตอนผ่าน และจำนวนแถวตรงกับที่ทีมรายงานไว้`
+
+| ตัวเลือก | ใช้เมื่อ |
+|---|---|
+| (ไม่มี) | เริ่มจาก `validation/cleaned/` ที่ commit ไว้ |
+| `--from-raw` | มีไฟล์ดิบครบ 5 ไฟล์ใน `ingestion/data/` และต้องการรัน validation ก่อน (ดูขั้นตอนที่ 6) |
+| `--verbose` | ดูข้อความที่แต่ละสคริปต์พิมพ์ออกมา |
+
+ขั้นตอนที่ 4–5 ด้านล่างคือคำสั่งเดียวกันแบบรันทีละขั้น
 
 ---
 
-> **ทางลัด:** หลังติดตั้งและวางไฟล์ดิบเสร็จ รัน `python run_all.py` คำสั่งเดียวแทนขั้นตอนที่ 3–5 ได้ (ใช้ `--verbose` เพื่อดูข้อความของแต่ละสคริปต์) ท้ายสุดจะตรวจจำนวนแถวของผลลัพธ์ให้อัตโนมัติ ส่วนขั้นตอนด้านล่างเป็นการรันทีละขั้นเพื่อดูผลลัพธ์แต่ละส่วน
+## 4. รัน Transformation & Integration
 
-## 4. รัน Data Validation
-
-```bash
-python ingestion/validate_data.py
-```
-
-ผลลัพธ์ที่คาดหวัง (จำนวนแถวที่ผ่าน/ถูกกักกัน):
-
-| ไฟล์ | accepted | quarantined |
-|---|---:|---:|
-| 2564_by_disaster_type1.csv | 76 | 7 |
-| Geographic_Data.csv | 1,772 | 44 |
-| Number_of Households_Affected_by_Flooding.csv | 144 | 0 |
-| Number_of_Affected_Households.xlsx | 48 | 0 |
-| STATISTIC_FLD.xlsx | 57,024 | 0 |
-| Salary.csv | 15,400 | 0 |
-| Salary2.csv | 144 | 0 |
-| dpm-gd015__1.csv | 29,999 | 0 |
-
-ไฟล์ที่ถูกสร้าง:
-- `validation/reports/validation_report.json` — รายงานผลตรวจ
-- `validation/cleaned/Geographic_Data_deduplicated.csv` — ข้อมูลภูมิศาสตร์ที่ตัดข้อมูลซ้ำแล้ว (ใช้เป็น input ของขั้นถัดไป)
-- `validation/quarantine/*.jsonl` — แถวที่ไม่ผ่านการตรวจ
-
----
-
-## 5. รัน Transformation & Integration
-
-รันตามลำดับนี้จาก root ของโปรเจกต์ (ลำดับสำคัญ เพราะบางสคริปต์ใช้ผลลัพธ์ของสคริปต์ก่อนหน้า)
+รันตามลำดับนี้จาก root ของโปรเจกต์ (สคริปต์ `integrate_*` ใช้ผลลัพธ์ของ `transform_*`)
 
 ```bash
-python transformation/scripts/clean_data.py
-python transformation/scripts/standardize.py
-python transformation/scripts/create_features.py
-python transformation/scripts/transform_flood_village_stats.py
-python transformation/scripts/transform_nso_income.py
-python transformation/scripts/transform_disaster_budget.py
-python transformation/scripts/transform_flood_affected_households.py
-python transformation/scripts/transform_affected_households_summary.py
-python transformation/scripts/integrate_data.py
+python transformation/scripts/transform_flood.py
+python transformation/scripts/transform_damage.py
+python transformation/scripts/transform_household_income.py
+python transformation/scripts/transform_village_mapping.py
+python transformation/scripts/integrate_flood_mapping.py
+python transformation/scripts/integrate_household_income_mapping.py
 ```
-
-> `integrate_data.py` ต้องรันหลัง `create_features.py` และ `transform_nso_income.py` เสมอ
 
 ### ผลลัพธ์ที่คาดหวัง
 
-| ชุดข้อมูล | แถว input | แถว output |
-|---|---:|---:|
-| Geographic Data (3 ขั้นตอน) | 1,772 | 1,772 |
-| Flood Village Stats | 57,024 | 57,024 |
-| NSO Household Income | 15,400 | 15,400 |
-| Disaster Budget 2564 | 83 | 76 (ตัด 7 แถวสรุป) |
-| Flood Affected Households | 144 | 144 |
-| Affected Households Summary | 48 | 48 |
-| Geographic + NSO Integrated | 1,772 / 15,400 | 10 |
+| ไฟล์ใน `transformation/output/` | แถว | หมายเหตุ |
+|---|---:|---|
+| `flood_2566_transformed.csv` | 1,198 | คัดเฉพาะเชียงใหม่จาก 19,584 แถว |
+| `flood_2567_transformed.csv` | 3,556 | คัดเฉพาะเชียงใหม่จาก 34,875 แถว |
+| `flood_chiangmai_combined.csv` | 4,754 | รวมสองปี |
+| `chiangmai_damage_transformed.csv` | 866 | |
+| `household_income_transformed.csv` | 2,154 | |
+| `village_mapping_transformed.csv` | 2,184 | |
+| `flood_mapping_integrated.csv` | 4,754 | จับคู่หมู่บ้านได้ 99.31% |
+| `household_income_mapping_integrated.csv` | 2,154 | จับคู่แบบ unique 67.22% |
 
-ไฟล์ที่ถูกสร้าง:
-- `transformation/output/` — ไฟล์ผลลัพธ์ `.csv` และ `.parquet` (รวม 15 ไฟล์)
-- `transformation/reports/` — รายงาน `.json` ของแต่ละขั้นตอน (รวม 9 ไฟล์)
-
-> ไฟล์ผลลัพธ์ที่ทีมรันไว้แล้วมีอยู่ในโปรเจกต์ตั้งแต่ต้น การรันซ้ำจะเขียนทับไฟล์เดิมด้วยผลลัพธ์ที่เหมือนกัน
-
-ตรวจสอบเร็ว ๆ ด้วย Python:
-
-```bash
-python -c "import pandas as pd; print(len(pd.read_parquet('transformation/output/flood_village_stats_transformed.parquet')))"
-```
-
-ควรได้ `57024`
+รายงาน `.json` ของแต่ละขั้นอยู่ใน `transformation/reports/` (6 ไฟล์)
 
 ---
 
-## 6. (ไม่บังคับ) ตรวจดูข้อมูลดิบ
+## 5. รัน Storage (Parquet) และ Query ในเครื่อง
 
 ```bash
-python ingestion/inspect_files.py
+python storage/build_curated.py        # CSV → Parquet ใน storage/curated/ + ตรวจจำนวนแถวและ primary key
+python storage/run_local_queries.py    # รัน SQL ทั้งหมดใน sql/curated/ ด้วย DuckDB
 ```
 
-แสดง encoding, จำนวนแถว และตัวอย่างหัวตารางของไฟล์ใน `ingestion/data/`
+- `build_curated.py` ต้องขึ้น `all checks passed` ได้ตาราง `dim_village` (2,184), `fact_flood_report` (4,754), `fact_disaster_damage` (866), `fact_household_income` (2,154)
+- `run_local_queries.py` เขียนผลของ data quality `dq_01`–`dq_05` และ query ตอบ Q1–Q3 (7 ไฟล์) ไว้ใน `storage/query_results/` ผลต้องตรงกับที่รันบน Athena (ภาพใน `docs/evidence/`)
+
+> ไฟล์ผลลัพธ์ที่ทีมรันไว้แล้วมีอยู่ในโปรเจกต์ตั้งแต่ต้น การรันซ้ำจะได้ข้อมูลเหมือนเดิม (ไฟล์ Parquet อาจต่างกันที่ metadata และ `curated_build_report.json` ต่างกันที่เวลา)
+
+---
+
+## 6. (ไม่บังคับ) รัน Data Validation จากไฟล์ดิบ
+
+ต้องมีไฟล์ดิบ 5 ไฟล์ใน `ingestion/data/` ก่อน วิธีหาไฟล์อยู่ใน [`ingestion/README.md`](ingestion/README.md) หัวข้อ **6B** (ไฟล์อุทกภัย 2 ไฟล์ดาวน์โหลดได้จาก ปภ. ส่วนอีก 3 ไฟล์ไม่มีลิงก์สาธารณะ ต้องขอสำเนาจากทีม)
+
+```bash
+python ingestion/inspect_files.py      # ดู encoding, หัวตาราง, จำนวนแถว
+python ingestion/validate_data.py
+```
+
+ผลลัพธ์ที่คาดหวัง:
+
+| ไฟล์ | แถว | accepted | quarantined |
+|---|---:|---:|---:|
+| `flood_2566.csv` | 19,607 | 19,584 | 23 |
+| `flood_2567.csv` | 34,882 | 34,875 | 7 |
+| `chiangmai_damage.xlsx` | 883 | 866 | 17 |
+| `household_income.xlsx` | 2,167 | 2,154 | 13 |
+| `village_mapping.json` | 2,198 | 2,184 | 14 |
+
+ไฟล์ที่ถูกสร้าง:
+- `validation/reports/validation_report.json` — รายงานผลตรวจ
+- `validation/cleaned/*_cleaned.csv` — แถวที่ผ่านการตรวจ (input ของขั้นตอนที่ 4)
+- `validation/quarantine/*_quarantine.json` — แถวที่ไม่ผ่าน พร้อมเลขแถวต้นฉบับและเหตุผล
+
+ข้อมูลบนเว็บต้นทางอาจอัปเดตหลังวันที่ทีมดาวน์โหลด จำนวนแถวจึงอาจไม่ตรงกับตารางนี้ทุกค่า
 
 ## 7. (ไม่บังคับ) ตรวจแพ็กเกจ Lambda
 
@@ -163,23 +141,25 @@ python ingestion/inspect_files.py
 python orchestration/build_package.py
 ```
 
-สร้างไฟล์ `orchestration/dist/cs341_pipeline.zip` (ประมาณ 25 KB) ซึ่งเป็นแพ็กเกจโค้ดสำหรับ AWS Lambda ทั้ง 5 ฟังก์ชัน ไม่ต้องใช้ AWS
+สร้างไฟล์ `orchestration/dist/cs341_pipeline.zip` ซึ่งเป็นแพ็กเกจโค้ดสำหรับ AWS Lambda ทั้ง 5 ฟังก์ชัน ไม่ต้องใช้ AWS
 
 ---
 
 ## 8. ส่วนที่ต้องใช้ AWS (รันบนเครื่องอื่นไม่ได้)
 
-ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่จำเป็นต้องรัน ถ้าต้องการลองบน AWS Account ของตัวเอง ทำตาม [`orchestration/README.md`](orchestration/README.md) (สร้าง bucket, ตาราง Athena จาก `sql/setup/01_create_tables.sql`, Lambda และ Step Functions)
+ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่จำเป็นต้องรัน ถ้าต้องการลองบน AWS Account ของตัวเอง ทำตาม [`orchestration/README.md`](orchestration/README.md) และ [`storage/README.md`](storage/README.md)
 
 | ส่วน | ไฟล์ | หมายเหตุ |
 |---|---|---|
-| อัปโหลดข้อมูลขึ้น S3 | `ingestion/ingest.py` | ต้องมี AWS Credentials; ถ้ารันโดยไม่มี จะขึ้น error ซึ่งเป็นเรื่องปกติ |
-| Orchestration | `orchestration/lambda_handlers.py`, `state_machine.asl.json` | ทำงานบน AWS Lambda และ Step Functions |
-| Query ด้วย Athena | `sql/curated/` (ตาราง/view, `data_quality/`, `queries/`) | ต้องรันบน Athena (database `flood_recovery_db`); อาจารย์อ่านโค้ด SQL ได้โดยตรง |
+| อัปโหลดข้อมูลดิบขึ้น S3 | `ingestion/ingest.py` | ต้องมี AWS Credentials ถ้ารันโดยไม่มีจะขึ้น error ซึ่งเป็นเรื่องปกติ |
+| Orchestration | `orchestration/lambda_handlers.py`, `state_machine.asl.json` | Lambda + Step Functions: CheckBatch → ValidateBatch → TransformBatch → VerifyBatch |
+| อัปโหลด Curated Zone | `storage/upload_to_s3.py` | `storage/curated/` → `s3://cs341-flood-recovery/curated/` |
+| Glue Data Catalog + Athena | `storage/run_athena.py`, `sql/curated/` | ตาราง 4 ตาราง + view 2 ตัวใน `flood_recovery_db`, data quality และ query Q1–Q3 อ่าน SQL ได้โดยตรง |
 
 หลักฐานการทำงานบน AWS ดูได้จาก:
 - Demo Video: https://youtu.be/vEXtP3JA8TA
-- แผนภาพสถาปัตยกรรม: `architechture/architecture_diagram.png`
+- แผนภาพสถาปัตยกรรม: [`docs/architecture_diagram.png`](docs/architecture_diagram.png)
+- ภาพการรันจริงบน S3 / Athena: [`docs/evidence/`](docs/evidence/)
 - รายละเอียดการออกแบบ: โฟลเดอร์ `docs/` และ `data_catalog/sources.md`
 
 ---
@@ -188,11 +168,9 @@ python orchestration/build_package.py
 
 | อาการ | สาเหตุ / วิธีแก้ |
 |---|---|
-| `ModuleNotFoundError: openpyxl` | ยังไม่ได้ติดตั้ง รัน `python -m pip install openpyxl` |
-| `ModuleNotFoundError: pyarrow` | รัน `python -m pip install pyarrow` |
-| `[MISSING] ...ingestion/data/...` | ยังไม่ได้ดาวน์โหลดไฟล์ดิบ หรือชื่อไฟล์ไม่ตรง (ขั้นตอนที่ 3.1) |
-| `FileNotFoundError: ...ingestion/data/raw/...` | ยังไม่ได้รัน `python prepare_local_data.py` (ขั้นตอนที่ 3.2) |
-| `FileNotFoundError: ...validation/cleaned/Geographic_Data_deduplicated.csv` | ยังไม่ได้รัน `ingestion/validate_data.py` (ขั้นตอนที่ 4) |
-| `FileNotFoundError: ...nso_household_income_transformed.csv` | รัน `integrate_data.py` ก่อน `transform_nso_income.py` ให้รันสคริปต์ตามลำดับในขั้นตอนที่ 5 |
-| ติดตั้ง pandas ไม่ได้ / เวอร์ชันไม่ตรง | ตรวจว่าใช้ Python 3.11+ (`python --version`) หรือใช้คำสั่งติดตั้งแบบไม่ระบุเวอร์ชัน |
-| ตัวอักษรไทยเพี้ยนใน Terminal บน Windows | ไม่กระทบการทำงาน; เปิดไฟล์ `.csv` ด้วย Excel หรือ VS Code (ไฟล์เป็น UTF-8 with BOM) |
+| `ModuleNotFoundError: duckdb` / `pyarrow` / `openpyxl` | ยังไม่ได้ติดตั้งตาม `requirements.txt` หรือยังไม่ได้เปิด venv (ขั้นตอนที่ 2) |
+| `FileNotFoundError: ...validation/cleaned/...` | ไฟล์ใน `validation/cleaned/` หายไป ใช้ `git checkout -- validation/` เพื่อคืนไฟล์ |
+| `--from-raw` แล้วขึ้นไม่พบไฟล์ใน `ingestion/data/` | ยังไม่มีไฟล์ดิบ หรือชื่อไฟล์ไม่ตรง (ขั้นตอนที่ 6) ถ้าไม่มีไฟล์ดิบให้รัน `python run_all.py` โดยไม่ใส่ `--from-raw` |
+| `FileNotFoundError: ...transformation/output/...` ตอนรัน `integrate_*` หรือ `build_curated.py` | รันสคริปต์ไม่ตามลำดับ ให้รันตามขั้นตอนที่ 4–5 หรือใช้ `run_all.py` |
+| ติดตั้ง pandas ไม่ได้ / เวอร์ชันไม่ตรง | ตรวจว่าใช้ Python 3.11+ (`python --version`) |
+| ตัวอักษรไทยเพี้ยนใน Terminal บน Windows | ไม่กระทบการทำงาน ตั้ง `PYTHONIOENCODING=utf-8` หรือเปิดไฟล์ `.csv` ด้วย VS Code (ไฟล์เป็น UTF-8) |

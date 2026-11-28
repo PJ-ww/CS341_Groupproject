@@ -1,48 +1,65 @@
-# CS341 Group Project: Flood Impact & Recovery
+# CS341 Group Project: Flood Impact & Recovery — Chiang Mai
 
 ## Architecture
 
 ![Architecture Diagram](docs/architecture_diagram.png)
+
+ต้นฉบับแผนภาพคือ [`docs/architecture_diagram.svg`](docs/architecture_diagram.svg) (แก้ไฟล์ SVG แล้ว render เป็น PNG ใหม่ ดูข้อ 8.4)
 
 ## Demo Video
 
 [![CS341 Demo](https://img.youtube.com/vi/vEXtP3JA8TA/maxresdefault.jpg)](https://youtu.be/vEXtP3JA8TA)
 
 ลิงก์วิดีโอ: https://youtu.be/vEXtP3JA8TA
+
 ## 1. Project Overview
-โครงการนี้ศึกษาผลกระทบจากน้ำท่วมและปัจจัยที่เกี่ยวข้องกับความเสียหายและการฟื้นตัวของผู้ประสบภัยในประเทศไทย โดยใช้ข้อมูลจริงจากหน่วยงานภาครัฐ เพื่อนำมารวบรวม ตรวจสอบ เชื่อมโยง และวิเคราะห์ข้อมูลสำหรับตอบคำถามวิจัย
+โครงการนี้ศึกษาผลกระทบจากอุทกภัยในจังหวัดเชียงใหม่ระดับหมู่บ้าน ปี 2566–2567 (ข้อมูลความเสียหาย 2563–2567) โดยรวบรวมข้อมูลรายงานอุทกภัยจาก ปภ. ข้อมูลความเสียหาย ข้อมูลพื้นฐานรายหมู่บ้าน และรายได้ครัวเรือน มาตรวจสอบ เชื่อมโยงด้วยรหัสหมู่บ้าน จัดเก็บเป็น Data Lake บน Amazon S3 และ query ด้วย Amazon Athena เพื่อตอบว่าพื้นที่ใดได้รับผลกระทบมาก ปัจจัยด้านพื้นที่ใดเกี่ยวข้อง และควรจัดลำดับความช่วยเหลืออย่างไร
 
 ## 2. Problem statement
 
-ครัวเรือนและพื้นที่ที่เผชิญอุทกภัยอาจได้รับความเสียหายแตกต่างกัน แม้จะเผชิญระดับน้ำท่วมใกล้เคียงกัน เนื่องจากมีความแตกต่างด้านลักษณะพื้นที่ ทรัพยากรของครัวเรือน และการเข้าถึงความช่วยเหลือ โดยปัจจุบันข้อมูลจากแต่ละหน่วยงานอาจมีรูปแบบและระดับพื้นที่แตกต่างกัน อีกทั้งอาจไม่มีข้อมูลระยะเวลาฟื้นตัวของแต่ละครัวเรือนโดยตรง โครงการนี้จึงมุ่งศึกษาว่าข้อมูลจริงที่เข้าถึงได้สามารถนำมาเชื่อมโยงและใช้ตรวจสอบความสัมพันธ์ระหว่างผลกระทบจากน้ำท่วม ปัจจัยระดับพื้นที่ และการให้ความช่วยเหลือได้อย่างไร
+แต่ละหมู่บ้านในเชียงใหม่ถูกรายงานว่าเกิดอุทกภัยบ่อยไม่เท่ากัน และมีลักษณะพื้นที่ (ติดแม่น้ำ ติดภูเขา) จำนวนประชากร และรายได้ครัวเรือนต่างกัน หน่วยงานที่ต้องจัดสรรความช่วยเหลือซึ่งมีจำกัดจึงต้องรู้ว่าพื้นที่ใดได้รับผลกระทบซ้ำ และพื้นที่ใดเปราะบาง แต่ข้อมูลเหล่านี้กระจายอยู่หลายไฟล์ คนละรูปแบบ คนละระดับพื้นที่ และมีค่าว่างมาก โครงการนี้จึงสร้าง pipeline ที่เชื่อมข้อมูลเหล่านี้ในระดับหมู่บ้านอย่างตรวจสอบย้อนกลับได้ และระบุให้ชัดว่าข้อมูลตอบอะไรได้และไม่ได้
 
 ## 3. Research Questions
-1. เมื่อระดับน้ำท่วมใกล้เคียงกัน ปัจจัยใดบ้างที่อาจทำให้แต่ละพื้นที่ได้รับความเสียหายแตกต่างกัน?
-2. ปัจจัยใดเกี่ยวข้องกับการฟื้นตัวจากน้ำท่วม และการได้รับความช่วยเหลือมีความสัมพันธ์กับการฟื้นตัวเร็วขึ้นหรือไม่?
-3. หากมีทรัพยากรช่วยเหลือจำกัด ควรให้ความสำคัญกับพื้นที่หรือครัวเรือนกลุ่มใดก่อน?
+1. **Q1:** พื้นที่ใดในจังหวัดเชียงใหม่ได้รับผลกระทบจากอุทกภัยมากที่สุด และรูปแบบผลกระทบเปลี่ยนแปลงอย่างไรในแต่ละปี?
+2. **Q2:** ลักษณะทางภูมิศาสตร์และประชากรของหมู่บ้าน (ติดแม่น้ำ ติดภูเขา ประชากร รายได้ครัวเรือน) มีความสัมพันธ์กับผลกระทบจากอุทกภัยหรือไม่?
+3. **Q3:** หากทรัพยากรช่วยเหลือมีจำกัด ควรจัดลำดับความสำคัญของหมู่บ้านและอำเภอที่ควรได้รับความช่วยเหลืออย่างไร?
+
+**ทำไมเปลี่ยนจากคำถามชุดแรก (proposal):** ชุดแรกถามเรื่องปัจจัยเมื่อระดับน้ำใกล้เคียงกัน การฟื้นตัว และความช่วยเหลือ ระดับประเทศ แต่เมื่อตรวจไฟล์จริงพบว่า (1) ไม่มีข้อมูลระยะเวลาฟื้นตัวและไม่มีข้อมูลความช่วยเหลือที่เชื่อมกับพื้นที่ที่ได้รับผลกระทบได้ (2) ไม่มีข้อมูลระดับน้ำ และ (3) ข้อมูลชุดเดิมอยู่คนละจังหวัด คนละระดับพื้นที่ และปีแทบไม่ซ้อนกัน เชื่อมกันได้จริงเพียง 10 แถว ทีมจึงจำกัดขอบเขตเป็นจังหวัดเชียงใหม่ซึ่งมีข้อมูลที่ใช้รหัสหมู่บ้านร่วมกัน และปรับคำถามให้ตรงกับข้อมูล: คำถามเรื่องการฟื้นตัว (ข้อ 2 เดิม) ถูกตัดออก ข้อ 1 เดิมกลายเป็น Q2 (ปัจจัยด้านพื้นที่ เป็นความสัมพันธ์เชิงพรรณนา) ข้อ 3 เดิมกลายเป็น Q3 (ระดับหมู่บ้าน/อำเภอ) และเพิ่ม Q1 เป็นฐานของการวิเคราะห์ รายละเอียดใน [`docs/01-problem-and-systems-thinking.md`](docs/01-problem-and-systems-thinking.md)
 
 ## 4. Data Sources
-- **สถิติอุทกภัยรายหมู่บ้าน:** [กรมป้องกันและบรรเทาสาธารณภัย](https://data.go.th/dataset/gdpublish-dfs_21_02)
-- **ข้อมูลรายได้:** [สำนักงานสถิติแห่งชาติ](https://data.go.th/en/dataset/ns_08_20241)
-- **ข้อมูลการช่วยเหลือผู้ประสบอุทกภัย:** [data.go.th](https://data.go.th/th/dataset/disaster_00013)
-- **ข้อมูลจำนวนครัวเรือนที่ได้รับเงินเยียวยา:** [data.go.th](https://data.go.th/th/dataset/flood01_30)
 
-ทีมจะตรวจสอบรายละเอียดและความพร้อมของข้อมูลจริงก่อนนำมาใช้วิเคราะห์และเชื่อมโยงกัน
+ข้อมูลดิบ 5 ไฟล์ รายละเอียดที่มา ช่วงเวลา คอลัมน์ และข้อจำกัดอยู่ใน [`data_catalog/sources.md`](data_catalog/sources.md)
+
+| ไฟล์ | เนื้อหา | ที่มา | ช่วงเวลา |
+|---|---|---|---|
+| `flood_2566.csv` | รายงานเหตุการณ์อุทกภัยรายหมู่บ้าน (69 จังหวัด, คัดเฉพาะเชียงใหม่) | ปภ. [`dpm-gd027` สถิติรายปีการเกิดอุทกภัย ปี 2566](https://catalog.disaster.go.th/dataset/dpm-gd027/resource/af2370d1-d2d0-4844-a16d-e6af34926e71) | ม.ค.–ธ.ค. 2566 |
+| `flood_2567.csv` | รายงานเหตุการณ์อุทกภัยรายหมู่บ้าน (72 จังหวัด, คัดเฉพาะเชียงใหม่) | ปภ. [`dpm-gd027` ปี 2567](https://catalog.disaster.go.th/dataset/dpm-gd027/resource/dde2eddc-28f5-40bf-8a62-28bc68f02af8) | ม.ค.–ธ.ค. 2567 |
+| `chiangmai_damage.xlsx` | ผู้ได้รับผลกระทบและความเสียหาย เชียงใหม่ | ไฟล์ที่ทีมได้รับโดยตรง ไม่มีลิงก์สาธารณะ | 2563–2567 |
+| `household_income.xlsx` | รายได้ครัวเรือนเฉลี่ยรายหมู่บ้าน (บาท/ปี) เชียงใหม่ | ไฟล์ที่ทีมได้รับโดยตรง ไม่มีลิงก์สาธารณะ | ไม่ระบุปี |
+| `village_mapping.json` | ข้อมูลพื้นฐานรายหมู่บ้าน: รหัส พิกัด ประชากร ลักษณะภูมิศาสตร์ เชียงใหม่ | ไฟล์ที่ทีมได้รับโดยตรง ไม่มีลิงก์สาธารณะ | ไม่ระบุปี |
+
+ข้อมูลดิบไม่ได้อยู่ใน Git แต่ข้อมูลหลังผ่าน validation ของทั้ง 5 ไฟล์อยู่ใน `validation/cleaned/` จึงรัน pipeline ต่อได้โดยไม่ต้องมีไฟล์ดิบ วิธีหาไฟล์ดิบดู [`ingestion/README.md`](ingestion/README.md) หัวข้อ 6B
 
 ## 5. Data Architecture
-ระบบมีขั้นตอนการทำงานหลักดังนี้
+ระบบมีขั้นตอนการทำงานหลักดังนี้ (ตามแผนภาพด้านบน)
 
-1. **Data Sources:** รวบรวมข้อมูลจากหน่วยงานภาครัฐ
-2. **Ingestion:** นำเข้าข้อมูลจากแหล่งต่าง ๆ
-3. **Validation:** ตรวจสอบความถูกต้องและความครบถ้วนของข้อมูล
-4. **Storage:** จัดเก็บข้อมูลบน Amazon S3
-5. **Transformation & Integration:** ทำความสะอาด แปลง และเชื่อมโยงข้อมูล
-6. **Query & Analysis:** ใช้ Amazon Athena สืบค้นและวิเคราะห์ข้อมูลด้วย SQL
-7. **Results:** นำเสนอผลการวิเคราะห์ด้วยตารางหรือกราฟ
+1. **Ingestion:** `ingestion/ingest.py` อัปโหลดไฟล์ดิบ 5 ไฟล์ขึ้น `s3://cs341-flood-recovery/raw/` พร้อม manifest (md5, ที่มา, ช่วงเวลา)
+2. **Orchestration:** AWS Step Functions เรียก Lambda ตามลำดับ `CheckBatch` → `ValidateBatch` → `TransformBatch` → `VerifyBatch` (batch ที่ไม่ผ่านไป `QuarantineBatch`) log อยู่ใน CloudWatch
+3. **Validation:** ตรวจ schema ชนิดข้อมูล ค่าว่าง แถวซ้ำ และค่าผิดรูปแบบ → `validation/cleaned/`, `validation/quarantine/`
+4. **Transformation & Integration:** สคริปต์ 6 ไฟล์ คัดเฉพาะเชียงใหม่ แปลงชนิดข้อมูล และเชื่อม flood/income กับ village mapping → `transformation/output/`
+5. **Storage (Curated Zone):** `storage/build_curated.py` แปลงเป็น Parquet แบบ star schema (1 dim + 3 fact) แบ่ง partition ตาม `source_year` แล้วอัปโหลดไป `s3://…/curated/`
+6. **Catalog & Serving:** ลงทะเบียนตาราง 4 ตาราง + view 2 ตัวใน Glue Data Catalog (`flood_recovery_db`) แล้ว query ด้วย Athena: data quality `dq_01`–`dq_05` และคำตอบ Q1–Q3 (7 query)
+7. **Results:** ผล query ใน `storage/query_results/` และภาพหลักฐานจาก Athena ใน `docs/evidence/`
 
+ขั้น 5–6 ยังรันด้วยมือหลัง batch สำเร็จ ยังไม่ได้เป็น state ใน Step Functions
 
 ## 6. Limitations
-ข้อมูลแต่ละแหล่งอาจมีระดับพื้นที่และช่วงเวลาที่แตกต่างกัน ข้อมูลรายได้อาจไม่ละเอียดถึงระดับครัวเรือน และอาจไม่มีข้อมูลระยะเวลาฟื้นตัวโดยตรง ดังนั้น ผลการวิเคราะห์จะขึ้นอยู่กับความครบถ้วนและความสามารถในการเชื่อมโยงข้อมูลจริง
+- ไม่มีข้อมูลการฟื้นตัวและข้อมูลความช่วยเหลือที่ได้รับ จึงไม่ได้ตอบคำถามเรื่องการฟื้นตัว
+- ข้อมูลอุทกภัยมีตัวเลขผู้ได้รับผลกระทบน้อย จึงใช้ "จำนวนหมู่บ้านที่ถูกรายงาน" เป็นตัวชี้วัดหลัก ซึ่งสะท้อนการรายงาน ไม่ใช่ความรุนแรงจริง
+- ข้อมูลความเสียหายเชื่อมได้แค่ระดับอำเภอ รายได้และข้อมูลหมู่บ้านไม่มีปี
+- ที่มาของไฟล์ `chiangmai_damage.xlsx`, `household_income.xlsx`, `village_mapping.json` ยังไม่มีลิงก์สาธารณะ
+- ผลเป็นของจังหวัดเชียงใหม่ และเป็นความสัมพันธ์เชิงพรรณนา ไม่ใช่เหตุและผล (รายละเอียดในข้อ 9)
+
 
 ## 7. Team Members
 
@@ -82,7 +99,7 @@ python storage/run_local_queries.py    # รัน SQL ทั้งหมดใ�
 
 `build_curated.py` ต้องขึ้น `all checks passed` ผลลัพธ์ query อยู่ใน `storage/query_results/` ผลลัพธ์ทุกขั้น commit ไว้แล้ว (`transformation/output/`, `storage/curated/`, `storage/query_results/`) จึงเปิดดูได้โดยไม่ต้องรันใหม่
 
-> `run_all.py` ยังเป็นเวอร์ชันขอบเขตเดิม (เรียกสคริปต์ใน `transformation/backup/`) ให้ใช้คำสั่งด้านบนแทนจนกว่าจะอัปเดต
+> **ทางลัด:** `python run_all.py` รันคำสั่งทั้งหมดด้านบนตามลำดับในคำสั่งเดียว แล้วตรวจจำนวนแถวของผลลัพธ์ให้อัตโนมัติ (ใช้ `--from-raw` ถ้าต้องการรัน validation จากไฟล์ดิบใน `ingestion/data/` ก่อน และ `--verbose` เพื่อดูข้อความของแต่ละสคริปต์)
 
 ### 8.2 รันบน AWS (S3 + Athena)
 
@@ -108,6 +125,14 @@ python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/qu
 | 5 | Storage: `python storage/build_curated.py` → Parquet ใน `storage/curated/` แล้ว `upload_to_s3.py` → `s3://cs341-flood-recovery/curated/` | [`storage/README.md`](storage/README.md) |
 | 6 | Catalog + Query: สร้างตาราง/view และรัน data quality + query ตอบ Q1–Q3 จาก `sql/curated/` บน Athena | [`docs/06-storage-data-model-query.md`](docs/06-storage-data-model-query.md) |
 
+### 8.4 แก้แผนภาพสถาปัตยกรรม
+
+แก้ [`docs/architecture_diagram.svg`](docs/architecture_diagram.svg) แล้ว render เป็น PNG ด้วยเบราว์เซอร์ headless (Chrome หรือ Edge) จาก root ของ repo:
+
+```bash
+chrome --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1240,790   --screenshot=docs/architecture_diagram.png docs/architecture_diagram.svg
+```
+
 ปัญหาที่พบระหว่างทำและเหตุผลของการตัดสินใจสำคัญ สรุปไว้ใน [`docs/05-problems-and-decisions.md`](docs/05-problems-and-decisions.md) และ [`docs/06-storage-data-model-query.md`](docs/06-storage-data-model-query.md) หัวข้อ 3
 
 ## 9. สิ่งที่ต้องทำต่อก่อน Final
@@ -117,12 +142,14 @@ python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/qu
 2. ทีมยืนยันการตีความผล Q1–Q3 จาก `storage/query_results/` (ผลไหนตอบคำถามได้แค่ไหน)
 3. เตรียมกราฟ/ตารางและเดโมสำหรับนำเสนอ
 
+**ด้านข้อมูล**
+1. ยืนยันหน่วยงานเจ้าของข้อมูลและลิงก์ (ถ้ามี) ของ `chiangmai_damage.xlsx`, `household_income.xlsx`, `village_mapping.json` แล้วแก้ `source` / `source_url` ใน `ingestion/config.py` และ `data_catalog/sources.md` หัวข้อ 3 (ตอนนี้ระบุว่าเป็นไฟล์ที่ทีมได้รับโดยตรง ไม่มีลิงก์สาธารณะ)
+
 **ด้าน pipeline**
-1. อัปเดต `run_all.py` และ `orchestration/lambda_handlers.py` ให้เรียกสคริปต์ transformation ชุดใหม่ และเพิ่มขั้น `storage/build_curated.py` + อัปโหลด `curated/` (ตอนนี้ยังใช้ชุดขอบเขตเดิม)
+1. Lambda และ Step Functions รันชุดเชียงใหม่ครบถึง `transformation/` แล้ว แต่ขั้น `storage/build_curated.py` + `upload_to_s3.py` และการรัน query บน Athena ยังรันด้วยมือ ควรเพิ่มเป็น state ต่อจาก `VerifyBatch`
 2. Step Functions ยังต้องกดรันเอง ยังไม่มี trigger อัตโนมัติ (ต่อยอดด้วย EventBridge)
-3. จำนวนแถวที่ `VerifyBatch` ใช้เทียบใส่ตายตัวไว้ในโค้ด (`DATASETS` ใน `orchestration/lambda_handlers.py`) ต้องแก้ให้ตรงกับตารางชุดใหม่
-4. ไฟล์บน S3 ถูกเขียนทับทุกรอบ ไม่เก็บประวัติแต่ละ batch (ทางเลือก: Iceberg snapshot ใน `sql/curated/03_iceberg_optional.sql`)
-5. หลังแก้ข้อ 1 แล้ว ลบตารางขอบเขตเดิมใน Athena (`geographic`, `flood_village_stats`, `nso_income`, `nso_income_partitioned`, `disaster_budget`, `flood_affected_households`, `affected_households_summary`, `geographic_nso_integrated`) และโฟลเดอร์ `processed/` บน S3
+3. ไฟล์บน S3 ถูกเขียนทับทุกรอบ ไม่เก็บประวัติแต่ละ batch (ทางเลือก: Iceberg snapshot ใน `sql/curated/03_iceberg_optional.sql`)
+4. ลบตารางขอบเขตเดิมใน Athena (`geographic`, `flood_village_stats`, `nso_income`, `nso_income_partitioned`, `disaster_budget`, `flood_affected_households`, `affected_households_summary`, `geographic_nso_integrated`) และโฟลเดอร์ `processed/` บน S3 ถ้ายังมีอยู่
 
 **ข้อจำกัดของข้อมูลที่แก้ไม่ได้ในโครงงานนี้** (ต้องระบุในรายงาน Final)
 - ไม่มีข้อมูลระยะเวลาฟื้นตัว จึงตอบไม่ได้โดยตรงว่าความช่วยเหลือทำให้ฟื้นตัวเร็วขึ้นหรือไม่

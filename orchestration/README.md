@@ -1,14 +1,17 @@
-# Orchestration: Deploy Glue/Athena, Lambda และ Step Functions
+# Orchestration: Deploy Lambda, Step Functions และ Glue/Athena
 
-เอกสารนี้อธิบายการสร้างส่วน AWS ทั้งหมดที่ pipeline ต้องใช้ ตั้งแต่ต้น บน AWS Account ใดก็ได้ ทั้งของทีมเองหรือของผู้ตรวจ
+เอกสารนี้อธิบายการสร้างส่วน AWS ทั้งหมดที่ pipeline ต้องใช้ ตั้งแต่ต้น บน AWS Account ใดก็ได้ ทั้งของทีมเองหรือของผู้ตรวจ แผนภาพรวมอยู่ที่ [`docs/architecture_diagram.png`](../docs/architecture_diagram.png)
 
 ```text
-S3 raw/  ->  CheckBatch -> ValidateBatch -> (QuarantineBatch | TransformBatch) -> VerifyBatch
-                                                                 |                  |
-                                                       S3 processed/<table>/   Athena COUNT(*) ทุกตาราง
+S3 raw/ (5 ไฟล์) -> CheckBatch -> ValidateBatch -> (QuarantineBatch | TransformBatch) -> VerifyBatch
+                                       |                  |                 |               |
+                            validation/batch_id=<id>/  quarantine/   transformation/output/  นับแถว CSV เทียบ DATASETS
+                                                                     transformation/reports/  แล้วเขียน _SUCCESS.json
+
+หลัง batch สำเร็จ (ยังรันด้วยมือ): build_curated.py -> upload_to_s3.py -> S3 curated/ -> Glue Data Catalog -> Athena
 ```
 
-`VerifyBatch` นับแถวผ่าน Athena ในฐานข้อมูล `flood_recovery_db` จึงต้องสร้างตารางในขั้นที่ 3 ก่อนรัน state machine ครั้งแรก
+`VerifyBatch` ดาวน์โหลด CSV 8 ไฟล์จาก `transformation/output/` มานับแถวเทียบกับ `DATASETS` ใน [`lambda_handlers.py`](lambda_handlers.py) และตรวจว่ามีรายงานครบ 6 ไฟล์ จึงไม่ต้องสร้างตาราง Athena ก่อนรัน state machine
 
 คำสั่งด้านล่างเขียนสำหรับ Git Bash / macOS / Linux และรันจาก root ของ repo ทั้งหมด
 
@@ -24,12 +27,12 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ถ้าเปลี่ยนชื่อ bucket ต้องแก้ 3 ที่ให้ตรงกัน:
 
 1. `BUCKET` ใน [`ingestion/config.py`](../ingestion/config.py)
-2. `LOCATION` ทุกตารางใน [`sql/setup/01_create_tables.sql`](../sql/setup/01_create_tables.sql)
-3. ค่า `"bucket"` ใน input ตอนสั่งรัน state machine (ขั้นที่ 6)
+2. `BUCKET` ใน [`storage/schema.py`](../storage/schema.py) แล้วรัน `python storage/generate_ddl.py` เพื่อสร้าง `LOCATION` ใน [`sql/curated/01_create_curated_tables.sql`](../sql/curated/01_create_curated_tables.sql) ใหม่
+3. ค่า `"bucket"` ใน input ตอนสั่งรัน state machine (ขั้นที่ 4)
 
 ## 1. สร้าง S3 bucket และอัปโหลดข้อมูลดิบ
 
-ต้องมีไฟล์ดิบทั้ง 8 ไฟล์ใน `ingestion/data/` ก่อน ดูวิธีโหลดไฟล์ได้ใน [`ingestion/README.md`](../ingestion/README.md) (หัวข้อ 6 หรือ 6B)
+ต้องมีไฟล์ดิบทั้ง 5 ไฟล์ใน `ingestion/data/` ก่อน ดูวิธีหาไฟล์ได้ใน [`ingestion/README.md`](../ingestion/README.md) (หัวข้อ 6 หรือ 6B) และที่มาของแต่ละไฟล์ใน [`data_catalog/sources.md`](../data_catalog/sources.md)
 
 ```bash
 aws s3 mb s3://$BUCKET --region $AWS_REGION      # ข้ามได้ถ้ามี bucket อยู่แล้ว
@@ -37,66 +40,7 @@ python ingestion/ingest.py                         # อัปโหลดไป
 aws s3 ls s3://$BUCKET/raw/ --recursive
 ```
 
-## 2. (ทางเลือก) อัปโหลดผลลัพธ์ที่ commit ไว้แล้วไป processed/
-
-ถ้าต้องการ query ใน Athena ทันทีโดยยังไม่ deploy Lambda ให้อัปโหลดผลลัพธ์ใน `transformation/output/` ขึ้นไปเอง แต่ถ้าจะรัน state machine ข้ามขั้นนี้ได้ เพราะ `TransformBatch` อัปโหลดให้
-
-```bash
-OUT=transformation/output
-aws s3 cp $OUT/geographic_data_features.csv                       s3://$BUCKET/processed/geographic/
-aws s3 cp $OUT/flood_village_stats_transformed.parquet            s3://$BUCKET/processed/flood_village_stats/
-aws s3 cp $OUT/nso_household_income_transformed.parquet           s3://$BUCKET/processed/nso_income/
-aws s3 cp $OUT/disaster_budget_2564_transformed.parquet           s3://$BUCKET/processed/disaster_budget/
-aws s3 cp $OUT/flood_affected_households_transformed.parquet      s3://$BUCKET/processed/flood_affected_households/
-aws s3 cp $OUT/affected_households_summary_transformed.parquet    s3://$BUCKET/processed/affected_households_summary/
-aws s3 cp $OUT/geographic_nso_integrated.parquet                  s3://$BUCKET/processed/geographic_nso_integrated/
-```
-
-แต่ละ prefix ต้องมีไฟล์เพียงไฟล์เดียว เพราะ Athena อ่านทุกไฟล์ใน LOCATION ถ้ามีไฟล์อื่นปนอยู่ จำนวนแถวจะไม่ตรง
-
-## 3. สร้าง Glue Data Catalog / ตาราง Athena
-
-**วิธีที่ 1: DDL (แนะนำ เพราะ schema คงที่)**
-
-1. เปิด Athena console ที่ region `us-east-1` ไปที่ Settings แล้วตั้ง Query result location เป็น `s3://<BUCKET>/athena-results/`
-2. รัน statement ใน [`sql/setup/01_create_tables.sql`](../sql/setup/01_create_tables.sql) ทีละ statement (`CREATE DATABASE` แล้วตามด้วย `CREATE EXTERNAL TABLE` ทั้ง 7 ตาราง)
-3. รัน query ท้ายไฟล์ จำนวนแถวต้องได้ `1772 / 57024 / 15400 / 76 / 144 / 48 / 10`
-
-หรือรันจาก CLI ทีละ statement:
-
-```bash
-aws athena start-query-execution \
-  --query-string "CREATE DATABASE IF NOT EXISTS flood_recovery_db" \
-  --result-configuration OutputLocation=s3://$BUCKET/athena-results/
-```
-
-**วิธีที่ 2: Glue Crawler (วิธีที่ทีมใช้ตอนพัฒนา)**
-
-ต้องมีไฟล์ใน `processed/` แล้ว (ทำขั้นที่ 2 ก่อน หรือรัน state machine ครั้งแรกให้ผ่าน TransformBatch)
-
-```bash
-aws glue create-database --database-input Name=flood_recovery_db
-
-# role ของ crawler ต้องมี AWSGlueServiceRole + สิทธิ์อ่าน s3://$BUCKET/processed/*
-aws glue create-crawler --name cs341-processed-crawler \
-  --role arn:aws:iam::$ACCOUNT_ID:role/<GLUE_CRAWLER_ROLE> \
-  --database-name flood_recovery_db \
-  --targets "{\"S3Targets\":[
-    {\"Path\":\"s3://$BUCKET/processed/geographic/\"},
-    {\"Path\":\"s3://$BUCKET/processed/flood_village_stats/\"},
-    {\"Path\":\"s3://$BUCKET/processed/nso_income/\"},
-    {\"Path\":\"s3://$BUCKET/processed/disaster_budget/\"},
-    {\"Path\":\"s3://$BUCKET/processed/flood_affected_households/\"},
-    {\"Path\":\"s3://$BUCKET/processed/affected_households_summary/\"},
-    {\"Path\":\"s3://$BUCKET/processed/geographic_nso_integrated/\"}]}"
-
-aws glue start-crawler --name cs341-processed-crawler
-aws glue get-tables --database-name flood_recovery_db --query "TableList[].Name"
-```
-
-ชื่อตารางที่ crawler สร้างต้องตรงกับชื่อโฟลเดอร์ทั้ง 7 ชื่อข้างบน ถ้าไม่ตรง (เช่นมี suffix) ให้ใช้วิธีที่ 1 แทน
-
-## 4. สร้าง IAM roles
+## 2. สร้าง IAM roles
 
 **Lambda role** (`cs341-lambda-role`)
 
@@ -130,7 +74,7 @@ aws iam put-role-policy --role-name cs341-sfn-role --policy-name invoke-cs341-la
     \"Resource\":\"arn:aws:lambda:$AWS_REGION:$ACCOUNT_ID:function:cs341-*\"}]}"
 ```
 
-## 5. Build และ deploy Lambda ทั้ง 5 ตัว
+## 3. Build และ deploy Lambda ทั้ง 5 ตัว
 
 สคริปต์ transformation ต้องใช้ `pandas`, `pyarrow` และ `openpyxl` ซึ่งไม่มีใน Lambda runtime จึงต้องแนบ AWS managed layer **AWS SDK for pandas** (`AWSSDKPandas-Python312`) ที่มีทั้ง 3 ตัว ดู ARN ล่าสุดของ region ได้ที่ <https://aws-sdk-pandas.readthedocs.io/en/stable/layers.html>
 
@@ -163,7 +107,7 @@ for f in check validate quarantine transform verify; do
 done
 ```
 
-## 6. สร้างและรัน Step Functions
+## 4. สร้างและรัน Step Functions
 
 ```bash
 aws stepfunctions create-state-machine --name cs341-pipeline \
@@ -182,14 +126,28 @@ aws stepfunctions start-execution --state-machine-arn $SM_ARN \
 | ผลลัพธ์ | ตำแหน่งใน S3 |
 |---|---|
 | รายงาน validation และไฟล์ cleaned/quarantine | `validation/batch_id=<id>/` |
-| ข้อมูลที่แปลงแล้ว 7 ชุด | `processed/<table>/` |
-| รายงาน transformation | `reports/batch_id=<id>/` |
-| marker ว่ารัน batch นี้สำเร็จแล้ว (ใช้ใน CheckBatch) | `processed/_success/batch_id=<id>/_SUCCESS.json` |
-| ไฟล์ของ batch ที่ไม่ผ่าน validation | `quarantine/batch_id=<id>/` |
+| ข้อมูลที่แปลงแล้ว 8 ไฟล์ (CSV) | `transformation/output/` |
+| รายงาน transformation 6 ไฟล์ | `transformation/reports/` |
+| marker ว่ารัน batch นี้สำเร็จแล้ว พร้อมจำนวนแถว (ใช้ใน CheckBatch) | `transformation/_success/batch_id=<id>/_SUCCESS.json` |
+| ไฟล์ของ batch ที่ไม่ผ่าน validation พร้อม `reason.json` | `quarantine/batch_id=<id>/` |
 
 รัน `batch_id` เดิมซ้ำ state machine จะหยุดที่ `Stop` ทันที (idempotent) ถ้าต้องการรันใหม่ให้ใช้ `batch_id` ใหม่ หรือลบ `_SUCCESS.json` ของ batch นั้น
 
-## 7. ลบ resource หลังทดลอง (ไม่บังคับ)
+## 5. Curated Zone, Glue Data Catalog และ Athena
+
+หลัง batch สำเร็จ สร้างตารางสำหรับ query (ขั้นนี้ยังไม่ได้เป็น state ใน Step Functions) ก่อนเริ่ม ให้เปิด Athena console ที่ region `us-east-1` ไปที่ Settings แล้วตั้ง Query result location เป็น `s3://<BUCKET>/athena-results/`
+
+```bash
+python storage/build_curated.py                                              # transformation/output/ -> Parquet ใน storage/curated/
+python storage/upload_to_s3.py                                               # -> s3://$BUCKET/curated/
+python storage/run_athena.py --sql sql/curated/01_create_curated_tables.sql  # database flood_recovery_db + 4 ตาราง (partition projection)
+python storage/run_athena.py --sql sql/curated/02_create_views.sql           # view 2 ตัว
+python storage/run_athena.py --sql sql/curated/data_quality --sql sql/curated/queries --save
+```
+
+หรือเปิด Athena Query Editor แล้วรันทีละ statement จากไฟล์เดียวกัน ผู้ใช้ที่รัน `run_athena.py` ต้องมีสิทธิ์ Athena, Glue Catalog และ S3 รายละเอียดอยู่ใน [`storage/README.md`](../storage/README.md) และ [`docs/06-storage-data-model-query.md`](../docs/06-storage-data-model-query.md)
+
+## 6. ลบ resource หลังทดลอง (ไม่บังคับ)
 
 ```bash
 aws stepfunctions delete-state-machine --state-machine-arn $SM_ARN

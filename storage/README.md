@@ -19,7 +19,7 @@ sql/curated/
 ├── 01_create_curated_tables.sql   # DDL (auto-generated) + partition projection
 ├── 02_create_views.sql            # v_flood_report_village, v_village_profile
 ├── 03_iceberg_optional.sql        # ตัวอย่าง Iceberg + time travel (ไม่บังคับ)
-├── data_quality/dq_01..dq_04      # row count, PK, join coverage, completeness
+├── data_quality/dq_01..dq_05      # row count, PK, join coverage, completeness, zero-impact damage
 └── queries/q1_* q2_* q3_*         # ตอบคำถามวิจัย Q1–Q3
 ```
 

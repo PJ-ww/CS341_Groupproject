@@ -23,9 +23,9 @@
 
 # 2. Project Research Questions
 
-กระบวนการ Transformation และ Integration ถูกออกแบบมาเพื่อสนับสนุน Research Questions ของโครงงาน ได้แก่
+กระบวนการ Transformation และ Integration ถูกออกแบบมาเพื่อสนับสนุน Research Questions ของโครงงาน (ชุดเดียวกับ [`docs/01-problem-and-systems-thinking.md`](../docs/01-problem-and-systems-thinking.md) หัวข้อ 1.2 ซึ่งอธิบายเหตุผลที่เปลี่ยนจากคำถามใน proposal ไว้ในหัวข้อ 1.3) ได้แก่
 
-### Q1: Which areas in Chiang Mai are most affected by floods, and how do damage patterns change year to year?
+### Q1: Which areas in Chiang Mai are most affected by floods, and how do impact patterns change year to year?
 
 ต้องการศึกษาว่าพื้นที่ใดในจังหวัดเชียงใหม่ได้รับผลกระทบจากน้ำท่วมมากที่สุด และรูปแบบความเสียหายเปลี่ยนแปลงอย่างไรระหว่างปี
 
@@ -41,7 +41,7 @@
 - เชื่อมโยงข้อมูลน้ำท่วมกับข้อมูลหมู่บ้าน
 - รักษาข้อมูลปีและข้อมูลความเสียหายไว้เพื่อใช้เปรียบเทียบ
 
-### Q2: Are geographic and demographic characteristics related to flood impacts?
+### Q2: Are geographic and demographic characteristics (incl. household income) related to flood impacts?
 
 ต้องการศึกษาความสัมพันธ์ระหว่างลักษณะทางภูมิศาสตร์ ประชากร และผลกระทบจากน้ำท่วม
 
