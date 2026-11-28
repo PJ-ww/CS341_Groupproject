@@ -169,7 +169,7 @@ python orchestration/build_package.py
 
 ## 8. ส่วนที่ต้องใช้ AWS (รันบนเครื่องอื่นไม่ได้)
 
-ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่จำเป็นต้องรัน ถ้าต้องการลองบน AWS Account ของตัวเอง ทำตาม [`orchestration/README.md`](orchestration/README.md) (สร้าง bucket, ตาราง Athena จาก `sql/setup/01_create_tables.sql`, Lambda และ Step Functions)
+ส่วนต่อไปนี้ใช้ AWS Account ของทีม ซึ่งไม่ได้แจก Credentials เพื่อความปลอดภัย จึงไม่จำเป็นต้องรัน ถ้าต้องการลองบน AWS Account ของตัวเอง ทำตาม [`orchestration/README.md`](orchestration/README.md) (สร้าง bucket, ตาราง Athena ด้วย Glue Crawler และจาก `sql/curated/`, Lambda และ Step Functions)
 
 | ส่วน | ไฟล์ | หมายเหตุ |
 |---|---|---|
